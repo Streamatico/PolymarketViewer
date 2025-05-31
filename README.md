@@ -2,20 +2,39 @@
 
 Android client application for browsing Polymarket prediction markets. Built with Jetpack Compose and modern Android development practices following Clean Architecture principles.
 
+## Screenshots
+
+<div align="center">
+  <img src="metadata/en-US/images/phoneScreenshots/1.png" width="200" alt="Main Events List"/>
+  <img src="metadata/en-US/images/phoneScreenshots/2.png" width="200" alt="Event Details"/>
+  <img src="metadata/en-US/images/phoneScreenshots/3.png" width="200" alt="Market Details"/>
+  <img src="metadata/en-US/images/phoneScreenshots/4.png" width="200" alt="Price Charts"/>
+</div>
+
 ## Features
 
-*   Browse a list of active prediction market events
-*   Filter events by category and search functionality  
-*   Sort events by various criteria (Volume 24h/All Time, Liquidity, Newest, Ending Soon, Competitive)
-*   View detailed event information with description, markets, and volume data
-*   Navigate to individual market details with outcomes and pricing
-*   Display interactive price history charts for events
-*   Adaptive card layouts for different market types (binary, categorical, multi-market)
-*   Comments system with hierarchical structure and holder filtering
-*   Pull-to-refresh functionality for updating data
-*   Pagination for loading more events and comments
-*   Material 3 design with dynamic theming
-*   User profile viewing
+*   📊 Browse a list of active prediction market events
+*   🔍 Filter events by category and search functionality  
+*   📈 Sort events by various criteria (Volume 24h/All Time, Liquidity, Newest, Ending Soon, Competitive)
+*   📋 View detailed event information with description, markets, and volume data
+*   💹 Navigate to individual market details with outcomes and pricing
+*   📊 Display interactive price history charts for events
+*   🎨 Adaptive card layouts for different market types (binary, categorical, multi-market)
+*   💬 Comments system with hierarchical structure and holder filtering
+*   🔄 Pull-to-refresh functionality for updating data
+*   📄 Pagination for loading more events and comments
+*   🎨 Material 3 design with dynamic theming
+*   👤 User profile viewing
+
+## Download
+
+### F-Droid (Recommended)
+Available on F-Droid (pending approval).
+
+### GitHub Releases
+Download the latest APK from [Releases](https://github.com/streamatico/PolymarketViewer/releases).
+
+*Enable "Install from unknown sources" in Android settings before installing.*
 
 ## Architecture
 
@@ -39,7 +58,6 @@ This project follows **Clean Architecture** principles with clear separation of 
 *   **Dependency Injection**: Hilt (Dagger)
 *   **Navigation**: Jetpack Navigation Compose
 *   **Data Storage**: DataStore Preferences
-*   **State Management**: StateFlow and Compose State
 
 ## Project Structure
 
