@@ -93,4 +93,4 @@ This is an unofficial, experimental application and is not affiliated with Polym
 
 ## Contact
 
-If you have any questions or suggestions, please contact us at: <streamatico+polymarket@gmail.com>.
+If you have any questions or suggestions, please contact us at: <streamatico+polymarket@gmail.com>."" 
