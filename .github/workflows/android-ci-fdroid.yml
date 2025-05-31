@@ -7,6 +7,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: write  # Required for creating releases and uploading assets
+  actions: read    # Required for downloading artifacts
+
 jobs:
   test:
     runs-on: ubuntu-latest
