@@ -13,18 +13,15 @@ Android client application for browsing Polymarket prediction markets. Built wit
 
 ## Features
 
-*   📊 Browse a list of active prediction market events
+*   📊 Browse a list of active prediction market events from Polymarket.com
 *   🔍 Filter events by category and search functionality  
 *   📈 Sort events by various criteria (Volume 24h/All Time, Liquidity, Newest, Ending Soon, Competitive)
 *   📋 View detailed event information with description, markets, and volume data
-*   💹 Navigate to individual market details with outcomes and pricing
 *   📊 Display interactive price history charts for events
 *   🎨 Adaptive card layouts for different market types (binary, categorical, multi-market)
 *   💬 Comments system with hierarchical structure and holder filtering
-*   🔄 Pull-to-refresh functionality for updating data
 *   📄 Pagination for loading more events and comments
 *   🎨 Material 3 design with dynamic theming
-*   👤 User profile viewing
 
 ## Download
 
@@ -48,16 +45,12 @@ This project follows **Clean Architecture** principles with clear separation of 
 ## Technologies
 
 *   **Language**: [Kotlin](https://kotlinlang.org/)
-*   **UI Framework**: [Jetpack Compose](https://developer.android.com/jetpack/compose) with [Material 3 Design](https://m3.material.io/)
-*   **Architecture**: Clean Architecture with MVVM pattern
-*   **Asynchronous Programming**: [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) & [Flow](https://kotlinlang.org/docs/flow.html)
-*   **Networking**: [Ktor Client](https://ktor.io/docs/getting-started-ktor-client.html) with OkHttp engine
-*   **JSON Parsing**: [Kotlinx Serialization](https://kotlinlang.org/docs/serialization.html)
-*   **Image Loading**: [Coil 3](https://coil-kt.github.io/coil/) with Ktor integration
-*   **Charts**: [Vico Charts](https://github.com/patrykandpatrick/vico) for interactive data visualization
-*   **Dependency Injection**: [Hilt](https://dagger.dev/hilt/) (Dagger)
-*   **Navigation**: [Jetpack Navigation Compose](https://developer.android.com/jetpack/compose/navigation)
-*   **Data Storage**: [DataStore Preferences](https://developer.android.com/topic/libraries/architecture/datastore)
+*   **UI**: [Jetpack Compose](https://developer.android.com/jetpack/compose) with [Material 3](https://m3.material.io/)
+*   **Architecture**: Clean Architecture with MVVM
+*   **Networking**: [Ktor Client](https://ktor.io/) 
+*   **Charts**: [Vico Charts](https://github.com/patrykandpatrick/vico)
+*   **DI**: [Hilt](https://dagger.dev/hilt/)
+*   **Images**: [Coil](https://coil-kt.github.io/coil/)
 
 ## Acknowledgments
 
@@ -66,31 +59,17 @@ Special thanks to the maintainers and contributors of the open source libraries 
 *   [Vico Charts](https://github.com/patrykandpatrick/vico) by @patrykandpatrick - Beautiful charts for Compose
 *   [Coil](https://github.com/coil-kt/coil) - Efficient image loading for Android
 *   [Ktor](https://github.com/ktorio/ktor) - Kotlin multiplatform HTTP client
-*   [Hilt](https://github.com/google/dagger) - Dependency injection framework
 *   [Kotlin](https://github.com/JetBrains/kotlin) - The amazing language powering this app
-
-## Project Structure
-
-```
-app/src/main/java/com/streamatico/polymarketviewer/
-├── data/           # Data layer (repositories, DTOs, network)
-├── domain/         # Domain layer (use cases, business logic)
-├── ui/             # Presentation layer (Compose UI, ViewModels)
-├── di/             # Dependency injection modules
-└── MainActivity.kt # Application entry point
-```
 
 ## Requirements
 
-*   **Android API Level**: 27+ (Android 8.1)
+*   **Android**: 8.1+ (API level 27)
 *   **Target SDK**: 35 (Android 15)
-*   **Kotlin**: 2.1.21
-*   **Java**: 17
 
 ## Disclaimer
 
-This is an unofficial, experimental application and is not affiliated with Polymarket. Use at your own discretion.
+This is an unofficial, experimental application and is not affiliated with Polymarket. Data is sourced from Polymarket.com via their public API. Use at your own discretion.
 
 ## Contact
 
-If you have any questions or suggestions, please contact us at: <streamatico+polymarket@gmail.com>."" 
+If you have any questions or suggestions, please contact us at: <streamatico+polymarket@gmail.com>.
