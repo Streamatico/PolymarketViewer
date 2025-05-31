@@ -47,17 +47,27 @@ This project follows **Clean Architecture** principles with clear separation of 
 
 ## Technologies
 
-*   **Language**: Kotlin
-*   **UI Framework**: Jetpack Compose with Material 3 Design
+*   **Language**: [Kotlin](https://kotlinlang.org/)
+*   **UI Framework**: [Jetpack Compose](https://developer.android.com/jetpack/compose) with [Material 3 Design](https://m3.material.io/)
 *   **Architecture**: Clean Architecture with MVVM pattern
-*   **Asynchronous Programming**: Kotlin Coroutines & Flow
-*   **Networking**: Ktor Client with OkHttp engine
-*   **JSON Parsing**: Kotlinx Serialization
-*   **Image Loading**: Coil 3 with Ktor integration
-*   **Charts**: Vico Charts for interactive data visualization
-*   **Dependency Injection**: Hilt (Dagger)
-*   **Navigation**: Jetpack Navigation Compose
-*   **Data Storage**: DataStore Preferences
+*   **Asynchronous Programming**: [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) & [Flow](https://kotlinlang.org/docs/flow.html)
+*   **Networking**: [Ktor Client](https://ktor.io/docs/getting-started-ktor-client.html) with OkHttp engine
+*   **JSON Parsing**: [Kotlinx Serialization](https://kotlinlang.org/docs/serialization.html)
+*   **Image Loading**: [Coil 3](https://coil-kt.github.io/coil/) with Ktor integration
+*   **Charts**: [Vico Charts](https://github.com/patrykandpatrick/vico) for interactive data visualization
+*   **Dependency Injection**: [Hilt](https://dagger.dev/hilt/) (Dagger)
+*   **Navigation**: [Jetpack Navigation Compose](https://developer.android.com/jetpack/compose/navigation)
+*   **Data Storage**: [DataStore Preferences](https://developer.android.com/topic/libraries/architecture/datastore)
+
+## Acknowledgments
+
+Special thanks to the maintainers and contributors of the open source libraries that make this project possible:
+
+*   [Vico Charts](https://github.com/patrykandpatrick/vico) by @patrykandpatrick - Beautiful charts for Compose
+*   [Coil](https://github.com/coil-kt/coil) - Efficient image loading for Android
+*   [Ktor](https://github.com/ktorio/ktor) - Kotlin multiplatform HTTP client
+*   [Hilt](https://github.com/google/dagger) - Dependency injection framework
+*   [Kotlin](https://github.com/JetBrains/kotlin) - The amazing language powering this app
 
 ## Project Structure
 
