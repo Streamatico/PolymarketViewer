@@ -1,0 +1,18 @@
+---
+description: 
+globs: app/src/main/java/**/ui/**/*.kt,app/src/main/java/**/presentation/**/*.kt
+alwaysApply: false
+---
+
+# Enforces specific UI-related guidelines for Jetpack Compose within the presentation layer
+
+- Use remember and derivedStateOf appropriately.
+- Implement proper recomposition optimization.
+- Use proper Compose modifiers ordering.
+- Follow composable function naming conventions.
+- Implement proper preview annotations.
+- Use proper state management with MutableState.
+- Implement proper error handling and loading states.
+- Use proper theming with MaterialTheme.
+- Follow accessibility guidelines.
+- Implement proper animation patterns.

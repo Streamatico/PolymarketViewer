@@ -1,0 +1,8 @@
+Initial release of Polymarket Viewer.
+
+Features include:
+• Browse prediction market events
+• Filter by category and sort by multiple criteria
+• View event details and price charts
+• Pull-to-refresh and pagination support
+• Modern Material 3 UI with Jetpack Compose 

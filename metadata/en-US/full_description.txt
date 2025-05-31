@@ -1,0 +1,15 @@
+Browse and explore Polymarket prediction markets with this Android client application.
+
+Features:
+• View active prediction market events
+• Filter events by category
+• Sort by volume, liquidity, newest, ending soon, and competitive criteria
+• View detailed event information including description and volume
+• Display price history charts for events
+• Adaptive card layouts for different market types (binary, multi-outcome)
+• Pull-to-refresh functionality for updating event lists
+• Pagination for loading more events
+
+Built with modern Android development practices using Jetpack Compose and Kotlin.
+
+This is an unofficial, experimental application and is not affiliated with Polymarket. Use at your own discretion. 

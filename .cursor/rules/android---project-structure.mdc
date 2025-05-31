@@ -1,0 +1,34 @@
+---
+description: 
+globs: app/**/*
+alwaysApply: false
+---
+# Recommends a flexible project structure for Android applications, adapting to existing project organization
+
+- Project Structure:
+
+app/
+  src/
+    main/
+      java/com/streamatico/polymarketapp/
+        data/
+          repository/
+          datasource/
+          models/
+        domain/
+          usecases/
+          models/
+          repository/
+        presentation/
+          screens/
+          components/
+          theme/
+          viewmodels/
+        di/
+        utils/
+      res/
+        values/
+        drawable/
+        mipmap/
+    test/
+    androidTest/
