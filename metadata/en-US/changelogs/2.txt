@@ -1,0 +1,4 @@
+• Reproducible Builds support for F-Droid
+• Improved GitHub release workflow  
+• Better distribution compatibility between F-Droid and GitHub
+• Minor performance optimizations 
