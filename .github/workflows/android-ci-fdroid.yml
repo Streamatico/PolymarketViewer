@@ -93,6 +93,17 @@ jobs:
     - name: Build release APK
       run: ./gradlew assembleRelease
 
+    - name: Sign APK for GitHub users
+      id: sign_apk
+      uses: ilharp/sign-android-release@v1
+      with:
+        releaseDir: app/build/outputs/apk/release
+        signingKey: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+        keyAlias: ${{ secrets.SIGNING_ALIAS }}
+        keyStorePassword: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+        keyPassword: ${{ secrets.SIGNING_ALIAS_PASSWORD }}
+        buildToolsVersion: 35.0.0
+
     - name: Get version name
       id: version
       run: |
@@ -110,25 +121,41 @@ jobs:
         body: |
           ## Polymarket Viewer ${{ steps.version.outputs.VERSION }}
           
-          ### Installation
-          - Download the APK below
+          ### Installation Options
+          
+          #### 📱 Direct Install (Recommended)
+          - Download the **signed APK** below
           - Enable "Install from unknown sources" in Android settings
           - Install the APK
           
-          ### F-Droid
+          #### 🤖 F-Droid (Auto-updates)
           This app is also available on F-Droid (pending approval).
+          Note: F-Droid and GitHub versions use the same signature (Reproducible Builds), so you can switch between them freely.
+          
+          #### 🔧 For Developers
+          - **Unsigned APK**: For F-Droid reproducible builds verification
           
           ### Changes
           See [metadata/en-US/changelogs/](https://github.com/${{ github.repository }}/tree/main/metadata/en-US/changelogs) for details.
         draft: false
         prerelease: false
 
-    - name: Upload Release APK
+    - name: Upload Signed APK (for users)
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ steps.sign_apk.outputs.signedFile }}
+        asset_name: polymarket-viewer-${{ steps.version.outputs.VERSION }}-signed.apk
+        asset_content_type: application/vnd.android.package-archive
+
+    - name: Upload Unsigned APK (for F-Droid)
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: app/build/outputs/apk/release/app-release-unsigned.apk
-        asset_name: polymarket-viewer-${{ steps.version.outputs.VERSION }}.apk
+        asset_name: polymarket-viewer-${{ steps.version.outputs.VERSION }}-unsigned.apk
         asset_content_type: application/vnd.android.package-archive
