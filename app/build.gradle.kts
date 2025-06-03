@@ -11,20 +11,26 @@ plugins {
     alias(libs.plugins.hilt.android)
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 android {
     namespace = "com.streamatico.polymarketviewer"
     compileSdk = 35
 
     defaultConfig {
         applicationId = "com.streamatico.polymarketviewer"
-        minSdk = 26
+        minSdk = 27
+        //noinspection OldTargetApi
         targetSdk = 35
         versionCode = 3
         versionName = "1.12"
+        buildToolsVersion = "35.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
-            useSupportLibrary = true
+            useSupportLibrary = false
         }
     }
 
@@ -41,6 +47,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -49,10 +56,12 @@ android {
         jvmTarget = "17"
         freeCompilerArgs += "-Xjavac-arguments=[\"-Xlint:deprecation\"]"
     }
+
     buildFeatures {
         compose = true
         buildConfig = true
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -119,10 +128,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-}
-
-// Reproducible builds configuration
-tasks.withType<AbstractArchiveTask>().configureEach {
-    isPreserveFileTimestamps = false
-    isReproducibleFileOrder = true
 }
