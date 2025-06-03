@@ -19,8 +19,8 @@ android {
         applicationId = "com.streamatico.polymarketviewer"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.11"
+        versionCode = 3
+        versionName = "1.12"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -57,6 +57,12 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+    
+    // Settings for reproducible builds
+    dependenciesInfo {
+        includeInApk = false
+        // includeInBundle = false  // Uncomment if building AAB files
     }
 }
 
@@ -113,4 +119,10 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+// Reproducible builds configuration
+tasks.withType<AbstractArchiveTask>().configureEach {
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
 }

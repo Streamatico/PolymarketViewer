@@ -132,9 +132,6 @@ jobs:
           This app is also available on F-Droid (pending approval).
           Note: F-Droid and GitHub versions use the same signature (Reproducible Builds), so you can switch between them freely.
           
-          #### 🔧 For Developers
-          - **Unsigned APK**: For F-Droid reproducible builds verification
-          
           ### Changes
           See [metadata/en-US/changelogs/](https://github.com/${{ github.repository }}/tree/main/metadata/en-US/changelogs) for details.
         draft: false
@@ -148,14 +145,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ steps.sign_apk.outputs.signedFile }}
         asset_name: polymarket-viewer-${{ steps.version.outputs.VERSION }}-signed.apk
-        asset_content_type: application/vnd.android.package-archive
-
-    - name: Upload Unsigned APK (for F-Droid)
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: app/build/outputs/apk/release/app-release-unsigned.apk
-        asset_name: polymarket-viewer-${{ steps.version.outputs.VERSION }}-unsigned.apk
         asset_content_type: application/vnd.android.package-archive

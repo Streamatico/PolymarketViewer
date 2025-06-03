@@ -1,0 +1,3 @@
+• Improved reproducible builds for F-Droid compatibility
+• Enhanced build consistency and determinism
+• Optimized APK generation process 
