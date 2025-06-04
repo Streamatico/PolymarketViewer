@@ -41,3 +41,8 @@
 # Ensure data classes used with serialization are kept
 -keep @kotlinx.serialization.Serializable class * { <fields>; }
 -keepclassmembers,allowoptimization enum * { @kotlinx.serialization.SerialName <fields>; }
+
+# Rules from F-Droid documentation for R8 non-deterministic behavior
+# Ref: https://f-droid.org/docs/Reproducible_Builds/
+-keep class kotlinx.coroutines.CoroutineExceptionHandler
+-keep class kotlinx.coroutines.internal.MainDispatcherFactory
