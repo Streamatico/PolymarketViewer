@@ -26,7 +26,6 @@ android {
         targetSdk = 35
         versionCode = 5
         versionName = "1.14"
-        buildToolsVersion = "35.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -68,10 +67,25 @@ android {
         }
     }
     
-    // Settings for reproducible builds
+    // By default, Android generates dependency metadata (a file containing information
+    // about all the dependencies used in the project) and includes it in both APKs and app bundles.
+    // This metadata is particularly useful for the Google Play Store, as it provides actionable
+    // feedback on potential issues with project dependencies. However, other platforms cannot
+    // utilize this metadata. For example, platforms like IzzyOnDroid, GitHub, and our website do not
+    // require or utilize the metadata.
+    // Since we only upload app bundles to the Play Store for kiwix app, dependency metadata
+    // is enabled for app bundles to leverage Google Play Store's analysis
+    // and feedback. For APKs distributed outside the Play Store, we exclude this metadata
+    // as they do not require this.
     dependenciesInfo {
+        // Disables dependency metadata when building APKs.
+        // This is for the signed APKs posted on F-Droid and Github,
+        // where dependency metadata is not required or utilized.
         includeInApk = false
-        // includeInBundle = false  // Uncomment if building AAB files
+        // Enables dependency metadata when building Android App Bundles.
+        // This is specifically for the Google Play Store, where dependency metadata
+        // is analyzed to provide actionable feedback on potential issues with dependencies.
+        includeInBundle = true
     }
 }
 
