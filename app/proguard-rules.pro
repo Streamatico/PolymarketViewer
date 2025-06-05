@@ -46,3 +46,7 @@
 # Ref: https://f-droid.org/docs/Reproducible_Builds/
 -keep class kotlinx.coroutines.CoroutineExceptionHandler
 -keep class kotlinx.coroutines.internal.MainDispatcherFactory
+
+# Disable devirtualization to fix reproducible build issues with F-Droid.
+# This prevents R8 from changing invoke-interface to invoke-virtual non-deterministically.
+-optimizations !class/devirtualize
