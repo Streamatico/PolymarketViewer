@@ -47,6 +47,6 @@
 -keep class kotlinx.coroutines.CoroutineExceptionHandler
 -keep class kotlinx.coroutines.internal.MainDispatcherFactory
 
-# Disable devirtualization to fix reproducible build issues with F-Droid.
-# This prevents R8 from changing invoke-interface to invoke-virtual non-deterministically.
--optimizations !class/devirtualize
+# Prevent R8 from devirtualizing the kotlinx.coroutines.Job interface
+# by explicitly keeping it. This should stabilize the output bytecode and fix reproducible builds.
+-keep interface kotlinx.coroutines.Job { *; }
