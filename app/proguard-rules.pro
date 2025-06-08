@@ -12,6 +12,9 @@
 #   public *;
 #}
 
+# Do not use ProGuard to obfuscate the code (can help with reproducibility F-Droid builds)
+-dontobfuscate
+
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 -keepattributes SourceFile,LineNumberTable
