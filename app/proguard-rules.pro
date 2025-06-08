@@ -53,3 +53,10 @@
 # Prevent R8 from devirtualizing the kotlinx.coroutines.Job interface
 # by explicitly keeping it. This should stabilize the output bytecode and fix reproducible builds.
 -keep interface kotlinx.coroutines.Job { *; }
+
+# Also keep the concrete JobSupport class to prevent R8 from devirtualizing to it
+# on more aggressive build environments like F-Droid's.
+-keep class kotlinx.coroutines.JobSupport { *; }
+
+# Disable obfuscation to simplify debugging of reproducible build issues.
+-dontobfuscate
