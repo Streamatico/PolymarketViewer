@@ -26,10 +26,13 @@ Android client application for browsing Polymarket prediction markets. Built wit
 ## Download
 
 ### F-Droid (Recommended)
-Available on F-Droid (pending approval).
+
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/com.streamatico.polymarketviewer/)
 
 ### GitHub Releases
-Download the latest APK from [Releases](https://github.com/streamatico/PolymarketViewer/releases).
+Download the latest APK from [Releases](https://github.com/streamatico/PolymarketViewer/releases/latest).
 
 *Enable "Install from unknown sources" in Android settings before installing.*
 
