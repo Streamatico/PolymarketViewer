@@ -3,6 +3,7 @@ package com.streamatico.polymarketviewer.data.network
 import com.streamatico.polymarketviewer.data.model.CommentDto
 import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.MarketDto
+import com.streamatico.polymarketviewer.data.model.PaginationDataDto
 import com.streamatico.polymarketviewer.data.model.TagDto
 import com.streamatico.polymarketviewer.data.model.UserProfileDto
 import io.ktor.client.HttpClient
@@ -32,8 +33,8 @@ class PolymarketGammaApiClient @Inject constructor(
         ascending: Boolean? = false,
         excludeTagId: Long? = null,
         eventId: String? = null // Note: API might ignore this non-standard parameter
-    ): List<EventDto> {
-        return client.get("events") {
+    ): PaginationDataDto<EventDto> {
+        return client.get("events/pagination") {
             parameter("limit", limit)
             parameter("offset", offset)
             parameter("active", active)
@@ -106,4 +107,4 @@ class PolymarketGammaApiClient @Inject constructor(
             parameter("address", address)
         }.body()
     }
-} 
+}

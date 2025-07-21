@@ -5,6 +5,7 @@ import com.streamatico.polymarketviewer.data.model.MarketDto
 import com.streamatico.polymarketviewer.data.model.TagDto
 import com.streamatico.polymarketviewer.data.model.TimeseriesPointDto
 import com.streamatico.polymarketviewer.data.model.CommentDto
+import com.streamatico.polymarketviewer.data.model.PaginationDataDto
 import com.streamatico.polymarketviewer.data.model.UserProfileDto
 import kotlin.Result
 
@@ -28,7 +29,7 @@ interface PolymarketRepository {
         //ascending: Boolean? = false,
         eventId: String? = null,
         excludeTagId: Long? = null
-    ): Result<List<EventDto>>
+    ): Result<PaginationDataDto<EventDto>>
 
     /**
      * Gets details of one market by ID.

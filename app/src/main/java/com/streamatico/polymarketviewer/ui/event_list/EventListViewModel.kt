@@ -120,7 +120,7 @@ class EventListViewModel  @Inject constructor(
                     active = true,
                     limit = PAGE_SIZE,
                     offset = offsetToLoad,
-                    tagSlug = currentTag,
+                    tagSlug = if(currentTag == POLYMARKET_EVENTS_SLUG_ALL) null else currentTag,
                     archived = false,
                     closed = false,
                     order = currentOrder,
@@ -128,8 +128,8 @@ class EventListViewModel  @Inject constructor(
                 )
 
                 result.onSuccess { newEvents ->
-                    _canLoadMore.value = newEvents.size == PAGE_SIZE
-                    val combinedList = if (isPagination) _eventList.value + newEvents else newEvents
+                    _canLoadMore.value = newEvents.data.size == PAGE_SIZE
+                    val combinedList: List<EventDto> = if (isPagination) _eventList.value + newEvents.data else newEvents.data
                     // Ensure uniqueness before updating the main list and UI state
                     val uniqueList = combinedList.distinctBy { it.id }
                     _eventList.value = uniqueList

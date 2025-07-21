@@ -3,6 +3,7 @@ package com.streamatico.polymarketviewer.data.repository
 import com.streamatico.polymarketviewer.data.model.CommentDto
 import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.MarketDto
+import com.streamatico.polymarketviewer.data.model.PaginationDataDto
 import com.streamatico.polymarketviewer.data.model.TagDto
 import com.streamatico.polymarketviewer.data.model.TimeseriesPointDto
 import com.streamatico.polymarketviewer.data.model.UserProfileDto
@@ -44,7 +45,7 @@ class PolymarketRepositoryImpl @Inject constructor(
         order: PolymarketEventsSortOrder,
         eventId: String?,
         excludeTagId: Long?
-    ): Result<List<EventDto>> {
+    ): Result<PaginationDataDto<EventDto>> {
         val orderString = when (order) {
             PolymarketEventsSortOrder.VOLUME_24H -> "volume24hr"
             PolymarketEventsSortOrder.VOLUME_TOTAL -> "volume"
@@ -121,4 +122,4 @@ class PolymarketRepositoryImpl @Inject constructor(
     override suspend fun getUserProfile(address: String): Result<UserProfileDto> {
         return safeApiCall { gammaApiClient.getUserProfile(address) }
     }
-} 
+}

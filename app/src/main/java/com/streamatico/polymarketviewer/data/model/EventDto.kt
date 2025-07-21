@@ -5,6 +5,18 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.OffsetDateTime
 
+@Serializable
+data class PaginationDataDto<T>(
+    @SerialName("data") val data: List<T>,
+    @SerialName("pagination") val pagination: PaginationDto
+)
+
+@Serializable
+data class PaginationDto(
+    @SerialName("hasMore") val hasMore: Boolean,
+    @SerialName("totalResults") val totalResults: Int,
+)
+
 /**
  * DTO for representing event data from Gamma API.
  */
