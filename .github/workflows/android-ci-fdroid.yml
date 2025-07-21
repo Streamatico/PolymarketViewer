@@ -91,7 +91,7 @@ jobs:
     - name: Get version name
       id: version
       run: |
-        VERSION=$(grep "versionName" app/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
+        VERSION=$(grep -w "versionName" app/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Create Release
