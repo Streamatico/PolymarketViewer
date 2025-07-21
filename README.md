@@ -66,7 +66,7 @@ Special thanks to the maintainers and contributors of the open source libraries 
 ## Requirements
 
 *   **Android**: 8.1+ (API level 27)
-*   **Target SDK**: 35 (Android 15)
+*   **Target SDK**: 36 (Android 16)
 
 ## Disclaimer
 

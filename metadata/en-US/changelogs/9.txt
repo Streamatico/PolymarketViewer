@@ -1,0 +1,2 @@
+• Updated dependencies to the latest
+• Target Android SDK 36 (Android 16)

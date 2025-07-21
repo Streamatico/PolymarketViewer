@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -13,19 +15,25 @@ plugins {
 
 kotlin {
     jvmToolchain(17)
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+
+        // See https://youtrack.jetbrains.com/issue/KT-73255
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
 }
 
 android {
     namespace = "com.streamatico.polymarketviewer"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.streamatico.polymarketviewer"
         minSdk = 27
         //noinspection OldTargetApi
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 9
-        versionName = "1.18"
+        versionName = "1.19"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -35,6 +43,7 @@ android {
 
     buildTypes {
         debug {
+            versionNameSuffix = "-DEBUG"
             isMinifyEnabled = false
         }
         release {
@@ -50,10 +59,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs += "-Xjavac-arguments=[\"-Xlint:deprecation\"]"
     }
 
     buildFeatures {
