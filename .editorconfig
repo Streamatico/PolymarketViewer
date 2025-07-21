@@ -1,0 +1,20 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+#insert_final_newline = true
+trim_trailing_whitespace = true
+#max_line_length = 120
+#ij_visual_guides = 100
+
+[{*.yaml,*.yml}]
+indent_size = 2
+ij_yaml_keep_indents_on_empty_lines = unset
+ij_yaml_keep_line_breaks = true
+ij_yaml_spaces_within_brackets = false
+
+[*.bat]
+end_of_line = crlf
