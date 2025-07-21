@@ -32,8 +32,8 @@ android {
         minSdk = 27
         //noinspection OldTargetApi
         targetSdk = 36
-        versionCode = 9
-        versionName = "1.19"
+        versionCode = 20
+        versionName = "1.20"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -71,7 +71,7 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    
+
     // By default, Android generates dependency metadata (a file containing information
     // about all the dependencies used in the project) and includes it in both APKs and app bundles.
     // This metadata is particularly useful for the Google Play Store, as it provides actionable
