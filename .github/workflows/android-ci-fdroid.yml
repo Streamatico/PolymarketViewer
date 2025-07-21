@@ -107,13 +107,16 @@ jobs:
           
           ### Installation Options
           
-          #### 📱 Direct Install (Recommended)
+          #### 📱 Direct Install
           - Download the **signed APK** below
           - Enable "Install from unknown sources" in Android settings
           - Install the APK
           
           #### 🤖 F-Droid (Auto-updates)
-          This app is also available on F-Droid (pending approval).
+          [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+               alt="Get it on F-Droid"
+               height="80">](https://f-droid.org/packages/com.streamatico.polymarketviewer/)
+          
           Note: F-Droid and GitHub versions use the same signature (Reproducible Builds), so you can switch between them freely.
           
           ### Changes
