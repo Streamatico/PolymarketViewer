@@ -295,7 +295,7 @@ fun EventListContent(
                         contentDescription = "Logo",
                         tint = Color.Unspecified,
                         modifier = Modifier
-                            .padding(4.dp)
+                            .size(52.dp)
                     )
                 },
                 title = {
