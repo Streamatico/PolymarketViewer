@@ -4,6 +4,8 @@ import com.streamatico.polymarketviewer.data.model.CommentDto
 import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.MarketDto
 import com.streamatico.polymarketviewer.data.model.PaginationDataDto
+import com.streamatico.polymarketviewer.data.model.SearchResultOptimizedDto
+import com.streamatico.polymarketviewer.data.model.SearchResultFullDto
 import com.streamatico.polymarketviewer.data.model.TagDto
 import com.streamatico.polymarketviewer.data.model.UserProfileDto
 import io.ktor.client.HttpClient
@@ -105,6 +107,46 @@ class PolymarketGammaApiClient @Inject constructor(
         // Use the full URL directly for this specific endpoint
         return client.get("https://polymarket.com/api/profile/userData") {
             parameter("address", address)
+        }.body()
+    }
+
+    suspend fun searchPublicOptimized(
+        query: String,
+        limitPerType: Int = 6,
+        searchTags: Boolean = true,
+        searchProfiles: Boolean = true,
+        cache: Boolean = true,
+        eventsStatus: String = "active"
+    ): SearchResultOptimizedDto {
+        return client.get("public-search") {
+            parameter("q", query)
+            parameter("optimized", true)
+            parameter("limit_per_type", limitPerType)
+            parameter("type", "events")
+            parameter("search_tags", searchTags)
+            parameter("search_profiles", searchProfiles)
+            parameter("cache", cache)
+            parameter("events_status", eventsStatus)
+        }.body()
+    }
+
+    suspend fun searchPublicFull(
+        query: String,
+        limitPerType: Int = 6,
+        searchTags: Boolean = true,
+        searchProfiles: Boolean = true,
+        cache: Boolean = true,
+        eventsStatus: String = "active"
+    ): SearchResultFullDto {
+        return client.get("public-search") {
+            parameter("q", query)
+            parameter("optimized", false)
+            parameter("limit_per_type", limitPerType)
+            parameter("type", "events")
+            parameter("search_tags", searchTags)
+            parameter("search_profiles", searchProfiles)
+            parameter("cache", cache)
+            parameter("events_status", eventsStatus)
         }.body()
     }
 }

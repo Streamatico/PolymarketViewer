@@ -23,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -31,12 +32,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.streamatico.polymarketviewer.data.model.EventDto
+import com.streamatico.polymarketviewer.data.model.BaseEventDto
+import com.streamatico.polymarketviewer.data.model.BaseMarketDto
 import com.streamatico.polymarketviewer.data.model.EventType
-import com.streamatico.polymarketviewer.data.model.MarketDto
 import com.streamatico.polymarketviewer.data.model.MarketResolutionStatus
 import com.streamatico.polymarketviewer.data.model.demoEventDto
 import com.streamatico.polymarketviewer.data.model.demoMarketDto
+import com.streamatico.polymarketviewer.data.model.demoOptimizedEventDto
+import com.streamatico.polymarketviewer.data.model.demoOptimizedMarketDto
+import com.streamatico.polymarketviewer.data.model.getResolutionStatus
+import com.streamatico.polymarketviewer.data.model.getTitleOrDefault
+import com.streamatico.polymarketviewer.data.model.getYesTitle
+import com.streamatico.polymarketviewer.data.model.yesPrice
 import com.streamatico.polymarketviewer.ui.shared.ComposableUiFormatter
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.sortedByViewPriority
@@ -51,7 +58,7 @@ private const val MAX_VISIBLE_MARKETS = 3
  */
 @Composable
 fun EventListItem(
-    event: EventDto,
+    event: BaseEventDto,
     onEventClick: (String) -> Unit // New parameter for clicking on the entire card
 ) {
     // State to track whether the market/outcome list is expanded
@@ -59,100 +66,119 @@ fun EventListItem(
 
     Card(
         modifier = Modifier
+            .alpha(if (event.closed) 0.7f else 1f)
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 8.dp)
             .clickable { onEventClick(event.id) }, // Click on the entire card
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column {
-            // --- Header (Image + Title) --- //
-            Row(
-                modifier = Modifier.padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if(event.iconUrl != null) {
-                    AsyncImage(
-                        model = event.iconUrl,
-                        contentDescription = event.title,
-                        modifier = Modifier.size(40.dp).clip(MaterialTheme.shapes.small),
-                        contentScale = ContentScale.Crop
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                }
-                Text(
-                    text = event.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-            // --- Market Content (choose display style) --- //
-            when(event.eventType) {
-                EventType.BinaryEvent -> {
-                    BinaryMarketContent(market = event.markets.first())
-                }
-                EventType.CategoricalMarket -> {
-                    CategoricalMarketContent(
-                        market = event.markets.first(),
-                        isExpanded = isMarketListExpanded, // Pass state
-                        onToggleExpand = { isMarketListExpanded = !isMarketListExpanded } // Pass lambda
+            Column {
+                // --- Header (Image + Title) --- //
+                Row(
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        top = 12.dp,
+                        end = 16.dp,
+                        bottom = 8.dp
+                    ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (event.imageUrl != null) {
+                        AsyncImage(
+                            model = event.imageUrl,
+                            contentDescription = event.title,
+                            modifier = Modifier.size(40.dp).clip(MaterialTheme.shapes.small),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                    }
+                    Text(
+                        text = event.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
-                EventType.MultiMarket -> {
-                    val sortedMarkets = remember(event) {
-                        event.markets
-                            .sortedByViewPriority(event.sortByEnum)
+
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                // --- Market Content (choose display style) --- //
+                when (event.eventType) {
+                    EventType.BinaryEvent -> {
+                        BinaryMarketContent(market = event.baseMarkets.first())
                     }
 
-                    MultiMarketContent(
-                        sortedMarkets = sortedMarkets,
-                        isExpanded = isMarketListExpanded, // Pass state
-                        onToggleExpand = { isMarketListExpanded = !isMarketListExpanded } // Pass lambda
-                    )
-                }
-            }
+                    EventType.CategoricalMarket -> {
+                        CategoricalMarketContent(
+                            market = event.baseMarkets.first(),
+                            isExpanded = isMarketListExpanded, // Pass state
+                            onToggleExpand = {
+                                isMarketListExpanded = !isMarketListExpanded
+                            } // Pass lambda
+                        )
+                    }
 
-            // --- Footer (Volume + End Date) --- //
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 4.dp), // Adjusted padding
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Volume on the left
-                event.volume?.let {
+                    EventType.MultiMarket -> {
+                        val sortedMarkets = remember(event) {
+                            event.baseMarkets
+                                .sortedByViewPriority(event.sortByEnum)
+                        }
+
+                        MultiMarketContent(
+                            sortedMarkets = sortedMarkets,
+                            isExpanded = isMarketListExpanded, // Pass state
+                            onToggleExpand = {
+                                isMarketListExpanded = !isMarketListExpanded
+                            } // Pass lambda
+                        )
+                    }
+                }
+
+                // --- Footer (Volume + End Date) --- //
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            bottom = 12.dp,
+                            top = 4.dp
+                        ), // Adjusted padding
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Volume on the left
+                    event.volume?.let {
+                        Text(
+                            text = UiFormatter.formatLargeValueUsd(it, suffix = " Vol."),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f)) // Push end date to the right
+
+                    // End Date/Time Remaining on the right
+                    val (endDateText, hasEnded) = ComposableUiFormatter.formatTimeRemainingOrDate(
+                        event.endDate
+                    )
                     Text(
-                        text = UiFormatter.formatLargeValueUsd(it, suffix = " Vol."),
+                        text = endDateText,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline,
+                        color = if (hasEnded) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
+                        textAlign = TextAlign.End // Align text to the end
                     )
                 }
-
-                Spacer(modifier = Modifier.weight(1f)) // Push end date to the right
-
-                // End Date/Time Remaining on the right
-                val (endDateText, hasEnded) = ComposableUiFormatter.formatTimeRemainingOrDate(event.endDate)
-                Text(
-                    text = endDateText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (hasEnded) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
-                    textAlign = TextAlign.End // Align text to the end
-                )
             }
         }
-    }
 }
 
 // --- Composable for "Binary market" style --- //
 @Composable
 private fun BinaryMarketContent(
-    market: MarketDto
+    market: BaseMarketDto
 ) {
-    val yesPrice = market.yesPrice
+    val yesPrice = market.yesPrice()
 
     Column(
         modifier = Modifier
@@ -189,7 +215,7 @@ private fun BinaryMarketContent(
 // --- Composable for SINGLE CATEGORICAL market --- //
 @Composable
 private fun CategoricalMarketContent(
-    market: MarketDto,
+    market: BaseMarketDto,
     isExpanded: Boolean,
     onToggleExpand: () -> Unit
 ) {
@@ -237,7 +263,7 @@ private fun CategoricalMarketContent(
 // --- Composable for MULTIPLE BINARY markets (elections) --- //
 @Composable
 private fun MultiMarketContent(
-    sortedMarkets: List<MarketDto>,
+    sortedMarkets: List<BaseMarketDto>,
     isExpanded: Boolean,
     onToggleExpand: () -> Unit
 ) {
@@ -250,7 +276,7 @@ private fun MultiMarketContent(
     val marketPricePairs = remember(sortedMarkets) {
         sortedMarkets
             .mapNotNull { market ->
-                val yesPrice = market.yesPrice
+                val yesPrice = market.yesPrice()
                 if (yesPrice != null) market to yesPrice else null // Include only if Yes price exists
             }
     }
@@ -409,28 +435,21 @@ private fun BinaryEventListItemPreview() {
 @Preview(showBackground = true, name = "Multi Market Event Preview (Corrected)")
 @Composable
 private fun MultiMarketEventListItemPreview() {
-    val previewMarket1 = demoMarketDto("m1", "Will Mark Carney be the next Canadian Prime Minister?", "m1-slug", description = "Desc M1", active = true, closed = false, resolutionSource = "Source M1", startDate=null, endDate=null, volume = 1000.0, liquidity = 50.0, "[\"Yes\", \"No\"]", "[\"0.77\", \"0.23\"]", groupItemTitle = "Mark Carney")
-    val previewMarket2 = demoMarketDto("m2", "Will Pierre Poilievre be the next Canadian Prime Minister?", "m2-slug", description = "Desc M2", active = true, closed = false, resolutionSource = "Source M2", startDate=null, endDate=null, volume = 2500.0, liquidity = 150.0, "[\"Yes\", \"No\"]", "[\"0.24\", \"0.76\"]", groupItemTitle = "Pierre Poilievre", umaResolutionStatus = "resolved")
-    val previewMarket3 = demoMarketDto("m3", "Will Jagmeet Singh be the next Canadian Prime Minister?", "m3-slug", description = "Desc M3", active = true, closed = false, resolutionSource = "Source M3", startDate=null, endDate=null, volume = 500.0, liquidity = 20.0, "[\"Yes\", \"No\"]", "[\"0.01\", \"0.99\"]", groupItemTitle = "Jagmeet Singh")
-    val previewMarket4 = demoMarketDto("m4", "Will Someone Else be the next Canadian Prime Minister?", "m4-slug", description = "Desc M4", active = true, closed = false, resolutionSource = "Source M4", startDate=null, endDate=null, volume = 800.0, liquidity = 40.0, "[\"Yes\", \"No\"]", "[\"0.01\", \"0.99\"]", groupItemTitle = "Someone Else")
-    val previewMarket5 = demoMarketDto("m5", "Will Yet Another Candidate be the next Canadian Prime Minister?", "m5-slug", description = "Desc M5", active = true, closed = false, resolutionSource = "Source M5", startDate=null, endDate=null, volume = 1200.0, liquidity = 60.0, "[\"Yes\", \"No\"]", "[\"0.00\", \"1.00\"]", groupItemTitle = "Yet Another Candidate")
+    val previewMarket1 = demoOptimizedMarketDto("Will Mark Carney be the next Canadian Prime Minister?", "m1-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.77, 0.23), groupItemTitle = "Mark Carney")
+    val previewMarket2 = demoOptimizedMarketDto("Will Pierre Poilievre be the next Canadian Prime Minister?", "m2-slug", active = true, closed = true, listOf("Yes", "No"), listOf(0.24, 0.76), groupItemTitle = "Pierre Poilievre")
+    val previewMarket3 = demoOptimizedMarketDto("Will Jagmeet Singh be the next Canadian Prime Minister?", "m3-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.01, 0.99), groupItemTitle = "Jagmeet Singh")
+    val previewMarket4 = demoOptimizedMarketDto("Will Someone Else be the next Canadian Prime Minister?", "m4-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.01, 0.99), groupItemTitle = "Someone Else")
+    val previewMarket5 = demoOptimizedMarketDto("Will Yet Another Candidate be the next Canadian Prime Minister?", "m5-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.00, 1.00), groupItemTitle = "Yet Another Candidate")
 
-    val previewEvent = demoEventDto(
+    val previewEvent = demoOptimizedEventDto(
         id = "event-multi",
         title = "Next Prime Minister of Canada after the election?",
         slug = "event-multi-slug",
-        description = "Desc",
-        category = "Politics",
         imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Canada_%28Pantone%29.svg/160px-Flag_of_Canada_%28Pantone%29.svg.png",
-        iconUrl = null,
         startDate = null,
         endDate = OffsetDateTime.now().minusDays(5),
-        resolutionSource = "Preview Source 2",
         active = true,
-        closed = false,
-        volume = 37_100_000.0,
-        liquidity = 123_000.2222,
-        featured = false,
+        closed = true,
         rawMarkets = listOf(previewMarket1, previewMarket2, previewMarket3, previewMarket4, previewMarket5)
     )
     PolymarketAppTheme {
@@ -442,41 +461,23 @@ private fun MultiMarketEventListItemPreview() {
 @Preview(showBackground = true, name = "Categorical Event Preview")
 @Composable
 private fun CategoricalEventListItemPreview() {
-    val previewMarket = demoMarketDto(
-        id = "m-cat",
-        question = "Who will win the Game Award?",
+    val previewMarket = demoOptimizedMarketDto(
         slug = "m-cat-slug",
-        description = "Categorical market description",
         active = true,
         closed = false,
-        resolutionSource = "Source Cat",
-        startDate = null,
-        endDate = null,
-        volume = 15000.0,
-        liquidity = 2000.0,
-        outcomesJson = "[\"Game A\", \"Game B\", \"Game C (Long Name Example)\", \"Game D\", \"Game E\"]",
-        outcomePricesJson = "[\"0.45\", \"0.30\", \"0.15\", \"0.05\", \"0.05\"]",
-        groupItemTitle = null
     )
-    val previewEvent = demoEventDto(
+    val previewEvent = demoOptimizedEventDto(
         id = "event-cat",
         title = "Game Award Winner",
         slug = "event-cat-slug",
-        description = "Desc",
-        category = "Gaming",
         imageUrl = "https://via.placeholder.com/150/0000FF/FFFFFF?Text=Game",
-        iconUrl = null,
         startDate = null,
         endDate = OffsetDateTime.now().plusDays(30),
-        resolutionSource = "Preview Source 3",
         active = true,
         closed = false,
-        volume = 15000.0,
-        liquidity = 2000.0,
-        featured = false,
         rawMarkets = listOf(previewMarket)
     )
     PolymarketAppTheme {
         EventListItem(event = previewEvent, onEventClick = {})
     }
-} 
+}

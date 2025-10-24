@@ -114,7 +114,12 @@ fun UserProfileContent(userProfile: UserProfileDto, modifier: Modifier = Modifie
          Spacer(modifier = Modifier.height(16.dp))
 
         // Add more fields as needed
-        InfoRow("Joined:", UiFormatter.formatDateTimeLong(userProfile.createdAt)) // Consider formatting date
+        if(userProfile.createdAt != null) {
+            InfoRow(
+                "Joined:",
+                UiFormatter.formatDateTimeLong(userProfile.createdAt)
+            ) // Consider formatting date
+        }
          // Display 'mod' or 'creator' status if relevant from userProfile.users
          // Add other user stats if available in the API response
 

@@ -4,6 +4,8 @@ import com.streamatico.polymarketviewer.data.model.CommentDto
 import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.MarketDto
 import com.streamatico.polymarketviewer.data.model.PaginationDataDto
+import com.streamatico.polymarketviewer.data.model.SearchResultOptimizedDto
+import com.streamatico.polymarketviewer.data.model.SearchResultFullDto
 import com.streamatico.polymarketviewer.data.model.TagDto
 import com.streamatico.polymarketviewer.data.model.TimeseriesPointDto
 import com.streamatico.polymarketviewer.data.model.UserProfileDto
@@ -121,5 +123,33 @@ class PolymarketRepositoryImpl @Inject constructor(
 
     override suspend fun getUserProfile(address: String): Result<UserProfileDto> {
         return safeApiCall { gammaApiClient.getUserProfile(address) }
+    }
+
+    override suspend fun searchPublicOptimized(
+        query: String,
+        limitPerType: Int,
+        eventsStatus: String
+    ): Result<SearchResultOptimizedDto> {
+        return safeApiCall {
+            gammaApiClient.searchPublicOptimized(
+                query = query,
+                limitPerType = limitPerType,
+                eventsStatus = eventsStatus
+            )
+        }
+    }
+
+    override suspend fun searchPublicFull(
+        query: String,
+        limitPerType: Int,
+        eventsStatus: String
+    ): Result<SearchResultFullDto> {
+        return safeApiCall {
+            gammaApiClient.searchPublicFull(
+                query = query,
+                limitPerType = limitPerType,
+                eventsStatus = eventsStatus
+            )
+        }
     }
 }

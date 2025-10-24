@@ -10,8 +10,8 @@ import kotlin.collections.any
 @Serializable
 data class MarketDto(
     @SerialName("id") val id: String, // Example: "0x123...abc"
-    @SerialName("question") val question: String, // Title/market question
-    @SerialName("slug") val slug: String, // Used for URL
+    @SerialName("question") override val question: String, // Title/market question
+    @SerialName("slug") override val slug: String, // Used for URL
     @SerialName("resolutionSource") val resolutionSource: String? = null,
 
     @Serializable(with = OffsetDateTimeSerializer::class)
@@ -30,23 +30,26 @@ data class MarketDto(
     @SerialName("volumeNum") val volume: Double? = null, // Trading volume in USD (can be null)
     @SerialName("liquidityNum") val liquidity: Double? = null,  // Liquidity in USD (can be null)
 
-    @SerialName("active") val active: Boolean, // Whether market is active
-    @SerialName("closed") val closed: Boolean, // Whether closed (event occurred)
+    @SerialName("active") override val active: Boolean, // Whether market is active
+    @SerialName("closed") override val closed: Boolean, // Whether closed (event occurred)
 
     @Serializable(with = OffsetDateTimeSerializer::class)
     @SerialName("createdAt") val createdAt: OffsetDateTime,
     @Serializable(with = OffsetDateTimeSerializer::class)
     @SerialName("updatedAt") val updatedAt: OffsetDateTime? = null,
 
+    @Serializable(with = OffsetDateTimeSerializer::class)
+    @SerialName("closedTime") override val closedTime: OffsetDateTime? = null,
+
     @SerialName("new") val isNew: Boolean,
     @SerialName("featured") val isFeatured: Boolean? = null,
 
     @SerialName("submitted_by") val submittedBy: String? = null,
-    @SerialName("archived") val isArchived: Boolean,
+    @SerialName("archived") override val isArchived: Boolean,
     @SerialName("resolvedBy") val resolvedBy: String? = null,
     @SerialName("restricted") val isRestricted: Boolean,
 
-    @SerialName("groupItemTitle") val groupItemTitle: String? = null,
+    @SerialName("groupItemTitle") override val groupItemTitle: String? = null,
     @SerialName("groupItemThreshold") val groupItemThreshold: Int? = null,
     @SerialName("questionID") val questionId: String? = null,
 
@@ -71,9 +74,10 @@ data class MarketDto(
     @SerialName("funded") val isFunded: Boolean,
     @SerialName("approved") val isApproved: Boolean,
 
-    @SerialName("lastTradePrice") val lastTradePrice: Double? = null,
-    @SerialName("bestBid") val bestBid: Double? = null,
-    @SerialName("bestAsk") val bestAsk: Double? = null,
+    @SerialName("spread") override val spread: Double? = null,
+    @SerialName("lastTradePrice") override val lastTradePrice: Double? = null,
+    @SerialName("bestBid") override val bestBid: Double? = null,
+    @SerialName("bestAsk") override val bestAsk: Double? = null,
     @SerialName("automaticallyActive") val automaticallyActive: Boolean = false,
 
     @SerialName("seriesColor") val seriesColor: String? = null,
@@ -82,67 +86,24 @@ data class MarketDto(
     @SerialName("manualActivation") val manualActivation: Boolean,
 
     // Allowed values: "disputed", "resolved", ...
-    @SerialName("umaResolutionStatus") val umaResolutionStatus: String? = null,
-) {
-    val outcomes: List<String> by lazy {
+    @SerialName("umaResolutionStatus") override val umaResolutionStatus: String? = null,
+) : BaseMarketDto {
+    override val outcomes: List<String> by lazy {
         JsonUtils.parsedJsonList(outcomesJson) ?: emptyList()
     }
 
-    val outcomePrices: List<Double> by lazy {
-        JsonUtils.parsedJsonList(outcomePricesJson)?.mapNotNull { it.toDoubleOrNull() ?: 0.0 } ?: emptyList()
-    }
-
-    fun getHasPositiveCompetitive(): Boolean {
-        return competitive != null && competitive > 0
-    }
-
-    val yesPrice: Double? by lazy {
-        if(getHasPositiveCompetitive()) {
-            if (outcomes.size == 2 && outcomePrices.size == 2) outcomePrices[0] else null
-        } else {
-            null
-        }
+    override val outcomePrices: List<Double> by lazy {
+        JsonUtils.parsedJsonList(outcomePricesJson)?.map { it.toDoubleOrNull() ?: 0.0 } ?: emptyList()
     }
 
     val isBinaryMarket: Boolean by lazy {
-        (outcomes.size == 2 && outcomes.any { it.equals("yes", ignoreCase = true) })
+        (outcomes.size == 2 && outcomes.any { isYesOutcome(it) })
     }
 
     fun getChartLabel(): String {
         //if(isBinaryMarket) return "Yes"
         return getTitleOrDefault("Unknown")
     }
-
-    fun getYesTitle(): String {
-        val binaryOutcomeTitle1 = if(outcomes.size == 2) outcomes[0] else null
-
-        if(!binaryOutcomeTitle1.isNullOrEmpty()) return binaryOutcomeTitle1
-
-        if(question.isNotEmpty()) return question
-
-        return "Unknown outcome"
-    }
-
-    fun getTitleOrDefault(defaultTitle: String): String {
-        val title = groupItemTitle?.trim()
-
-        if(!title.isNullOrEmpty()) return title
-
-        return defaultTitle
-    }
-
-    fun getResolutionStatus(): MarketResolutionStatus? {
-        return when (umaResolutionStatus) {
-            "disputed" -> MarketResolutionStatus.DISPUTED
-            "resolved" -> MarketResolutionStatus.RESOLVED
-            else -> null
-        }
-    }
-}
-
-enum class MarketResolutionStatus {
-    DISPUTED,
-    RESOLVED,
 }
 
  fun demoMarketDto(

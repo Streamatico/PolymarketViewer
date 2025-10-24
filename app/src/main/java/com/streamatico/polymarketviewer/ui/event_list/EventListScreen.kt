@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.HourglassBottom
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.outlined.Info
@@ -70,6 +71,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -91,7 +93,8 @@ import kotlinx.coroutines.launch
 fun EventListScreen(
     viewModel: EventListViewModel = hiltViewModel(),
     onNavigateToEventDetail: (String) -> Unit,
-    onNavigateToAbout: () -> Unit
+    onNavigateToAbout: () -> Unit,
+    onNavigateToSearch: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val tags by viewModel.tagsState.collectAsState()
@@ -122,7 +125,8 @@ fun EventListScreen(
         showBottomSheet = showBottomSheet,
         onShowSortOptionsClick = { showBottomSheet = true },
         onDismissRequest = { showBottomSheet = false },
-        onNavigateToAbout = onNavigateToAbout
+        onNavigateToAbout = onNavigateToAbout,
+        onNavigateToSearch = onNavigateToSearch,
     )
 }
 
@@ -146,7 +150,8 @@ private fun EventListScreenContent(
     showBottomSheet: Boolean,
     onShowSortOptionsClick: () -> Unit,
     onDismissRequest: () -> Unit,
-    onNavigateToAbout: () -> Unit
+    onNavigateToAbout: () -> Unit,
+    onNavigateToSearch: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -165,7 +170,8 @@ private fun EventListScreenContent(
         onRetry = onRetry,
         onNavigateToEventDetail = onNavigateToEventDetail,
         onShowSortOptionsClick = onShowSortOptionsClick,
-        onNavigateToAbout = onNavigateToAbout
+        onNavigateToAbout = onNavigateToAbout,
+        onSearchClick = onNavigateToSearch
     )
 
     if (showBottomSheet) {
@@ -259,6 +265,7 @@ fun EventListContent(
     onRetry: () -> Unit,
     onNavigateToEventDetail: (String) -> Unit,
     onShowSortOptionsClick: () -> Unit,
+    onSearchClick: () -> Unit,
     onNavigateToAbout: () -> Unit
 ) {
     // More info: https://developer.android.com/develop/ui/compose/layouts/adaptive/build-adaptive-navigation
@@ -298,29 +305,24 @@ fun EventListContent(
                             .size(52.dp)
                     )
                 },
-                title = {
-                    Column {
-                        Text("Polymarket Viewer")
-                        /*
-                            Text(
-                                appVersionTitle,
-                                style = MaterialTheme.typography.labelSmall,
-                                modifier = Modifier.alpha(0.7f)
-                            )
-                         */
-                    }
-                },
+                title = { Text(stringResource(R.string.app_name), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 actions = {
-                    IconButton(onClick = onShowSortOptionsClick) {
-                        Icon(
-                            imageVector = Icons.Filled.FilterList,
-                            contentDescription = stringResource(id = R.string.filter_tooltip)
-                        )
-                    }
+                        IconButton(onClick = onSearchClick) {
+                            Icon(
+                                imageVector = Icons.Filled.Search,
+                                contentDescription = stringResource(id = R.string.search_tooltip)
+                            )
+                        }
+                        IconButton(onClick = onShowSortOptionsClick) {
+                            Icon(
+                                imageVector = Icons.Filled.FilterList,
+                                contentDescription = stringResource(id = R.string.filter_tooltip)
+                            )
+                        }
 
-                    AboutAction(
-                        onNavigateToAbout = onNavigateToAbout
-                    )
+                        AboutAction(
+                            onNavigateToAbout = onNavigateToAbout
+                        )
                 },
                 scrollBehavior = scrollBehavior
             )
@@ -590,7 +592,8 @@ private fun EventListScreenPreview_Success() {
             showBottomSheet = false,
             onShowSortOptionsClick = {},
             onDismissRequest = {},
-            onNavigateToAbout = {}
+            onNavigateToAbout = {},
+            onNavigateToSearch = {},
         )
     }
 }
@@ -618,7 +621,8 @@ private fun EventListScreenPreview_Loading() {
             showBottomSheet = false,
             onShowSortOptionsClick = {},
             onDismissRequest = {},
-            onNavigateToAbout = {}
+            onNavigateToAbout = {},
+            onNavigateToSearch = {},
         )
     }
 }
@@ -646,7 +650,8 @@ private fun EventListScreenPreview_Error() {
             showBottomSheet = false,
             onShowSortOptionsClick = {},
             onDismissRequest = {},
-            onNavigateToAbout = {}
+            onNavigateToAbout = {},
+            onNavigateToSearch = {},
         )
     }
 }
