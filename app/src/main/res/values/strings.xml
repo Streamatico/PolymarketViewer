@@ -12,4 +12,8 @@
     <string name="about_data_source_text">This is an unofficial application that displays publicly available data from the Polymarket platform (polymarket.com).</string>
     <string name="about_disclaimer_title">Disclaimer</string>
     <string name="about_disclaimer_text">This application is not affiliated with Polymarket, government entities, or any organizations. Functionality and content are limited to comply with policies. Use at your own risk.</string>
+    <string name="search_hint">Search events...</string>
+    <string name="search_empty_message">Start typing to search events</string>
+    <string name="search_no_results">No events found</string>
+    <string name="search_clear">Clear search</string>
 </resources>

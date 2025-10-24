@@ -102,6 +102,10 @@ import com.streamatico.polymarketviewer.data.model.MarketResolutionStatus
 import com.streamatico.polymarketviewer.data.model.PositionDto
 import com.streamatico.polymarketviewer.data.model.TagDto
 import com.streamatico.polymarketviewer.data.model.demoMarketDto
+import com.streamatico.polymarketviewer.data.model.getResolutionStatus
+import com.streamatico.polymarketviewer.data.model.getTitleOrDefault
+import com.streamatico.polymarketviewer.data.model.getYesTitle
+import com.streamatico.polymarketviewer.data.model.yesPrice
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
@@ -327,7 +331,7 @@ private fun EventDetailsContentSuccess(
 
     val marketPrices = remember(event.markets) {
         event.markets.associate { market ->
-            market.id to  market.yesPrice
+            market.id to market.yesPrice()
         }
     }
     val sortedMarkets = remember(event.markets) {
@@ -504,7 +508,7 @@ private fun EventDetailsContentSuccess(
             }
         }
 
-        CommentsSection(
+        commentsSection(
             displayableComments = displayableComments,
             // Receive other states/callbacks
             commentsLoading = commentsLoading,
@@ -544,7 +548,7 @@ private fun EventDetailsContentSuccess(
 }
 
 //@Composable
-private fun LazyListScope.CommentsSection(
+private fun LazyListScope.commentsSection(
     displayableComments: List<HierarchicalComment>,
     // Receive other states/callbacks
     commentsLoading: Boolean,
@@ -938,7 +942,7 @@ private val sampleComment2 = CommentDto(
     reportCount = 2,
 )
 
-private val sampleHierarchicalComments = listOf<HierarchicalComment>(
+private val sampleHierarchicalComments = listOf(
     HierarchicalComment(sampleComment1, listOf(sampleReply1)),
     HierarchicalComment(sampleComment2)
 )

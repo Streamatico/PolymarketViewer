@@ -48,11 +48,7 @@ fun AppNavigation(
             SearchScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToEventDetail = { eventId ->
-                    navController.navigate("${AppDestinations.EVENT_DETAIL}/$eventId") {
-                        popUpTo(AppDestinations.SEARCH) {
-                            inclusive = true
-                        }
-                    }
+                    navController.navigate("${AppDestinations.EVENT_DETAIL}/$eventId")
                 },
             )
         }

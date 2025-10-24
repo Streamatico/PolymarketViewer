@@ -20,9 +20,13 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ErrorBox(
     message: String,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
         Icon(
             imageVector = Icons.Default.ErrorOutline,
             contentDescription = null,

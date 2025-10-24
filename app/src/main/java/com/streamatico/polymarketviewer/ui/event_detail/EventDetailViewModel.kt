@@ -11,6 +11,8 @@ import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.MarketDto
 import com.streamatico.polymarketviewer.data.model.TimeseriesPointDto
 import com.streamatico.polymarketviewer.data.model.CommentDto
+import com.streamatico.polymarketviewer.data.model.getTitleOrDefault
+import com.streamatico.polymarketviewer.data.model.yesPrice
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import com.streamatico.polymarketviewer.ui.navigation.AppDestinations
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -172,8 +174,8 @@ class EventDetailViewModel @Inject constructor(
         Log.d("EventDetailVM", "Loading chart data for range: $range")
 
         val topMarkets = currentEvent.markets
-            .filter { it.yesPrice.let { price -> price != null && price > 0.0 } }
-            .sortedByDescending { it.yesPrice }
+            .filter { it.yesPrice().let { price -> price != null && price > 0.0 } }
+            .sortedByDescending { it.yesPrice() }
             .take(5)
 
         viewModelScope.launch {
@@ -212,7 +214,7 @@ class EventDetailViewModel @Inject constructor(
                  result.onSuccess { pointsDto: List<TimeseriesPointDto> ->
                      val market = topMarkets[originalIndex]
                      Log.d("EventDetailVM", "Received ${pointsDto.size} points for market ${market.id}")
-                     
+
                      val chartEntries = pointsDto.map { point ->
                          point.close.let { price ->
                              // Convert timestamp (assumed seconds) to milliseconds for the chart's X-axis
@@ -227,7 +229,7 @@ class EventDetailViewModel @Inject constructor(
                           combinedMarketsResults.add(
                               InternalMarketTimeseries(
                                   market = market,
-                                  yesPrice = market.yesPrice ?: -1.0,
+                                  yesPrice = market.yesPrice() ?: -1.0,
                                   timeseries = chartEntries
                             )
                           )
@@ -336,7 +338,7 @@ class EventDetailViewModel @Inject constructor(
         val repliesMap = flatList
             .filter { it.parentCommentID != null }
             .groupBy { it.parentCommentID!! } // Group by non-null parent ID
-        
+
         // Filter top-level comments
         val topLevelComments = flatList.filter { it.parentCommentID == null }
 

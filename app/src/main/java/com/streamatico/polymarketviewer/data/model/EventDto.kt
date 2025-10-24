@@ -22,26 +22,28 @@ data class PaginationDto(
  */
 @Serializable
 data class EventDto(
-    @SerialName("id") val id: String,
-    @SerialName("title") internal val title: String, // Make internal if possible
-    @SerialName("slug") val slug: String,
+    @SerialName("id") override val id: String,
+    @SerialName("title") override val title: String, // Make internal if possible
+    @SerialName("slug") override val slug: String,
     @SerialName("description") internal val description: String? = null, // Make internal
     @SerialName("category") val category: String? = null,
 
     @SerialName("icon") val iconUrl: String? = null,   // Icon URL
-    @SerialName("image") val imageUrl: String? = null, // Image URL
+    @SerialName("image") override val imageUrl: String? = null, // Image URL
     @SerialName("showMarketImages") val showMarketImages: Boolean = true,
 
     // NBA market showAllOutcomes = false
     @SerialName("showAllOutcomes") val showAllOutcomes: Boolean = true,
 
-    @SerialName("active") val active: Boolean,
-    @SerialName("closed") val closed: Boolean,
-    @SerialName("archived") val archived: Boolean = false,
+    @SerialName("active") override val active: Boolean,
+    @SerialName("closed") override val closed: Boolean,
+    @SerialName("archived") override val archived: Boolean = false,
     @SerialName("new") val new: Boolean = false,
     @SerialName("restricted") val restricted: Boolean = false,
+    @SerialName("ended") override val ended: Boolean = false,
+    @SerialName("negRisk") override val negRisk: Boolean = false,
 
-    @SerialName("volume") val volume: Double? = null,
+    @SerialName("volume") override val volume: Double? = null,
     @SerialName("liquidity") val liquidity: Double? = null,
 
     @Serializable(with = OffsetDateTimeSerializer::class)
@@ -52,15 +54,18 @@ data class EventDto(
     @Serializable(with = OffsetDateTimeSerializer::class)
     @SerialName("creationDate") val creationDate: OffsetDateTime? = null,
     @Serializable(with = OffsetDateTimeSerializer::class)
-    @SerialName("startDate") val startDate: OffsetDateTime? = null,
+    @SerialName("startDate") override val startDate: OffsetDateTime? = null,
     @Serializable(with = OffsetDateTimeSerializer::class)
-    @SerialName("endDate") val endDate: OffsetDateTime? = null,
+    @SerialName("endDate") override val endDate: OffsetDateTime? = null,
+
+    @Serializable(with = OffsetDateTimeSerializer::class)
+    @SerialName("closedTime") override val closedTime: OffsetDateTime? = null,
 
     @SerialName("resolution_source") val resolutionSource: String? = null,
     @SerialName("markets") internal val rawMarkets: List<MarketDto>, // Make internal
     @SerialName("featured") val featured: Boolean? = null,
     @SerialName("featuredOrder") val featuredOrder: Int? = null,
-    @SerialName("tags") val tags: List<TagDto>? = null, // List of event tags (categories)
+    @SerialName("tags") override val tags: List<TagDto>? = null, // List of event tags (categories)
 
     @SerialName("competitive") val competitive: Double? = null,
     @SerialName("commentCount") val commentCount: Long = 0,
@@ -70,7 +75,7 @@ data class EventDto(
     @SerialName("series") val series: List<SeriesDto>? = null,
 
     // Add other fields as needed (volume24hr, etc.)
-){
+): BaseEventDto {
     val markets: List<MarketDto> by lazy {
         val activeMarkets = rawMarkets.filter { it.active } // Filter only active markets
 
@@ -85,7 +90,11 @@ data class EventDto(
         }
     }
 
-    val eventType: EventType by lazy {
+    override val baseMarkets: List<BaseMarketDto> by lazy {
+        markets
+    }
+
+    override val eventType: EventType by lazy {
         when {
             rawMarkets.size == 1 && rawMarkets[0].isBinaryMarket -> EventType.BinaryEvent
             rawMarkets.size == 1 -> EventType.CategoricalMarket
@@ -93,7 +102,7 @@ data class EventDto(
         }
     }
 
-    val sortByEnum: EventMarketsSortBy
+    override val sortByEnum: EventMarketsSortBy
         get() = when (sortBy) {
             "price" -> EventMarketsSortBy.Price
             else -> EventMarketsSortBy.None

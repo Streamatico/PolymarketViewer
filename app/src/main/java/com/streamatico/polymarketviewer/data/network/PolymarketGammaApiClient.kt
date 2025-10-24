@@ -110,7 +110,7 @@ class PolymarketGammaApiClient @Inject constructor(
         }.body()
     }
 
-    suspend fun searchPublic(
+    suspend fun searchPublicOptimized(
         query: String,
         limitPerType: Int = 6,
         searchTags: Boolean = true,

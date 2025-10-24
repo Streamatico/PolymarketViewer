@@ -131,7 +131,7 @@ class PolymarketRepositoryImpl @Inject constructor(
         eventsStatus: String
     ): Result<SearchResultOptimizedDto> {
         return safeApiCall {
-            gammaApiClient.searchPublic(
+            gammaApiClient.searchPublicOptimized(
                 query = query,
                 limitPerType = limitPerType,
                 eventsStatus = eventsStatus

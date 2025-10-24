@@ -11,8 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun LoadingBox() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+fun LoadingBox(
+    modifier: Modifier = Modifier
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
         CircularProgressIndicator()
         Spacer(modifier = Modifier.height(8.dp))
         Text("Loading...")
