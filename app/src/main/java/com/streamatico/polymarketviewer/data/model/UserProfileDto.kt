@@ -11,7 +11,7 @@ import java.time.OffsetDateTime
 @Serializable
 data class UserProfileDto(
     @Serializable(with = OffsetDateTimeSerializer::class)
-    @SerialName("createdAt") val createdAt: OffsetDateTime, // Consider parsing to OffsetDateTime if needed
+    @SerialName("createdAt") val createdAt: OffsetDateTime?, // Consider parsing to OffsetDateTime if needed
     @SerialName("proxyWallet") override val proxyWallet: String, // User's wallet address
     @SerialName("profileImage") override val profileImage: String? = null,
     @SerialName("displayUsernamePublic") override val displayUsernamePublic: Boolean? = null,
@@ -39,4 +39,4 @@ data class UserAssociationDto(
     @SerialName("id") val id: String?,
     @SerialName("creator") val creator: Boolean?,
     @SerialName("mod") val mod: Boolean?
-) 
+)

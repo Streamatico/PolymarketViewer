@@ -2,6 +2,8 @@ package com.streamatico.polymarketviewer.domain.repository
 
 import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.MarketDto
+import com.streamatico.polymarketviewer.data.model.SearchResultOptimizedDto
+import com.streamatico.polymarketviewer.data.model.SearchResultFullDto
 import com.streamatico.polymarketviewer.data.model.TagDto
 import com.streamatico.polymarketviewer.data.model.TimeseriesPointDto
 import com.streamatico.polymarketviewer.data.model.CommentDto
@@ -71,6 +73,24 @@ interface PolymarketRepository {
     ): Result<List<CommentDto>>
 
     suspend fun getUserProfile(address: String): Result<UserProfileDto>
+
+    /**
+     * Search for events, profiles, and tags (optimized format).
+     */
+    suspend fun searchPublic(
+        query: String,
+        limitPerType: Int = 6,
+        eventsStatus: String = "active"
+    ): Result<SearchResultOptimizedDto>
+
+    /**
+     * Search for events, profiles, and tags (full format with pagination).
+     */
+    suspend fun searchPublicFull(
+        query: String,
+        limitPerType: Int = 6,
+        eventsStatus: String = "active"
+    ): Result<SearchResultFullDto>
 }
 
 enum class PolymarketEventsSortOrder {
