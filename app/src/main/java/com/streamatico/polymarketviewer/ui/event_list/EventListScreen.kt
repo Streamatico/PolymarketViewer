@@ -72,13 +72,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
+import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.TagDto
 import com.streamatico.polymarketviewer.domain.repository.PolymarketEventsSortOrder
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
-import com.streamatico.polymarketviewer.R
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -262,7 +264,7 @@ fun EventListContent(
     // More info: https://developer.android.com/develop/ui/compose/layouts/adaptive/build-adaptive-navigation
     val adaptiveInfo = currentWindowAdaptiveInfo()
 
-    val useGrid = adaptiveInfo.windowSizeClass.windowWidthSizeClass != androidx.window.core.layout.WindowWidthSizeClass.COMPACT
+    val useGrid = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_MEDIUM_LOWER_BOUND)
     val listState = rememberLazyListState()
     val gridState = rememberLazyGridState()
 
@@ -352,13 +354,12 @@ fun EventListContent(
                                 modifier = Modifier.fillMaxSize()
                             ) {
                                 val adaptiveInfo = currentWindowAdaptiveInfo()
-                                val isSizeWidthMedium = adaptiveInfo.windowSizeClass.windowWidthSizeClass == androidx.window.core.layout.WindowWidthSizeClass.MEDIUM
 
                                 // Determine number of columns for the grid
-                                val gridCells = if (isSizeWidthMedium) {
-                                    GridCells.Fixed(2) // 2 columns for Medium width
-                                } else {
+                                val gridCells = if(adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND)) {
                                     GridCells.Adaptive(minSize = 300.dp) // Adaptive columns for Expanded width
+                                } else {
+                                    GridCells.Fixed(2) // 2 columns for Medium and Compact width
                                 }
 
                                 // Use LazyColumn for Compact, LazyVerticalGrid otherwise
@@ -435,7 +436,7 @@ fun EventListContent(
                                         }
                                         .distinctUntilChanged()
                                         .filter { shouldLoadMore -> shouldLoadMore }
-                                        .collect { 
+                                        .collect {
                                             if (canLoadMore && !isLoadingMore && !isRefreshing) {
                                                 onLoadMore()
                                             }

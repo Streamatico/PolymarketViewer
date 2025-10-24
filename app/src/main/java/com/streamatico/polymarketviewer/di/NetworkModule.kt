@@ -3,6 +3,7 @@ package com.streamatico.polymarketviewer.di
 import android.content.Context
 import android.util.Log
 import com.streamatico.polymarketviewer.BuildConfig
+import com.streamatico.polymarketviewer.data.network.PolymarketHttpClientNames
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -46,14 +47,14 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    @Named("GammaClient")
+    @Named(PolymarketHttpClientNames.GAMMA_CLIENT)
     fun provideGammaHttpClient(@ApplicationContext context: Context): HttpClient {
         return createHttpClient(context, BASE_GAMMA_URL)
     }
 
     @Provides
     @Singleton
-    @Named("ClobClient")
+    @Named(PolymarketHttpClientNames.CLOB_CLIENT)
     fun provideClobHttpClient(@ApplicationContext context: Context): HttpClient {
         return createHttpClient(context, BASE_CLOB_URL)
     }
@@ -113,4 +114,4 @@ object NetworkModule {
             }
         }
     }
-} 
+}

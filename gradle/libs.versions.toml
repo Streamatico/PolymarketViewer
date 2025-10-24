@@ -1,29 +1,29 @@
 [versions]
-agp = "8.11.1"
+agp = "8.13.0"
 
-kotlin = "2.2.0" # Required compatibility "ksp"
-ksp = "2.2.0-2.0.2"
+kotlin = "2.2.21" # Required compatibility "ksp"
+ksp = "2.3.0"
 
-coreKtx = "1.16.0"
+coreKtx = "1.17.0"
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-activityCompose = "1.10.1"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+activityCompose = "1.11.0"
 datastore = "1.1.7"
 
-composeBom = "2025.07.00"
+composeBom = "2025.10.01"
 
-lifecycleVersion = "2.9.2"
-navigationCompose = "2.9.2"
-coil = "3.2.0"
+lifecycleVersion = "2.9.4"
+navigationCompose = "2.9.5"
+coil = "3.3.0"
 coroutines = "1.10.2"
-vico = "2.1.3"
+vico = "2.2.1"
 
-ktor = "3.2.2"  # Ktor version
-kotlinx-serialization = "1.8.1" # Kotlinx Serialization version
+ktor = "3.3.1"  # Ktor version
+kotlinx-serialization = "1.9.0" # Kotlinx Serialization version
 
-hilt = "2.56.2"
-hiltNavigationCompose = "1.2.0"
+hilt = "2.57.2"
+hiltNavigationCompose = "1.3.0"
 
 
 [libraries]

@@ -9,7 +9,7 @@ import javax.inject.Named
 
 // Class to handle API calls to Polymarket Clob API using Ktor
 class PolymarketClobApiClient @Inject constructor(
-    @Named("ClobClient") private val client: HttpClient
+    @Named(PolymarketHttpClientNames.CLOB_CLIENT) private val client: HttpClient
 ) {
 
     /**
@@ -27,4 +27,4 @@ class PolymarketClobApiClient @Inject constructor(
             parameter("fidelity", fidelity)
         }.body()
     }
-} 
+}

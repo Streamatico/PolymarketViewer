@@ -16,7 +16,7 @@ import javax.inject.Named
 
 // Class to handle API calls to Polymarket Gamma API using Ktor
 class PolymarketGammaApiClient @Inject constructor(
-    @Named("GammaClient") private val client: HttpClient
+    @Named(PolymarketHttpClientNames.GAMMA_CLIENT) private val client: HttpClient
 ) {
 
     suspend fun getEvents(

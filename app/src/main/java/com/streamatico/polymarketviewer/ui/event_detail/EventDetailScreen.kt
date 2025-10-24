@@ -69,7 +69,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
@@ -744,7 +744,7 @@ fun PriceHistoryChart(
     }
 
     val xAxisValueFormatter = remember(selectedRange) {
-        CartesianValueFormatter { context: CartesianMeasuringContext, value: Double, _ -> 
+        CartesianValueFormatter { context: CartesianMeasuringContext, value: Double, _ ->
             val timestampSeconds = value.toLong()
 
             val instant = Instant.ofEpochSecond(timestampSeconds)

@@ -32,7 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.streamatico.polymarketviewer.data.model.UserProfileDto
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
@@ -40,9 +40,6 @@ import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(
-    // Use Hilt or your DI framework to inject ViewModel
-    // viewModel: UserProfileViewModel = hiltViewModel(), 
-    // Or use the factory if not using Hilt/Dagger
     viewModel: UserProfileViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit
 ) {
@@ -136,4 +133,4 @@ private fun InfoRow(label: String, value: String) {
         )
         Text(value, style = MaterialTheme.typography.bodyLarge)
     }
-} 
+}
