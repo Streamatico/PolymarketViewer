@@ -77,7 +77,7 @@ interface PolymarketRepository {
     /**
      * Search for events, profiles, and tags (optimized format).
      */
-    suspend fun searchPublic(
+    suspend fun searchPublicOptimized(
         query: String,
         limitPerType: Int = 6,
         eventsStatus: String = "active"

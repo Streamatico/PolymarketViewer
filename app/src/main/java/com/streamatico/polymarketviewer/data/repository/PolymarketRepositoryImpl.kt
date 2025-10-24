@@ -125,7 +125,7 @@ class PolymarketRepositoryImpl @Inject constructor(
         return safeApiCall { gammaApiClient.getUserProfile(address) }
     }
 
-    override suspend fun searchPublic(
+    override suspend fun searchPublicOptimized(
         query: String,
         limitPerType: Int,
         eventsStatus: String

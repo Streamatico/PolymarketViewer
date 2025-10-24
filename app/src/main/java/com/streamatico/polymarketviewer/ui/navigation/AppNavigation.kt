@@ -11,6 +11,7 @@ import com.streamatico.polymarketviewer.ui.event_list.EventListScreen
 import com.streamatico.polymarketviewer.ui.market_detail.MarketDetailScreen
 import com.streamatico.polymarketviewer.ui.user_profile.UserProfileScreen
 import com.streamatico.polymarketviewer.ui.about.AboutScreen
+import com.streamatico.polymarketviewer.ui.search_screen.SearchScreen
 
 // Define routes
 object AppDestinations {
@@ -19,6 +20,7 @@ object AppDestinations {
     const val EVENT_DETAIL = "eventDetail"
     const val USER_PROFILE = "userProfile"
     const val ABOUT_APP = "aboutApp"
+    const val SEARCH = "search"
     const val MARKET_ID_ARG = "marketId"
     const val EVENT_ID_ARG = "eventId"
     const val USER_ADDRESS_ARG = "userAddress"
@@ -36,7 +38,22 @@ fun AppNavigation(
                 onNavigateToEventDetail = { eventId ->
                     navController.navigate("${AppDestinations.EVENT_DETAIL}/$eventId")
                 },
-                onNavigateToAbout = { navController.navigate(AppDestinations.ABOUT_APP) }
+                onNavigateToAbout = { navController.navigate(AppDestinations.ABOUT_APP) },
+                onNavigateToSearch = { navController.navigate(AppDestinations.SEARCH) }
+            )
+        }
+
+        // Search screen
+        composable(AppDestinations.SEARCH) {
+            SearchScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEventDetail = { eventId ->
+                    navController.navigate("${AppDestinations.EVENT_DETAIL}/$eventId") {
+                        popUpTo(AppDestinations.SEARCH) {
+                            inclusive = true
+                        }
+                    }
+                },
             )
         }
 
@@ -87,4 +104,4 @@ fun AppNavigation(
             )
         }
     }
-} 
+}

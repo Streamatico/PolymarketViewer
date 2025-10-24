@@ -71,7 +71,7 @@ fun AboutScreen(
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = stringResource(id = R.string.app_name_long),
+                text = stringResource(id = R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium,
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -140,4 +140,4 @@ fun AboutScreenPreviewDark() {
             onNavigateBack = {} // Dummy lambda for preview
         )
     }
-} 
+}
