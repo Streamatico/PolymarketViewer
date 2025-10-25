@@ -77,6 +77,9 @@ class EventDetailViewModel @Inject constructor(
     // Expose the outcome map state flow publicly
     val eventOutcomeTokensMap: StateFlow<Map<String, String>> = _eventOutcomeTokensMap.asStateFlow()
 
+    private val _isChartAvailable = MutableStateFlow(true)
+    val isChartAvailable: StateFlow<Boolean> = _isChartAvailable.asStateFlow()
+
     // Map for displaying badge text (Token ID -> Market Title like "Pierre Poilievre")
     private val _eventTokenToGroupTitleMap = MutableStateFlow<Map<String, String>>(emptyMap())
     val eventTokenToGroupTitleMap: StateFlow<Map<String, String>> = _eventTokenToGroupTitleMap.asStateFlow()
@@ -185,7 +188,11 @@ class EventDetailViewModel @Inject constructor(
                     // Use Kotlinx Serialization
                     market.clobTokenIds?.let { jsonParser.decodeFromString<List<String>>(it) }
                 } catch (e: Exception) {
-                    Log.e("EventDetailVM", "Failed to parse clobTokenIds for market ${market.id}: ${market.clobTokenIds}", e)
+                    Log.e(
+                        "EventDetailVM",
+                        "Failed to parse clobTokenIds for market ${market.id}: ${market.clobTokenIds}",
+                        e
+                    )
                     null
                 }
                 val tokenId = tokenIds?.firstOrNull()
@@ -211,48 +218,70 @@ class EventDetailViewModel @Inject constructor(
             val combinedMarketsResults = mutableListOf<InternalMarketTimeseries>()
 
             results.forEachIndexed { originalIndex, result: Result<List<TimeseriesPointDto>> ->
-                 result.onSuccess { pointsDto: List<TimeseriesPointDto> ->
-                     val market = topMarkets[originalIndex]
-                     Log.d("EventDetailVM", "Received ${pointsDto.size} points for market ${market.id}")
+                result.onSuccess { pointsDto: List<TimeseriesPointDto> ->
+                    val market = topMarkets[originalIndex]
+                    Log.d(
+                        "EventDetailVM",
+                        "Received ${pointsDto.size} points for market ${market.id}"
+                    )
 
-                     val chartEntries = pointsDto.map { point ->
-                         point.close.let { price ->
-                             // Convert timestamp (assumed seconds) to milliseconds for the chart's X-axis
-                             val xValue = point.timestamp // Timestamp in seconds
-                             val yValue = price.toFloat() * 100f
-                             // Populate the map for the axis formatter, using milliseconds for consistency
-                             //allChartPoints[xValue] = timestampMillis
-                             xValue to yValue
-                         }
-                     }
-                     if (chartEntries.isNotEmpty()) {
-                          combinedMarketsResults.add(
-                              InternalMarketTimeseries(
-                                  market = market,
-                                  yesPrice = market.yesPrice() ?: -1.0,
-                                  timeseries = chartEntries
+                    val chartEntries = pointsDto.map { point ->
+                        point.close.let { price ->
+                            // Convert timestamp (assumed seconds) to milliseconds for the chart's X-axis
+                            val xValue = point.timestamp // Timestamp in seconds
+                            val yValue = price.toFloat() * 100f
+                            // Populate the map for the axis formatter, using milliseconds for consistency
+                            //allChartPoints[xValue] = timestampMillis
+                            xValue to yValue
+                        }
+                    }
+                    if (chartEntries.isNotEmpty()) {
+                        combinedMarketsResults.add(
+                            InternalMarketTimeseries(
+                                market = market,
+                                yesPrice = market.yesPrice() ?: -1.0,
+                                timeseries = chartEntries
                             )
-                          )
-                     }
-                 }.onFailure { error ->
-                     val market = topMarkets[originalIndex]
-                     Log.e("EventDetailVM", "Failed to load timeseries for market ${market.id}", error)
-                 }
+                        )
+                    }
+                }.onFailure { error ->
+                    val market = topMarkets[originalIndex]
+                    Log.e(
+                        "EventDetailVM",
+                        "Failed to load timeseries for market ${market.id}",
+                        error
+                    )
+                }
             }
 
             // --- Update Vico Chart --- //
-            try {
-                chartModelProducer.runTransaction {
-                    lineSeries {
-                        combinedMarketsResults.forEach { x ->
-                            series(x.timeseries.map { it.first }, x.timeseries.map { it.second })
+            if (!combinedMarketsResults.isEmpty()) {
+                _isChartAvailable.value = true
+                try {
+                    chartModelProducer.runTransaction {
+                        lineSeries {
+                            combinedMarketsResults.forEach { x ->
+                                series(
+                                    x.timeseries.map { it.first },
+                                    x.timeseries.map { it.second })
+                            }
+                        }
+                        extras { extraStore ->
+                            extraStore[LegendLabelKey] =
+                                combinedMarketsResults.mapIndexed { index, value ->
+                                    OrderedChartLabel(
+                                        index,
+                                        value.market.getChartLabel()
+                                    )
+                                }.toSet()
                         }
                     }
-                    extras { extraStore -> extraStore[LegendLabelKey] = combinedMarketsResults.mapIndexed { index, value -> OrderedChartLabel(index, value.market.getChartLabel()) }.toSet() }
+                    //Log.d("EventDetailVM", "Real chart data updated. X-axis map size: ${allChartPoints.size}")
+                } catch (e: Throwable) {
+                    Log.e("EventDetailVM", "Error during runTransaction with real data", e)
                 }
-                //Log.d("EventDetailVM", "Real chart data updated. X-axis map size: ${allChartPoints.size}")
-            } catch (e: Throwable) {
-                Log.e("EventDetailVM", "Error during runTransaction with real data", e)
+            } else {
+                _isChartAvailable.value = false
             }
         }
     }

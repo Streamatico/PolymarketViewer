@@ -141,10 +141,13 @@ fun EventDetailScreen(
     val eventOutcomeTokensMap by viewModel.eventOutcomeTokensMap.collectAsState()
     val eventTokenToGroupTitleMap by viewModel.eventTokenToGroupTitleMap.collectAsState()
 
+    val isChartAvailable by viewModel.isChartAvailable.collectAsState()
+
     EventDetailsContent(
         uiState = uiState,
         onMarketClick = onNavigateToMarketDetail,
         chartModelProducer = viewModel.chartModelProducer,
+        isChartAvailable = isChartAvailable,
         selectedRange = selectedTimeRange,
         onRangeSelected = viewModel::selectTimeRange,
         // Pass hierarchical comments
@@ -172,6 +175,7 @@ private fun EventDetailsContent(
     uiState: EventDetailUiState,
     onMarketClick: (String) -> Unit,
     chartModelProducer: CartesianChartModelProducer,
+    isChartAvailable: Boolean,
     selectedRange: TimeRange,
     onRangeSelected: (TimeRange) -> Unit,
     // Receive hierarchical comments
@@ -268,6 +272,7 @@ private fun EventDetailsContent(
                     modifier = Modifier.padding(paddingValues),
                     onMarketClick = onMarketClick,
                     chartModelProducer = chartModelProducer,
+                    isChartAvailable = isChartAvailable,
                     selectedRange = selectedRange,
                     onRangeSelected = onRangeSelected,
                     // Pass hierarchical comments
@@ -308,6 +313,7 @@ private fun EventDetailsContentSuccess(
     modifier: Modifier = Modifier,
     onMarketClick: (String) -> Unit,
     chartModelProducer: CartesianChartModelProducer,
+    isChartAvailable: Boolean,
     selectedRange: TimeRange,
     onRangeSelected: (TimeRange) -> Unit,
     // Receive hierarchical comments
@@ -438,16 +444,18 @@ private fun EventDetailsContentSuccess(
             }
         }
 
-        // Chart
-        item {
-            //Spacer(modifier = Modifier.height(16.dp))
-            PriceHistoryChart(
-                chartModelProducer = chartModelProducer,
-                event = event,
-                selectedRange = selectedRange,
-                onRangeSelected = onRangeSelected,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+        if(isChartAvailable) {
+            // Chart
+            item {
+                //Spacer(modifier = Modifier.height(16.dp))
+                PriceHistoryChart(
+                    chartModelProducer = chartModelProducer,
+                    event = event,
+                    selectedRange = selectedRange,
+                    onRangeSelected = onRangeSelected,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
 
         // Event markets (outcomes)
@@ -1008,6 +1016,7 @@ private fun EventDetailsContentPreviewTemplate(uiState: EventDetailUiState) {
             uiState = uiState,
             onMarketClick = { },
             chartModelProducer = previewChartModelProducer, // Use the mock producer
+            isChartAvailable = true,
             selectedRange = TimeRange.D1,
             onRangeSelected = { },
             displayableComments = sampleHierarchicalComments,
