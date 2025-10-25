@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,7 +19,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -41,6 +41,7 @@ import com.streamatico.polymarketviewer.data.model.OptimizedEventDto
 import com.streamatico.polymarketviewer.ui.event_list.EventListItem
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
+import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,7 +82,7 @@ private fun SearchScreenContent(
         focusRequester.requestFocus()
     }
 
-    Scaffold(
+    MyScaffold(
         topBar = {
             TopAppBar(
                 navigationIcon = {
@@ -118,6 +119,7 @@ private fun SearchScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .imePadding()
         ) {
             when (uiState) {
                 is SearchUiState.Empty -> {

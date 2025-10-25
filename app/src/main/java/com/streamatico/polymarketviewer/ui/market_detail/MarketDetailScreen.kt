@@ -24,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -50,6 +49,7 @@ import com.streamatico.polymarketviewer.data.model.getTitleOrDefault
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
+import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import java.time.OffsetDateTime
 
 // Market details screen
@@ -74,7 +74,7 @@ private fun MarketDetailContent(
     onNavigateBack: () -> Unit,
     onRetry: () -> Unit
 ) {
-    Scaffold(
+    MyScaffold(
         topBar = {
             TopAppBar(
                 title = {

@@ -39,7 +39,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -109,6 +108,7 @@ import com.streamatico.polymarketviewer.data.model.yesPrice
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
+import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.shared.sortedByViewPriority
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -210,7 +210,7 @@ private fun EventDetailsContent(
     // Show title in app bar if the second item (index 1, the title) is no longer the first visible item
     val showTitleInAppBar by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
 
-    Scaffold(
+    MyScaffold(
         topBar = {
             TopAppBar(
                 title = {

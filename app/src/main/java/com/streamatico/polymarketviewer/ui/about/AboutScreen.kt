@@ -14,7 +14,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -30,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.streamatico.polymarketviewer.BuildConfig
 import com.streamatico.polymarketviewer.R
+import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
 
 const val PRIVACY_POLICY_URL = "https://streamatico.github.io/polymarketapp/privacy_policy"
@@ -41,7 +41,7 @@ fun AboutScreen(
 ) {
     val uriHandler = LocalUriHandler.current
 
-    Scaffold(
+    MyScaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.about_app_title)) },
@@ -76,7 +76,7 @@ fun AboutScreen(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "v${BuildConfig.VERSION_NAME}",
+                text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(4.dp))
