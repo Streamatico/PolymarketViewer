@@ -1,5 +1,6 @@
 [versions]
-agp = "8.13.0"
+#noinspection AndroidGradlePluginVersion
+agp = "8.11.1" # F-droid supports up to AGP 8.11.1 Issue: https://github.com/Streamatico/PolymarketViewer/issues/3
 
 kotlin = "2.2.21" # Required compatibility "ksp"
 ksp = "2.3.0"
