@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Polymarket Viewer</string>
+    <string name="company_name">Streamatico</string>
     <string name="about_app_title">About App</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="navigate_back">Navigate back</string>
@@ -7,7 +8,7 @@
     <string name="search_tooltip">Search</string>
     <string name="more_options_tooltip">More options</string>
     <string name="app_logo_content_description">App Logo</string>
-    <string name="developed_by_streamatico">Developed by Streamatico</string>
+    <string name="developed_by">Developed by</string>
     <string name="about_data_source_title">Data Source</string>
     <string name="about_data_source_text">This is an unofficial application that displays publicly available data from the Polymarket platform (polymarket.com).</string>
     <string name="about_disclaimer_title">Disclaimer</string>
@@ -17,11 +18,11 @@
     <string name="search_empty_message">Start typing to search events</string>
     <string name="search_no_results">No events found</string>
     <string name="search_clear">Clear search</string>
-    
+
     <!-- Analytics settings -->
     <string name="analytics_title">Help Improve the App</string>
     <string name="analytics_description">Send anonymous usage statistics (app version, Android SDK, language). No personal data is collected.</string>
-    
+
     <!-- Links section -->
     <string name="links_section_title">Links</string>
     <string name="source_code">Source Code</string>

@@ -49,9 +49,10 @@ import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
 import kotlinx.coroutines.launch
 
-const val PRIVACY_POLICY_URL = "https://streamatico.github.io/polymarketapp/privacy_policy"
+const val PRIVACY_POLICY_URL = "https://streamatico.net/polymarketapp/privacy_policy"
 const val GITHUB_URL = "https://github.com/streamatico/PolymarketViewer"
 const val EMAIL_ADDRESS = "streamatico+polymarket@gmail.com"
+const val COMPANY_URL = "https://streamatico.net/"
 
 @Composable
 fun AboutScreen(
@@ -125,11 +126,26 @@ private fun AboutScreenContent(
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(id = R.string.developed_by_streamatico),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+
+            // Clickable text with link to company website
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.developed_by),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = stringResource(R.string.company_name),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.primary,
+                        textDecoration = TextDecoration.Underline
+                    ),
+                    modifier = Modifier.clickable { uriHandler.openUri(COMPANY_URL) }
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
