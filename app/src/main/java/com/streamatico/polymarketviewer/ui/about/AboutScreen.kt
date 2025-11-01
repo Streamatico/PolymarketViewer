@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -65,7 +66,7 @@ fun AboutScreen(
 
     AboutScreenContent(
         onNavigateBack = onNavigateBack,
-        analyticsEnabled = userPreferences?.analyticsEnabled ?: true,
+        analyticsEnabled = userPreferences?.analyticsEnabled,
         onAnalyticsEnabledChange = { enabled ->
             scope.launch {
                 userPreferencesRepository.setAnalyticsEnabled(enabled)
@@ -78,7 +79,7 @@ fun AboutScreen(
 @Composable
 private fun AboutScreenContent(
     onNavigateBack: () -> Unit,
-    analyticsEnabled: Boolean,
+    analyticsEnabled: Boolean?,
     onAnalyticsEnabledChange: (enabled: Boolean) -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
@@ -211,10 +212,15 @@ private fun AboutScreenContent(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    Switch(
-                        checked = analyticsEnabled,
-                        onCheckedChange = onAnalyticsEnabledChange
-                    )
+
+                    if(analyticsEnabled == null) {
+                        CircularProgressIndicator()
+                    } else {
+                        Switch(
+                            checked = analyticsEnabled,
+                            onCheckedChange = onAnalyticsEnabledChange
+                        )
+                    }
                 }
             }
 
