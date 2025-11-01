@@ -21,4 +21,11 @@
     <!-- Analytics settings -->
     <string name="analytics_title">Help Improve the App</string>
     <string name="analytics_description">Send anonymous usage statistics (app version, Android SDK, language). No personal data is collected.</string>
+    
+    <!-- Links section -->
+    <string name="links_section_title">Links</string>
+    <string name="source_code">Source Code</string>
+    <string name="contact_email">Contact Email</string>
+    <string name="open_github">Open GitHub repository</string>
+    <string name="send_email">Send email</string>
 </resources>

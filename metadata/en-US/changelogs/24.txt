@@ -1,4 +1,6 @@
 - Added privacy-friendly opt-out analytics
 - Anonymous usage statistics (can be disabled in About screen)
 - No personal data collection
+- Redesigned About screen with improved UI using Material 3 cards
+- Added links to GitHub repository and contact email in About screen
 
