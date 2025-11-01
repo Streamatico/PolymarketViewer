@@ -1,0 +1,4 @@
+- Added privacy-friendly opt-out analytics
+- Anonymous usage statistics (can be disabled in About screen)
+- No personal data collection
+

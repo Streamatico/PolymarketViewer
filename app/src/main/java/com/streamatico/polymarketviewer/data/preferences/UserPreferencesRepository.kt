@@ -11,7 +11,9 @@ import javax.inject.Singleton
 
 @Singleton
 data class UserPreferences( // Data class to hold related preferences
-    val preferencesVersion: Int
+    val preferencesVersion: Int,
+    val analyticsEnabled: Boolean = true, // Opt-out: enabled by default
+    val isFirstLaunch: Boolean = true // True until first analytics ping is sent
 )
 
 @Singleton
@@ -21,7 +23,9 @@ class UserPreferencesRepository @Inject constructor(
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data
         .map { preferences ->
             val prefsVersion = preferences[PreferenceKeys.PREFERENCES_VERSION] ?: 0
-            UserPreferences(prefsVersion)
+            val analyticsEnabled = preferences[PreferenceKeys.ANALYTICS_ENABLED] ?: true
+            val isFirstLaunch = preferences[PreferenceKeys.IS_FIRST_LAUNCH] ?: true
+            UserPreferences(prefsVersion, analyticsEnabled, isFirstLaunch)
         }
 
     /**
@@ -35,6 +39,24 @@ class UserPreferencesRepository @Inject constructor(
             dataStore.edit {
                 it[PreferenceKeys.PREFERENCES_VERSION] = LATEST_PREFERENCES_VERSION
             }
+        }
+    }
+
+    /**
+     * Sets whether analytics is enabled.
+     */
+    suspend fun setAnalyticsEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferenceKeys.ANALYTICS_ENABLED] = enabled
+        }
+    }
+
+    /**
+     * Marks that the first launch has been completed.
+     */
+    suspend fun setFirstLaunchCompleted() {
+        dataStore.edit { preferences ->
+            preferences[PreferenceKeys.IS_FIRST_LAUNCH] = false
         }
     }
 }

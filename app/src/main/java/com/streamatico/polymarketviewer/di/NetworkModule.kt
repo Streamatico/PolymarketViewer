@@ -59,6 +59,19 @@ object NetworkModule {
         return createHttpClient(context, BASE_CLOB_URL)
     }
 
+    @Provides
+    @Singleton
+    @Named(PolymarketHttpClientNames.ANALYTICS_CLIENT)
+    fun provideAnalyticsHttpClient(): HttpClient {
+        return HttpClient(OkHttp) {
+            // No cache needed for analytics
+            install(HttpTimeout) {
+                requestTimeoutMillis = 5_000 // Short timeout for analytics
+            }
+            // No logging for analytics, even in debug mode
+        }
+    }
+
     private fun createHttpClient(context: Context, baseUrl: String): HttpClient {
         return HttpClient(OkHttp) {
 

@@ -2,6 +2,7 @@ package com.streamatico.polymarketviewer
 
 import android.app.Application
 import android.util.Log
+import com.streamatico.polymarketviewer.data.analytics.AnalyticsService
 import com.streamatico.polymarketviewer.data.preferences.UserPreferencesRepository
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
@@ -20,12 +21,16 @@ class PolymarketApplication : Application() {
     @Inject
     lateinit var userPreferencesRepository: UserPreferencesRepository
 
+    @Inject
+    lateinit var analyticsService: AnalyticsService
+
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     override fun onCreate() {
         super.onCreate()
 
         initializeUserPreferences()
+        sendAnalyticsPing()
     }
 
     private fun initializeUserPreferences() {
@@ -35,6 +40,12 @@ class PolymarketApplication : Application() {
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize user preferences.", e)
             }
+        }
+    }
+
+    private fun sendAnalyticsPing() {
+        applicationScope.launch {
+            analyticsService.sendPing()
         }
     }
 }
