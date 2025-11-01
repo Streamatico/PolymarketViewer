@@ -133,7 +133,7 @@ private fun AboutScreenContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(R.string.developed_by),
+                    text = stringResource(R.string.developed_by)+" ",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
