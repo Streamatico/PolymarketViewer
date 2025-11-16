@@ -14,7 +14,7 @@ Android client application for browsing Polymarket prediction markets. Built wit
 ## Features
 
 *   📊 Browse a list of active prediction market events from Polymarket.com
-*   🔍 Filter events by category and search functionality  
+*   🔍 Filter by category and search events by keywords  
 *   📈 Sort events by various criteria (Volume 24h/All Time, Liquidity, Newest, Ending Soon, Competitive)
 *   📋 View detailed event information with description, markets, and volume data
 *   📊 Display interactive price history charts for events
@@ -75,3 +75,5 @@ This is an unofficial, experimental application and is not affiliated with Polym
 ## Contact
 
 If you have any questions or suggestions, please contact us at: <streamatico+polymarket@gmail.com>.
+
+Visit our website: [streamatico.net](https://streamatico.net/)
