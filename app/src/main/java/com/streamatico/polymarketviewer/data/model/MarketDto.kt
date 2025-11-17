@@ -50,7 +50,7 @@ data class MarketDto(
     @SerialName("restricted") val isRestricted: Boolean,
 
     @SerialName("groupItemTitle") override val groupItemTitle: String? = null,
-    @SerialName("groupItemThreshold") val groupItemThreshold: Int? = null,
+    @SerialName("groupItemThreshold") override val groupItemThreshold: Int? = null,
     @SerialName("questionID") val questionId: String? = null,
 
 

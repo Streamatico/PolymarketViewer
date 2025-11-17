@@ -22,6 +22,7 @@ data class OptimizedMarketDto(
     @SerialName("closed") override val closed: Boolean, // Whether closed (event occurred)
     @SerialName("archived") override val isArchived: Boolean,
 
+    @SerialName("groupItemThreshold") override val groupItemThreshold: Int? = null,
     @SerialName("groupItemTitle") override val groupItemTitle: String? = null,
 
     @Serializable(with = OffsetDateTimeSerializer::class)

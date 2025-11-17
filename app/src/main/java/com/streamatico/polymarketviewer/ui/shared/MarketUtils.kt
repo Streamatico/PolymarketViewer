@@ -9,7 +9,13 @@ import com.streamatico.polymarketviewer.data.model.yesPrice
 fun <T : BaseMarketDto> List<T>.sortedByViewPriority(sortByEnum: EventMarketsSortBy): List<T> {
     return when(sortByEnum) {
         EventMarketsSortBy.None -> this
-            .sortedBy { if(it.yesPrice() == null) 1 else 0 }
+            .sortedWith(
+                // Sort by yesPrice descending
+                // Move resolved markets to the end
+                compareBy<T> { if (it.getResolutionStatus() != MarketResolutionStatus.RESOLVED) 0 else 1 }
+                    //.thenByDescending { if(it.yesPrice() == null) 1 else 0 }
+                    .thenBy { it.groupItemThreshold }
+            )
 
         EventMarketsSortBy.Price -> this
             .sortedWith(

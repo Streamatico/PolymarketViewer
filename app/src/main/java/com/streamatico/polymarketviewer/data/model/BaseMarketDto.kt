@@ -18,6 +18,7 @@ interface BaseMarketDto {
     val closed: Boolean
     val isArchived: Boolean
 
+    val groupItemThreshold: Int?
     val groupItemTitle: String?
 
     val closedTime: OffsetDateTime?
