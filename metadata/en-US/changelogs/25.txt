@@ -1,0 +1,5 @@
+- Added comments sorting options (Newest/Most liked)
+- Fixed comments pagination to match Polymarket API behavior
+- Improved UX: no screen jump when changing filters
+- Added bottom padding to content for better scrolling experience
+
