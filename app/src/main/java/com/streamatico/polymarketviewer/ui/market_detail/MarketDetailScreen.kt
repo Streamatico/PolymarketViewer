@@ -129,7 +129,7 @@ fun MarketDetailsContent(market: MarketDto, modifier: Modifier = Modifier) {
             //.sortedByDescending { it.second }
     }
 
-    LazyColumn(modifier = modifier, contentPadding = PaddingValues(horizontal = 16.dp)) {
+    LazyColumn(modifier = modifier, contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
         // --- Display Market Image --- //
         if(!market.imageUrl.isNullOrBlank()) {
             item {

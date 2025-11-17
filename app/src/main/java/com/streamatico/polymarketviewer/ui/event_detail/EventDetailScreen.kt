@@ -1,6 +1,5 @@
 package com.streamatico.polymarketviewer.ui.event_detail
 
-import android.content.Intent
 import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -29,11 +29,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -67,7 +70,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -97,6 +99,7 @@ import com.streamatico.polymarketviewer.data.model.CommentCreatorProfileDto
 import com.streamatico.polymarketviewer.data.model.CommentDto
 import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.EventType
+import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
 import com.streamatico.polymarketviewer.data.model.MarketResolutionStatus
 import com.streamatico.polymarketviewer.data.model.PositionDto
 import com.streamatico.polymarketviewer.data.model.TagDto
@@ -109,6 +112,7 @@ import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
+import com.streamatico.polymarketviewer.ui.shared.components.OpenInBrowserIconButton
 import com.streamatico.polymarketviewer.ui.shared.sortedByViewPriority
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -136,6 +140,7 @@ fun EventDetailScreen(
     val commentsLoading by viewModel.commentsLoading.collectAsState()
     val commentsError by viewModel.commentsError.collectAsState()
     val holdersOnly by viewModel.holdersOnly.collectAsState()
+    val commentsSortOrder by viewModel.commentsSortOrder.collectAsState()
     val canLoadMoreComments by viewModel.canLoadMoreComments.collectAsState()
     // Collect the token map
     val eventOutcomeTokensMap by viewModel.eventOutcomeTokensMap.collectAsState()
@@ -157,8 +162,10 @@ fun EventDetailScreen(
         commentsError = commentsError,
         onNavigateToUserProfile = onNavigateToUserProfile,
         holdersOnly = holdersOnly,
+        commentsSortOrder = commentsSortOrder,
         canLoadMoreComments = canLoadMoreComments,
         onToggleHoldersOnly = viewModel::toggleHoldersOnly,
+        onCommentsSortOrderChange = viewModel::selectCommentsSortOrder,
         onLoadMoreComments = viewModel::loadMoreComments,
         onRefreshComments = viewModel::refreshComments,
         onNavigateBack = onNavigateBack,
@@ -185,8 +192,10 @@ private fun EventDetailsContent(
     commentsError: String?,
     onNavigateToUserProfile: (profileAddress: String) -> Unit,
     holdersOnly: Boolean,
+    commentsSortOrder: CommentsSortOrder,
     canLoadMoreComments: Boolean,
     onToggleHoldersOnly: () -> Unit,
+    onCommentsSortOrderChange: (CommentsSortOrder) -> Unit,
     onLoadMoreComments: () -> Unit,
     onRefreshComments: () -> Unit,
     onNavigateBack: () -> Unit,
@@ -236,27 +245,16 @@ private fun EventDetailsContent(
                     // Open in Browser Action
                     if (uiState is EventDetailUiState.Success) {
                         uiState.event.slug.let { slug ->
-                            val url = "https://polymarket.com/event/$slug"
-                            IconButton(onClick = {
-                                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                                try {
-                                    context.startActivity(intent)
-                                } catch (e: Exception) {
-                                    Log.e("EventDetailScreen", "Failed to open URL: $url", e)
-                                }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Default.OpenInNew,
-                                    contentDescription = "Open in browser"
-                                )
-                            }
+                            OpenInBrowserIconButton(
+                                "https://polymarket.com/event/$slug"
+                            )
                         }
                     }
                 }
             )
         }
     ) { paddingValues ->
-        when (val state = uiState) {
+        when (uiState) {
             is EventDetailUiState.Loading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -268,7 +266,7 @@ private fun EventDetailsContent(
             is EventDetailUiState.Success -> {
                 EventDetailsContentSuccess(
                     listState = listState, // Pass listState down
-                    event = state.event,
+                    event = uiState.event,
                     modifier = Modifier.padding(paddingValues),
                     onMarketClick = onMarketClick,
                     chartModelProducer = chartModelProducer,
@@ -282,8 +280,10 @@ private fun EventDetailsContent(
                     commentsError = commentsError,
                     onNavigateToUserProfile = onNavigateToUserProfile,
                     holdersOnly = holdersOnly,
+                    commentsSortOrder = commentsSortOrder,
                     canLoadMoreComments = canLoadMoreComments,
                     onToggleHoldersOnly = onToggleHoldersOnly,
+                    onCommentsSortOrderChange = onCommentsSortOrderChange,
                     onLoadMoreComments = onLoadMoreComments,
                     onRefreshComments = onRefreshComments,
                     // Pass the token map
@@ -297,7 +297,7 @@ private fun EventDetailsContent(
                     contentAlignment = Alignment.Center
                 ) {
                     ErrorBox(
-                        message = state.message,
+                        message = uiState.message,
                         onRetry = onRetry
                     )
                 }
@@ -323,8 +323,10 @@ private fun EventDetailsContentSuccess(
     commentsError: String?,
     onNavigateToUserProfile: (profileAddress: String) -> Unit,
     holdersOnly: Boolean,
+    commentsSortOrder: CommentsSortOrder,
     canLoadMoreComments: Boolean,
     onToggleHoldersOnly: () -> Unit,
+    onCommentsSortOrderChange: (CommentsSortOrder) -> Unit,
     onLoadMoreComments: () -> Unit,
     onRefreshComments: () -> Unit,
     // Receive the token map
@@ -356,8 +358,7 @@ private fun EventDetailsContentSuccess(
     LazyColumn(
         state = listState, // Use passed state
         modifier = modifier.fillMaxSize(),
-        //contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
     ) {
         // Event title
         item {
@@ -529,7 +530,9 @@ private fun EventDetailsContentSuccess(
             eventType = event.eventType,
 
             holdersOnly = holdersOnly,
+            commentsSortOrder = commentsSortOrder,
             onToggleHoldersOnly = onToggleHoldersOnly,
+            onCommentsSortOrderChange = onCommentsSortOrderChange,
         )
     }
 
@@ -556,6 +559,7 @@ private fun EventDetailsContentSuccess(
 }
 
 //@Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun LazyListScope.commentsSection(
     displayableComments: List<HierarchicalComment>,
     // Receive other states/callbacks
@@ -569,7 +573,9 @@ private fun LazyListScope.commentsSection(
     eventType: EventType,
 
     holdersOnly: Boolean,
+    commentsSortOrder: CommentsSortOrder,
     onToggleHoldersOnly: () -> Unit,
+    onCommentsSortOrderChange: (CommentsSortOrder) -> Unit,
 ) {
     // Comments header
     item {
@@ -580,15 +586,70 @@ private fun LazyListScope.commentsSection(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text("Comments", style = MaterialTheme.typography.titleLarge)
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable { onToggleHoldersOnly() }
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Checkbox(
-                    checked = holdersOnly,
-                    onCheckedChange = { onToggleHoldersOnly() }
-                )
-                Text("Holders only", style = MaterialTheme.typography.bodyMedium)
+                // Sort order dropdown (first, as on website)
+                var sortDropdownExpanded by remember { mutableStateOf(false) }
+
+                ExposedDropdownMenuBox(
+                    expanded = sortDropdownExpanded,
+                    onExpandedChange = { sortDropdownExpanded = it }
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                    ) {
+                        Text(
+                            text = when (commentsSortOrder) {
+                                CommentsSortOrder.NEWEST -> "Newest"
+                                CommentsSortOrder.MOST_LIKED -> "Most liked"
+                            },
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = "Sort order",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    ExposedDropdownMenu(
+                        expanded = sortDropdownExpanded,
+                        onDismissRequest = { sortDropdownExpanded = false },
+                        modifier = Modifier.widthIn(min = 120.dp)
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Newest") },
+                            onClick = {
+                                onCommentsSortOrderChange(CommentsSortOrder.NEWEST)
+                                sortDropdownExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Most liked") },
+                            onClick = {
+                                onCommentsSortOrderChange(CommentsSortOrder.MOST_LIKED)
+                                sortDropdownExpanded = false
+                            }
+                        )
+                    }
+                }
+
+                // Holders checkbox (second, as on website)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { onToggleHoldersOnly() }
+                ) {
+                    Checkbox(
+                        checked = holdersOnly,
+                        onCheckedChange = { onToggleHoldersOnly() }
+                    )
+                    Text("Holders", style = MaterialTheme.typography.bodyMedium)
+                }
             }
         }
         HorizontalDivider()
@@ -756,7 +817,7 @@ fun PriceHistoryChart(
     }
 
     val xAxisValueFormatter = remember(selectedRange) {
-        CartesianValueFormatter { context: CartesianMeasuringContext, value: Double, _ ->
+        CartesianValueFormatter { _: CartesianMeasuringContext, value: Double, _ ->
             val timestampSeconds = value.toLong()
 
             val instant = Instant.ofEpochSecond(timestampSeconds)
@@ -826,7 +887,7 @@ fun PriceHistoryChart(
                 lineLayer,
                 marker = rememberChartMarker(),
                 startAxis = VerticalAxis.rememberStart(
-                    valueFormatter = CartesianValueFormatter { context: CartesianMeasuringContext, value: Double, _ ->
+                    valueFormatter = CartesianValueFormatter { _: CartesianMeasuringContext, value: Double, _ ->
                         "${value.toInt()}%"
                     }
                 ),
@@ -1024,8 +1085,10 @@ private fun EventDetailsContentPreviewTemplate(uiState: EventDetailUiState) {
             commentsError = null,
             onNavigateToUserProfile = { },
             holdersOnly = false,
+            commentsSortOrder = CommentsSortOrder.NEWEST,
             canLoadMoreComments = true,
             onToggleHoldersOnly = { },
+            onCommentsSortOrderChange = { },
             onLoadMoreComments = { },
             onRefreshComments = { },
             onNavigateBack = { },

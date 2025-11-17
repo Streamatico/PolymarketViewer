@@ -11,6 +11,25 @@ interface PolymarketUserProfile {
     val name: String?
 }
 
+fun PolymarketUserProfile.getDisplayName(): String {
+    val name = this.name
+    val pseudonym = this.pseudonym
+
+    return if (displayUsernamePublic == true && !name.isNullOrBlank()) {
+        // Display "pseudonym" instead of "name" when "name" is too long (behaviour like on Polymarket Web)
+        if(name.length > 30 && !pseudonym.isNullOrEmpty() && pseudonym.length > 2)
+            pseudonym
+        else
+            name
+    } else if (!pseudonym.isNullOrBlank()) {
+        pseudonym
+    } else {
+        // Fallback or generate placeholder if needed
+        "User ${proxyWallet.takeLast(4)}" // Example fallback
+    }
+}
+
+
 /**
  * DTO for user profile information embedded in comments.
  * Based on the actual API response structure.
@@ -35,21 +54,3 @@ data class CommentCreatorProfileDto(
     // Assuming PositionDto will also be made @Serializable
     @SerialName("positions") val positions: List<PositionDto>? = null // Added positions list
 ): PolymarketUserProfile
-{
-    /**
-     * Helper to get the most appropriate display name.
-     */
-    // No need for @Transient on function
-    fun getDisplayName(): String {
-        return if (displayUsernamePublic == true && !name.isNullOrBlank()) {
-            name
-        } else if (!pseudonym.isNullOrBlank()) {
-            pseudonym
-        } else if (!baseAddress.isNullOrBlank()){
-             // Fallback to shortened address if no name available
-             baseAddress.take(6) + "..." + baseAddress.takeLast(4)
-        } else {
-            "Anonymous"
-        }
-    }
-} 

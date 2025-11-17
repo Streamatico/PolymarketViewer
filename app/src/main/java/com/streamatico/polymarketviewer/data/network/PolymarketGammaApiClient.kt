@@ -79,9 +79,10 @@ class PolymarketGammaApiClient @Inject constructor(
         }.body()
     }
 
+    // Ref: https://docs.polymarket.com/api-reference/comments/list-comments
     suspend fun getComments(
-        eventId: String,
-        parentEntityType: String = "Event",
+        parentEntityId: String,
+        parentEntityType: String, // Event, Series, market
         limit: Int = 40,
         offset: Int = 0,
         ascending: Boolean? = false,
@@ -91,7 +92,7 @@ class PolymarketGammaApiClient @Inject constructor(
         getReports: Boolean? = true
     ): List<CommentDto> {
         return client.get("comments") {
-            parameter("parent_entity_id", eventId)
+            parameter("parent_entity_id", parentEntityId)
             parameter("parent_entity_type", parentEntityType)
             parameter("limit", limit)
             parameter("offset", offset)

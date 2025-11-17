@@ -18,20 +18,7 @@ data class UserProfileDto(
     @SerialName("pseudonym") override val pseudonym: String? = null,
     @SerialName("name") override val name: String? = null,
     @SerialName("users") val users: List<UserAssociationDto>? = null // Additional user info if available
-) : PolymarketUserProfile {
-    // Helper function to get the display name, similar to CommentDto.ProfileDto
-    // No need for @Transient on functions
-    fun getDisplayName(): String {
-        return if (displayUsernamePublic == true && !name.isNullOrBlank()) {
-            name
-        } else if (!pseudonym.isNullOrBlank()) {
-            pseudonym
-        } else {
-            // Fallback or generate placeholder if needed
-            "User ${proxyWallet.takeLast(4)}" // Example fallback
-        }
-    }
-}
+) : PolymarketUserProfile
 
 // Represents the nested 'users' object in the profile API response
 @Serializable

@@ -30,12 +30,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.UserProfileDto
+import com.streamatico.polymarketviewer.data.model.getDisplayName
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
+import com.streamatico.polymarketviewer.ui.shared.components.OpenInBrowserIconButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,10 +50,24 @@ fun UserProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val successUserProfile = (uiState as? UserProfileUiState.Success)?.userProfile
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("User Profile") },
+                title = {
+                    val displayName = successUserProfile?.getDisplayName()
+                    Text(
+                        text = displayName ?: stringResource(R.string.user_profile_title),
+                        overflow = TextOverflow.Ellipsis)
+                },
+                actions = {
+                    if(successUserProfile != null) {
+                        OpenInBrowserIconButton(
+                            "https://polymarket.com/profile/${successUserProfile.proxyWallet}"
+                        )
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -99,30 +118,23 @@ fun UserProfileContent(userProfile: UserProfileDto, modifier: Modifier = Modifie
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = userProfile.getDisplayName(),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(4.dp))
+        if(!userProfile.name.isNullOrEmpty()) {
+            InfoRow("Name",userProfile.name)
+        }
 
-         Text(
-             text = "Address: ${userProfile.proxyWallet}", // Consider shortening or adding copy functionality
-             style = MaterialTheme.typography.bodyMedium,
-             color = MaterialTheme.colorScheme.outline
-         )
-         Spacer(modifier = Modifier.height(16.dp))
+        if(!userProfile.pseudonym.isNullOrEmpty()) {
+            InfoRow("Pseudonym",userProfile.pseudonym)
+        }
+
+        InfoRow("Address",userProfile.proxyWallet)
 
         // Add more fields as needed
         if(userProfile.createdAt != null) {
             InfoRow(
-                "Joined:",
+                "Joined",
                 UiFormatter.formatDateTimeLong(userProfile.createdAt)
-            ) // Consider formatting date
+            )
         }
-         // Display 'mod' or 'creator' status if relevant from userProfile.users
-         // Add other user stats if available in the API response
-
     }
 }
 
@@ -131,11 +143,16 @@ fun UserProfileContent(userProfile: UserProfileDto, modifier: Modifier = Modifie
 private fun InfoRow(label: String, value: String) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Text(
-            "$label ",
+            text = "$label: ",
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.width(100.dp) // Align labels
         )
-        Text(value, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            //fontWeight = FontWeight.SemiBold,
+        )
     }
+    Spacer(modifier = Modifier.height(4.dp))
 }

@@ -63,12 +63,13 @@ interface PolymarketRepository {
      * Gets list of comments for an event.
      */
     suspend fun getComments(
-        eventId: String,
+        parentEntity: CommentsParentEntityId,
         limit: Int? = 40,
         offset: Int? = 0,
-        holdersOnly: Boolean? = null,
-        order: String? = "createdAt",
-        ascending: Boolean? = false
+        holdersOnly: Boolean,
+        order: CommentsSortOrder
+        //order: String? = "createdAt",
+        //ascending: Boolean? = false
         // Add other parameters if needed
     ): Result<List<CommentDto>>
 
@@ -91,6 +92,22 @@ interface PolymarketRepository {
         limitPerType: Int = 6,
         eventsStatus: String = "active"
     ): Result<SearchResultFullDto>
+}
+
+data class CommentsParentEntityId(
+    val entityType: CommentsParentEntityType,
+    val entityId: String,
+)
+
+enum class CommentsParentEntityType(val value: String) {
+    Series("Series"),
+    Market("market"),
+    Event("Event"),
+}
+
+enum class CommentsSortOrder {
+    NEWEST,
+    MOST_LIKED
 }
 
 enum class PolymarketEventsSortOrder {

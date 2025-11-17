@@ -13,6 +13,9 @@ import com.streamatico.polymarketviewer.data.model.TimeseriesPointDto
 import com.streamatico.polymarketviewer.data.model.CommentDto
 import com.streamatico.polymarketviewer.data.model.getTitleOrDefault
 import com.streamatico.polymarketviewer.data.model.yesPrice
+import com.streamatico.polymarketviewer.domain.repository.CommentsParentEntityId
+import com.streamatico.polymarketviewer.domain.repository.CommentsParentEntityType
+import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import com.streamatico.polymarketviewer.ui.navigation.AppDestinations
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -111,6 +114,10 @@ class EventDetailViewModel @Inject constructor(
     // Default holdersOnly to true
     private val _holdersOnly = MutableStateFlow(true) // Changed initial value to true
     val holdersOnly: StateFlow<Boolean> = _holdersOnly.asStateFlow()
+
+    // Default sort order to NEWEST
+    private val _commentsSortOrder = MutableStateFlow(CommentsSortOrder.NEWEST)
+    val commentsSortOrder: StateFlow<CommentsSortOrder> = _commentsSortOrder.asStateFlow()
 
     private val _canLoadMoreComments = MutableStateFlow(true)
     val canLoadMoreComments: StateFlow<Boolean> = _canLoadMoreComments.asStateFlow()
@@ -295,23 +302,31 @@ class EventDetailViewModel @Inject constructor(
             commentsOffset = 0
             _canLoadMoreComments.value = true
             _commentsError.value = null // Clear previous error on reset
-            // Keep existing comments visible during refresh? Or clear?
-             _commentsState.value = emptyList() // Clear list on refresh
+            // Keep existing comments visible during refresh for better UX
         }
 
         viewModelScope.launch {
+            val commentsParentEntityId = (_uiState.value as? EventDetailUiState.Success)?.event?.let { eventDto ->
+                val firstSeries = eventDto.series?.firstOrNull()
+
+                if(firstSeries != null) CommentsParentEntityId(CommentsParentEntityType.Series, firstSeries.id)
+                else CommentsParentEntityId(CommentsParentEntityType.Event, eventDto.id)
+            } ?: return@launch
+
             val result = polymarketRepository.getComments(
-                eventId = eventId,
+                parentEntity = commentsParentEntityId,
                 limit = DEFAULT_COMMENTS_LIMIT,
                 offset = commentsOffset,
-                holdersOnly = _holdersOnly.value.takeIf { it } // Pass true only if true, null otherwise
+                holdersOnly = _holdersOnly.value,
+                order = _commentsSortOrder.value
                 // order and ascending can be added if needed
             )
 
             result.onSuccess {
-                _canLoadMoreComments.value = it.size == DEFAULT_COMMENTS_LIMIT
+                val topLevelCommentsCount = it.count { comment -> comment.parentCommentID == null }
+                _canLoadMoreComments.value = topLevelCommentsCount == DEFAULT_COMMENTS_LIMIT
                 _commentsState.value = if (reset) it else _commentsState.value + it
-                commentsOffset = _commentsState.value.size
+                commentsOffset = _commentsState.value.count { it.parentCommentID == null }
                 if (reset) _commentsError.value = null // Clear error on successful refresh
             }.onFailure {
                 Log.e("EventDetailViewModel", "Failed to load comments for event $eventId", it)
@@ -336,6 +351,12 @@ class EventDetailViewModel @Inject constructor(
     fun toggleHoldersOnly() {
         _holdersOnly.value = !_holdersOnly.value
         refreshComments() // Reload comments with the new filter setting
+    }
+
+    fun selectCommentsSortOrder(order: CommentsSortOrder) {
+        if (order == _commentsSortOrder.value) return
+        _commentsSortOrder.value = order
+        refreshComments() // Reload comments with the new sort order
     }
 
     fun selectTimeRange(range: TimeRange) {

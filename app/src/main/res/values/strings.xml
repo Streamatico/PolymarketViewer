@@ -29,4 +29,6 @@
     <string name="contact_email">Contact Email</string>
     <string name="open_github">Open GitHub repository</string>
     <string name="send_email">Send email</string>
+
+    <string name="user_profile_title">User Profile...</string>
 </resources>

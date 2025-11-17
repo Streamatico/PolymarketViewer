@@ -11,6 +11,8 @@ import com.streamatico.polymarketviewer.data.model.TimeseriesPointDto
 import com.streamatico.polymarketviewer.data.model.UserProfileDto
 import com.streamatico.polymarketviewer.data.network.PolymarketClobApiClient
 import com.streamatico.polymarketviewer.data.network.PolymarketGammaApiClient
+import com.streamatico.polymarketviewer.domain.repository.CommentsParentEntityId
+import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
 import com.streamatico.polymarketviewer.domain.repository.PolymarketEventsSortOrder
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import io.ktor.client.plugins.ClientRequestException
@@ -100,21 +102,35 @@ class PolymarketRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getComments(
-        eventId: String,
+        parentEntity: CommentsParentEntityId,
         limit: Int?,
         offset: Int?,
-        holdersOnly: Boolean?,
-        order: String?,
-        ascending: Boolean?
+        holdersOnly: Boolean,
+        order: CommentsSortOrder,
     ): Result<List<CommentDto>> {
+        val resultOrder: String
+        val resultAscending: Boolean
+
+        when(order) {
+            CommentsSortOrder.NEWEST -> {
+                resultOrder = "createdAt"
+                resultAscending = false
+            }
+            CommentsSortOrder.MOST_LIKED -> {
+                resultOrder = "reactionCount"
+                resultAscending = false
+            }
+        }
+
         return safeApiCall {
             gammaApiClient.getComments(
-                eventId = eventId,
+                parentEntityId = parentEntity.entityId,
+                parentEntityType = parentEntity.entityType.value,
                 limit = limit ?: 40,
                 offset = offset ?: 0,
                 holdersOnly = holdersOnly,
-                order = order ?: "createdAt",
-                ascending = ascending,
+                order = resultOrder,
+                ascending = resultAscending,
                 getPositions = true,
                 getReports = true
             )

@@ -43,6 +43,7 @@ import coil3.compose.AsyncImage
 import com.streamatico.polymarketviewer.data.model.CommentCreatorProfileDto
 import com.streamatico.polymarketviewer.data.model.CommentDto
 import com.streamatico.polymarketviewer.data.model.PolymarketUserProfile
+import com.streamatico.polymarketviewer.data.model.getDisplayName
 import com.streamatico.polymarketviewer.ui.shared.ComposableUiFormatter
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.theme.ExtendedTheme
@@ -421,4 +422,4 @@ private fun ReplyItemStandalonePreview() {
             onToggleReplies = { }
         )
     }
-} 
+}
