@@ -116,7 +116,7 @@ fun UserProfileContent(userProfile: UserProfileDto, modifier: Modifier = Modifie
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentScale = ContentScale.Crop
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         if(!userProfile.name.isNullOrEmpty()) {
             InfoRow("Name",userProfile.name)
