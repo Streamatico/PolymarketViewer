@@ -1,3 +1,4 @@
 - Display 1-day price change for markets
 - Fixed sort order for markets
+- Fixed the appearance and behavior of the chart marker
 
