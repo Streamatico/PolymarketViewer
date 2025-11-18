@@ -63,7 +63,7 @@ data class MarketDto(
 
     @SerialName("competitive") val competitive: Double? = null,
 
-    @SerialName("clobTokenIds") val clobTokenIds: String? = null, // List of ERC1155 token ID of conditional token being traded
+    @SerialName("clobTokenIds") val clobTokenIdsJson: String? = null, // List of ERC1155 token ID of conditional token being traded
 
 
     @SerialName("acceptingOrders") val acceptingOrders: Boolean? = null,
@@ -102,6 +102,10 @@ data class MarketDto(
 
     val isBinaryMarket: Boolean by lazy {
         (outcomes.size == 2 && outcomes.any { isYesOutcome(it) })
+    }
+
+    val clobTokenIds: List<String>? by lazy {
+        JsonUtils.parsedJsonList(clobTokenIdsJson)
     }
 
     fun getChartLabel(): String {
@@ -187,7 +191,7 @@ data class MarketDto(
         showGmpSeries = false,
         showGmpOutcome = false,
         manualActivation = false,
-        clobTokenIds = null,
+        clobTokenIdsJson = null,
         hasReviewedDates = null,
         imageUrl = null,
         iconUrl = null,

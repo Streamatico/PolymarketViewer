@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 @HiltViewModel
@@ -92,9 +91,6 @@ class EventDetailViewModel @Inject constructor(
     val canLoadMoreComments: StateFlow<Boolean> = _canLoadMoreComments.asStateFlow()
     private var commentsOffset = 0
 
-    // Configure Json parser once
-    private val jsonParser = Json { ignoreUnknownKeys = true; isLenient = true }
-
     init {
         loadEventDetailsAndInitialData()
     }
@@ -127,20 +123,16 @@ class EventDetailViewModel @Inject constructor(
         val titleMap = mutableMapOf<String, String>()
 
         event.markets.forEach { market ->
-            try {
-                // Use Kotlinx Serialization
-                val tokenIds: List<String>? = market.clobTokenIds?.let { jsonParser.decodeFromString<List<String>>(it) }
-                val outcomes: List<String>? = market.outcomesJson?.let { jsonParser.decodeFromString<List<String>>(it) }
-                val displayTitle = market.getTitleOrDefault(market.question)
+            // Use Kotlinx Serialization
+            val tokenIds = market.clobTokenIds
+            val outcomes = market.outcomes
+            val displayTitle = market.getTitleOrDefault(market.question)
 
-                if (tokenIds != null && outcomes != null && tokenIds.size == outcomes.size) {
-                    tokenIds.zip(outcomes).forEach { (tokenId, outcomeLabel) ->
-                        outcomeMap[tokenId] = outcomeLabel // Map for color
-                        titleMap[tokenId] = displayTitle    // Map for text
-                    }
+            if (tokenIds != null && tokenIds.size == outcomes.size) {
+                tokenIds.zip(outcomes).forEach { (tokenId, outcomeLabel) ->
+                    outcomeMap[tokenId] = outcomeLabel // Map for color
+                    titleMap[tokenId] = displayTitle    // Map for text
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to parse token/outcome JSON for market ${market.id}", e)
             }
         }
         Log.d(TAG, "Built token maps. OutcomeMap: ${outcomeMap.size}, TitleMap: ${titleMap.size} for event ${event.id}")
@@ -160,18 +152,8 @@ class EventDetailViewModel @Inject constructor(
         viewModelScope.launch {
             // --- Load data asynchronously ---
             val deferredResults = topMarkets.mapNotNull { market ->
-                val tokenIds: List<String>? = try {
-                    // Use Kotlinx Serialization
-                    market.clobTokenIds?.let { jsonParser.decodeFromString<List<String>>(it) }
-                } catch (e: Exception) {
-                    Log.e(
-                        TAG,
-                        "Failed to parse clobTokenIds for market ${market.id}: ${market.clobTokenIds}",
-                        e
-                    )
-                    null
-                }
-                val tokenId = tokenIds?.firstOrNull()
+
+                val tokenId = market.clobTokenIds?.firstOrNull()
                 if (tokenId == null) {
                     Log.w(TAG, "No valid clobTokenId found for market ${market.id}")
                     null
