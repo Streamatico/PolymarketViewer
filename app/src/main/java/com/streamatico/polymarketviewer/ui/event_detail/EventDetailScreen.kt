@@ -1,50 +1,21 @@
 package com.streamatico.polymarketviewer.ui.event_detail
 
 import android.util.Log
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -59,78 +30,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import coil3.compose.AsyncImage
-import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
-import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
-import com.patrykandpatrick.vico.compose.common.component.shapeComponent
-import com.patrykandpatrick.vico.compose.common.fill
-import com.patrykandpatrick.vico.compose.common.insets
-import com.patrykandpatrick.vico.compose.common.rememberHorizontalLegend
-import com.patrykandpatrick.vico.compose.common.vicoTheme
-import com.patrykandpatrick.vico.core.cartesian.CartesianDrawingContext
-import com.patrykandpatrick.vico.core.cartesian.CartesianMeasuringContext
-import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
-import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.core.common.Legend
-import com.patrykandpatrick.vico.core.common.LegendItem
-import com.patrykandpatrick.vico.core.common.shape.CorneredShape
-import com.streamatico.polymarketviewer.data.model.CommentCreatorProfileDto
-import com.streamatico.polymarketviewer.data.model.CommentDto
 import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.EventType
-import com.streamatico.polymarketviewer.data.model.MarketDto
-import com.streamatico.polymarketviewer.data.model.MarketResolutionStatus
-import com.streamatico.polymarketviewer.data.model.PositionDto
-import com.streamatico.polymarketviewer.data.model.TagDto
-import com.streamatico.polymarketviewer.data.model.demoMarketDto
-import com.streamatico.polymarketviewer.data.model.getResolutionStatus
-import com.streamatico.polymarketviewer.data.model.getTitleOrDefault
-import com.streamatico.polymarketviewer.data.model.getYesTitle
-import com.streamatico.polymarketviewer.data.model.yesPrice
 import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
-import com.streamatico.polymarketviewer.ui.event_detail.components.ChangePercentIndicator
-import com.streamatico.polymarketviewer.ui.event_detail.components.CommentItem
-import com.streamatico.polymarketviewer.ui.event_detail.components.EventChartRangeProvider
+import com.streamatico.polymarketviewer.ui.event_detail.components.EventChartSection
+import com.streamatico.polymarketviewer.ui.event_detail.components.EventCommentsSection
+import com.streamatico.polymarketviewer.ui.event_detail.components.EventHeader
+import com.streamatico.polymarketviewer.ui.event_detail.components.EventMarketsList
 import com.streamatico.polymarketviewer.ui.event_detail.components.TranslateAction
-import com.streamatico.polymarketviewer.ui.event_detail.components.rememberChartMarker
-import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.shared.components.OpenInBrowserIconButton
 import com.streamatico.polymarketviewer.ui.shared.sortedByViewPriority
+import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import java.time.Instant
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import kotlin.math.abs
-
-// Define constant for market limit
-private const val MARKET_DISPLAY_LIMIT = 5
 
 @Composable
 fun EventDetailScreen(
@@ -336,7 +258,6 @@ private fun EventDetailsContentSuccess(
     eventOutcomeTokensMap: Map<String, String>,
     eventTokenToGroupTitleMap: Map<String, String>
 ) {
-    var isDescriptionExpanded by remember { mutableStateOf(false) }
     // Add state for market list expansion
     var isMarketListExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -349,96 +270,15 @@ private fun EventDetailsContentSuccess(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
     ) {
-        // Event title
+        // Header (Title, Image, Description, Info)
         item {
-            Text(
-                modifier = Modifier.padding(bottom = 8.dp),
-                text = event.title,
-                style = MaterialTheme.typography.headlineMedium,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-
-        // Event image
-        if (event.imageUrl != null) {
-            item {
-                AsyncImage(
-                    model = event.imageUrl,
-                    contentDescription = event.title,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(2f)
-                        .clip(MaterialTheme.shapes.medium),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
-
-        // Event description
-        item {
-            event.description?.takeIf { it.isNotBlank() }?.let {
-                Column {
-                    SelectionContainer {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = if (isDescriptionExpanded) Int.MAX_VALUE else 5,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.animateContentSize()
-                        )
-                    }
-                    val showMoreText = if (isDescriptionExpanded) "Show less" else "Show more"
-                    if (it.lines().size > 5) {
-                        Text(
-                            text = showMoreText,
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                            textDecoration = TextDecoration.Underline,
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .padding(top = 4.dp)
-                                .clickable { isDescriptionExpanded = !isDescriptionExpanded }
-                        )
-                    }
-                }
-                //Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
-
-        // Event properties
-        item {
-            Column(
-                modifier = Modifier.padding(vertical = 16.dp)
-            ) {
-                event.volume?.let {
-                    InfoRow(label = "Total Volume", value = UiFormatter.formatLargeValueUsd(it))
-                    Spacer(Modifier.height(8.dp))
-                }
-                event.category?.let {
-                    InfoRow(label = "Category", value = it)
-                    Spacer(Modifier.height(8.dp))
-                }
-                event.startDate?.let {
-                    InfoRow(label = "Starts", value = UiFormatter.formatDateTimeLong(it))
-                    Spacer(Modifier.height(8.dp))
-                }
-                event.endDate?.let {
-                    InfoRow(label = "Ends", value = UiFormatter.formatDateTimeLong(it))
-                    Spacer(Modifier.height(8.dp))
-                }
-                event.resolutionSource?.takeIf { it.isNotBlank() }?.let {
-                    InfoRow(label = "Resolution Source", value = it)
-                }
-            }
+            EventHeader(event = event)
         }
 
         if(isChartAvailable) {
             // Chart
             item {
-                //Spacer(modifier = Modifier.height(16.dp))
-                PriceHistoryChart(
+                EventChartSection(
                     chartModelProducer = chartModelProducer,
                     event = event,
                     selectedRange = selectedRange,
@@ -449,7 +289,7 @@ private fun EventDetailsContentSuccess(
         }
 
         // Event markets (outcomes)
-        marketsListSection(
+        EventMarketsList(
             sortedMarkets = sortedMarkets,
             showMarketImages = event.showMarketImages && event.eventType != EventType.BinaryEvent,
             isMarketListExpanded = isMarketListExpanded,
@@ -459,7 +299,7 @@ private fun EventDetailsContentSuccess(
             onMarketClick = onMarketClick
         )
 
-        commentsSection(
+        EventCommentsSection(
             displayableComments = displayableComments,
             // Receive other states/callbacks
             commentsLoading = commentsLoading,
@@ -500,657 +340,8 @@ private fun EventDetailsContentSuccess(
     }
 }
 
-private fun LazyListScope.marketsListSection(
-    sortedMarkets: List<MarketDto>,
-    isMarketListExpanded: Boolean,
-    showMarketImages: Boolean,
-    onMarketExpandToggle: () -> Unit,
-    onMarketClick: (String) -> Unit
-) {
-    val marketPrices =
-        sortedMarkets.associate { market ->
-            market.id to market.yesPrice()
-        }
-
-    // Determine which markets to display
-    val visibleMarkets = if (sortedMarkets.size > MARKET_DISPLAY_LIMIT && !isMarketListExpanded) {
-        sortedMarkets.take(MARKET_DISPLAY_LIMIT)
-    } else {
-        sortedMarkets
-    }
-
-    val trendIndicatorEndPadding = visibleMarkets
-        .any { x -> x.oneDayPriceChange != null && displayOneDayPriceChange(x.oneDayPriceChange) }
-        .let {
-            if(it) 40.dp else 0.dp
-        }
-
-    val hiddenMarketCount = sortedMarkets.size - MARKET_DISPLAY_LIMIT
-
-    item {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(end = trendIndicatorEndPadding)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Outcome".uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.outline
-                )
-                Text(
-                    text = "% Chance".uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.outline
-                )
-            }
-            HorizontalDivider()
-        }
-    }
-
-    val isSingleMarket = sortedMarkets.size == 1
-
-    items(visibleMarkets, key = { it.id }) { market ->
-        val price = marketPrices[market.id]
-
-        val outcomeText = if (isSingleMarket) market.getYesTitle()
-        else market.getTitleOrDefault("Unknown")
-
-        EventMarketRow(
-            outcomeText = outcomeText,
-            iconUrl = market.iconUrl,
-            resolutionStatus = market.getResolutionStatus(),
-            price = price,
-            oneDayPriceChange = market.oneDayPriceChange,
-            volume = market.volume,
-            showIcon = showMarketImages,
-            trendIndicatorEndPadding = trendIndicatorEndPadding,
-            onClick = { onMarketClick(market.id) }
-        )
-    }
-
-    // Add "Show More/Less" button if needed
-    if (sortedMarkets.size > MARKET_DISPLAY_LIMIT) {
-        item {
-            Text(
-                text = if (isMarketListExpanded) "Show less" else "+ $hiddenMarketCount more outcomes",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .clickable { onMarketExpandToggle() }
-            )
-        }
-    }
-}
-
-//@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun LazyListScope.commentsSection(
-    displayableComments: List<HierarchicalComment>,
-    // Receive other states/callbacks
-    commentsLoading: Boolean,
-    commentsError: String?,
-    onNavigateToUserProfile: (profileAddress: String) -> Unit,
-    onRefreshComments: () -> Unit,
-    // Receive the token map
-    eventOutcomeTokensMap: Map<String, String>,
-    eventTokenToGroupTitleMap: Map<String, String>,
-    eventType: EventType,
-
-    holdersOnly: Boolean,
-    commentsSortOrder: CommentsSortOrder,
-    onToggleHoldersOnly: () -> Unit,
-    onCommentsSortOrderChange: (CommentsSortOrder) -> Unit,
-) {
-    // Comments header
-    item {
-        Spacer(modifier = Modifier.height(24.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Comments", style = MaterialTheme.typography.titleLarge)
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Sort order dropdown (first, as on website)
-                var sortDropdownExpanded by remember { mutableStateOf(false) }
-
-                ExposedDropdownMenuBox(
-                    expanded = sortDropdownExpanded,
-                    onExpandedChange = { sortDropdownExpanded = it }
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                    ) {
-                        Text(
-                            text = when (commentsSortOrder) {
-                                CommentsSortOrder.NEWEST -> "Newest"
-                                CommentsSortOrder.MOST_LIKED -> "Most liked"
-                            },
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "Sort order",
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
-                    ExposedDropdownMenu(
-                        expanded = sortDropdownExpanded,
-                        onDismissRequest = { sortDropdownExpanded = false },
-                        modifier = Modifier.widthIn(min = 120.dp)
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Newest") },
-                            onClick = {
-                                onCommentsSortOrderChange(CommentsSortOrder.NEWEST)
-                                sortDropdownExpanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Most liked") },
-                            onClick = {
-                                onCommentsSortOrderChange(CommentsSortOrder.MOST_LIKED)
-                                sortDropdownExpanded = false
-                            }
-                        )
-                    }
-                }
-
-                // Holders checkbox (second, as on website)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { onToggleHoldersOnly() }
-                ) {
-                    Checkbox(
-                        checked = holdersOnly,
-                        onCheckedChange = { onToggleHoldersOnly() }
-                    )
-                    Text("Holders", style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-        }
-        HorizontalDivider()
-    }
-
-    // Comments list
-    if (displayableComments.isNotEmpty()) {
-        items(displayableComments, key = { it.comment.id }) { hierarchicalComment ->
-            CommentItem(
-                hierarchicalComment = hierarchicalComment,
-                eventOutcomeTokensMap = eventOutcomeTokensMap,
-                eventTokenToGroupTitleMap = eventTokenToGroupTitleMap,
-                onUserProfileClick = { profile ->
-                    onNavigateToUserProfile(profile.proxyWallet)
-                },
-                isBinaryEvent = eventType == EventType.BinaryEvent,
-            )
-            HorizontalDivider()
-        }
-    }
-
-    // Comments loading and error states
-    item {
-        if (commentsLoading && displayableComments.isNotEmpty()) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (commentsError != null && displayableComments.isEmpty()) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text("Error loading comments: $commentsError", color = MaterialTheme.colorScheme.error)
-                Spacer(Modifier.height(8.dp))
-                Button(onClick = onRefreshComments) { Text("Retry") }
-            }
-        } else if (!commentsLoading && displayableComments.isEmpty()) {
-            Text(
-                "No comments found.",
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
-}
-
-@Composable
-private fun InfoRow(label: String, value: String) {
-    Row {
-        Text("$label: ", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-        Text(value, style = MaterialTheme.typography.bodyMedium)
-    }
-}
-
-@Composable
-private fun EventMarketRow(
-    //market: MarketDto,
-    outcomeText: String,
-    iconUrl: String?,
-    resolutionStatus: MarketResolutionStatus?,
-    price: Double?,
-    oneDayPriceChange: Double?,
-    volume: Double?,
-    showIcon: Boolean,
-    trendIndicatorEndPadding: Dp,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // --- Start Icon --- //
-            if(showIcon && iconUrl != null) {
-                AsyncImage(
-                    model = iconUrl,
-                    contentDescription = "$outcomeText icon",
-                    modifier = Modifier
-                        .size(40.dp) // Adjust size as needed
-                        .clip(CircleShape) // Keep it circular? Or MaterialTheme.shapes.small?
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.width(12.dp)) // Space between icon and text
-            }
-            // --- End Icon --- //
-
-            Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = outcomeText,
-                        style = MaterialTheme.typography.bodyLarge,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    if(resolutionStatus != null) {
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        val resolutionText = when (resolutionStatus) {
-                            MarketResolutionStatus.DISPUTED -> "(Disputed)"
-                            MarketResolutionStatus.RESOLVED -> "(Resolved)"
-                        }
-
-                        Text(
-                            text = resolutionText,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                }
-
-                 volume?.let {
-                     Text(
-                         text = UiFormatter.formatLargeValueUsd(it, suffix = " Vol."),
-                         style = MaterialTheme.typography.bodySmall,
-                         color = MaterialTheme.colorScheme.outline,
-                         modifier = Modifier.padding(top = 2.dp)
-                     )
-                 }
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            val chanceColor = if (price != null && price < 0.01) {
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            }
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = UiFormatter.formatPriceAsPercentage(price),
-                        style = MaterialTheme.typography.titleLarge,
-                        //fontWeight = FontWeight.Bold,
-                        color = chanceColor
-                    )
-
-                    Box(Modifier.widthIn(min = trendIndicatorEndPadding)) {
-                        if(oneDayPriceChange != null && displayOneDayPriceChange(oneDayPriceChange)) {
-                            val priceChangePercent = (oneDayPriceChange * 100).toInt()
-                            ChangePercentIndicator(priceChangePercent)
-                        }
-                    }
-                }
-            }
-        }
-        price?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-            LinearProgressIndicator(
-                progress = { it.toFloat() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = trendIndicatorEndPadding)
-            )
-        }
-    }
-}
-
-private fun displayOneDayPriceChange(oneDayPriceChange: Double): Boolean {
-    return abs(oneDayPriceChange) >= 0.01
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PriceHistoryChart(
-    chartModelProducer: CartesianChartModelProducer,
-    event: EventDto,
-    selectedRange: TimeRange,
-    onRangeSelected: (TimeRange) -> Unit,
-) {
-    val timeRanges = TimeRange.entries
-        .filter { it != TimeRange.H6 }
-        .toTypedArray()
-
-    val lineColors = remember(event.markets.size) {
-        (0 until event.markets.size).map { index ->
-            Color.hsl(
-                hue = (index * (360f / (event.markets.size.takeIf { it > 0 } ?: 1))) % 360f,
-                saturation = 0.9f,
-                lightness = 0.6f
-            )
-        }
-    }
-
-    val xAxisValueFormatter = remember(selectedRange) {
-        CartesianValueFormatter { _: CartesianMeasuringContext, value: Double, _ ->
-            val timestampSeconds = value.toLong()
-
-            val instant = Instant.ofEpochSecond(timestampSeconds)
-            val zoneId = ZoneId.systemDefault()
-            val pattern = when (selectedRange) {
-                TimeRange.H1, TimeRange.H6, TimeRange.D1 -> "HH:mm"
-                TimeRange.W1, TimeRange.M1 -> "dd MMM"
-                TimeRange.ALL -> "MMM uuuu"
-            }
-            val formatter = DateTimeFormatter.ofPattern(pattern).withZone(zoneId)
-            formatter.format(instant)
-        }
-    }
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.Center
-        ) {
-             SingleChoiceSegmentedButtonRow {
-                timeRanges
-                    .forEachIndexed { index, range ->
-
-                    val rangeName = when (range) {
-                        TimeRange.H1 -> "1H"
-                        TimeRange.H6 -> "6H"
-                        TimeRange.D1 -> "1D"
-                        TimeRange.W1 -> "1W"
-                        TimeRange.M1 -> "1M"
-                        TimeRange.ALL -> "ALL"
-                    }
-
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(index = index, count = timeRanges.size),
-                        onClick = { onRangeSelected(range) },
-                        selected = range == selectedRange
-                    ) {
-                        Text(rangeName)
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(2.dp))
-
-        val lineLayer = rememberLineCartesianLayer(
-            LineCartesianLayer.LineProvider.series(
-                lineColors.map { color ->
-                    LineCartesianLayer.rememberLine(LineCartesianLayer.LineFill.single(fill(color)))
-                }
-            ),
-            /*
-            rangeProvider = CartesianLayerRangeProvider.fixed(
-                minY = 0.0,
-                maxY = 100.0
-            )
-             */
-            rangeProvider = EventChartRangeProvider
-        )
-
-        CartesianChartHost(
-            modifier = Modifier.height(280.dp),
-            scrollState = rememberVicoScrollState(scrollEnabled = false),
-            chart = rememberCartesianChart(
-                lineLayer,
-                marker = rememberChartMarker(),
-                startAxis = VerticalAxis.rememberStart(
-                    valueFormatter = CartesianValueFormatter { _: CartesianMeasuringContext, value: Double, _ ->
-                        "${value.toInt()}%"
-                    }
-                ),
-                bottomAxis = HorizontalAxis.rememberBottom(
-                    valueFormatter = xAxisValueFormatter,
-                    itemPlacer = remember {
-                        HorizontalAxis.ItemPlacer.aligned()
-                    }
-                ),
-
-                legend = rememberEventChartLegend(
-                    showLegend = event.markets.size > 1,
-                    lineColors = lineColors
-                ),
-            ),
-            modelProducer = chartModelProducer,
-            placeholder = {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.Center),
-                )
-            }
-        )
-    }
-}
-
-@Composable
-private fun rememberEventChartLegend(
-    showLegend: Boolean,
-    lineColors: List<Color>
-) : Legend<CartesianMeasuringContext, CartesianDrawingContext>? {
-    if(!showLegend) {
-        return null
-    }
-
-    val legendItemLabelComponent = rememberTextComponent(vicoTheme.textColor)
-
-    return rememberHorizontalLegend(
-        items = { extraStore ->
-            extraStore[LegendLabelKey]
-                .toList()
-                .sortedBy { it.order }
-                .forEachIndexed { index, orderedLabel ->
-                    add(
-                        LegendItem(
-                            shapeComponent(fill(lineColors[index]), CorneredShape.Pill),
-                            legendItemLabelComponent,
-                            orderedLabel.label,
-                        )
-                    )
-                }
-        },
-        padding = insets(top = 16.dp),
-    )
-}
 
 // --- Previews --- //
-
-private val sampleUserProfile = CommentCreatorProfileDto(
-    name = "CryptoChad",
-    pseudonym = "CryptoChad",
-    profileImage = "https://via.placeholder.com/150/0000FF/808080?Text=User+Avatar",
-    proxyWallet = "0x123abc456def7890",
-    positions = listOf(
-        PositionDto(
-            tokenId = "token-yes-1",
-            positionSize = "500000000" // 500 USDC
-        ),
-        PositionDto(
-            tokenId = "token-no-2",
-            positionSize = "1000000000" // 1000 USDC
-        )
-    ),
-    displayUsernamePublic = true,
-    bio = "Crypto enthusiast and trader.",
-)
-
-private val sampleComment1 = CommentDto(
-    id = "comment-1",
-    body = "This looks promising! Going long here.",
-    createdAt = OffsetDateTime.now().minusHours(2),
-    profile = sampleUserProfile,
-    parentCommentID = null,
-    parentEntityID = null,
-    parentEntityType = null,
-    updatedAt = OffsetDateTime.now().minusMinutes(30),
-    userAddress = null,
-    replyAddress = null,
-    reportCount = 10,
-    reactionCount = 3,
-)
-
-private val sampleReply1 = CommentDto(
-    id = "reply-1",
-    body = "Disagree, I think it's going down.",
-    createdAt = OffsetDateTime.now().minusMinutes(30),
-    profile = sampleUserProfile.copy(name = "BearishBob", proxyWallet = "0xabc123def456fed789"),
-    parentEntityType = null,
-    parentEntityID = null,
-    parentCommentID = null,
-    reactionCount = 5,
-    updatedAt = null,
-    userAddress = null,
-    replyAddress = null,
-    reportCount = 0,
-)
-
-private val sampleComment2 = CommentDto(
-    id = "comment-2",
-    body = "What does everyone think about the latest news?",
-    createdAt = OffsetDateTime.now().minusDays(1),
-    profile = sampleUserProfile.copy(name = "NewsNancy", proxyWallet = "0xfed789abc123def456", profileImage = "https://via.placeholder.com/150/FF0000/FFFFFF?Text=NN"),
-    parentEntityType = null,
-    parentEntityID = null,
-    parentCommentID = null,
-    reactionCount = 12,
-    updatedAt = null,
-    userAddress = null,
-    replyAddress = null,
-    reportCount = 2,
-)
-
-private val sampleHierarchicalComments = listOf(
-    HierarchicalComment(sampleComment1, listOf(sampleReply1)),
-    HierarchicalComment(sampleComment2)
-)
-
-private val sampleMarket1 = demoMarketDto(
-    id = "market-1",
-    groupItemTitle = "Will the price reach $100k?",
-    slug = "price-100k",
-    description = "Market for price prediction.",
-    startDate = OffsetDateTime.now().minusDays(5),
-    endDate = OffsetDateTime.now().plusDays(30),
-    resolutionSource = "Coinbase",
-    volume = 500000.0,
-    liquidity = 20000.0,
-    outcomesJson = "[\"Yes\", \"No\"]",
-    outcomePricesJson = "[\"0.65\", \"0.35\"]",
-    active = true,
-    closed = false,
-    oneDayPriceChange = 0.116,
-)
-
-private val sampleMarket2 = demoMarketDto(
-    id = "market-2",
-    groupItemTitle = "Will it close above $90k?",
-    slug = "price-90k",
-    outcomesJson = "[\"Yes\", \"No\"]",
-    outcomePricesJson = "[\"0.80\", \"0.20\"]",
-    volume = 300000.0,
-    liquidity = 15000.0,
-
-    lastTradePrice = 0.79,
-    bestBid = 0.78,
-    bestAsk = 0.81
-)
-
-private val sampleMarket3 = demoMarketDto(
-    id = "market-3",
-    groupItemTitle = "Will it close above $80k?",
-    slug = "price-80k",
-    outcomesJson = "[\"Yes\", \"No\"]",
-    outcomePricesJson = "[\"0.14\", \"0.25\"]",
-    volume = 200000.0,
-    liquidity = 10000.0,
-    lastTradePrice = 0.14,
-    active = true,
-    closed = false,
-    oneDayPriceChange = -0.05,
-    umaResolutionStatus = "resolved"
-)
-
-private val sampleEvent = EventDto(
-    id = "event-1",
-    title = "Bitcoin Price Prediction End of Year",
-    slug = "bitcoin-price-prediction-eoy",
-    description = "Predict the price of Bitcoin by the end of the current year. This event covers multiple price targets.",
-    category = "Crypto",
-    imageUrl = "https://via.placeholder.com/600x300/0000FF/FFFFFF?Text=Event+Image",
-    iconUrl = null,
-    active = true,
-    closed = false,
-    volume = 800000.0, // Sum of market volumes
-    liquidity = 35000.0, // Sum of market liquidities
-    startDate = OffsetDateTime.now().minusDays(10),
-    endDate = OffsetDateTime.now().plusDays(60),
-    resolutionSource = "Multiple Exchanges Average",
-    rawMarkets = listOf(
-        sampleMarket1,
-        sampleMarket2,
-        sampleMarket3
-    ),
-    featured = true,
-    featuredOrder = 1,
-    tags = listOf(TagDto(id = "tag-crypto", label = "Crypto", slug = "crypto", forceShow = false))
-)
-
-// Mock ChartModelProducer for previews
-private val previewChartModelProducer = CartesianChartModelProducer()
 
 @Composable
 private fun EventDetailsContentPreviewTemplate(uiState: EventDetailUiState) {
@@ -1158,11 +349,11 @@ private fun EventDetailsContentPreviewTemplate(uiState: EventDetailUiState) {
         EventDetailsContent(
             uiState = uiState,
             onMarketClick = { },
-            chartModelProducer = previewChartModelProducer, // Use the mock producer
+            chartModelProducer = PreviewMocks.previewChartModelProducer, // Use the mock producer
             isChartAvailable = true,
             selectedRange = TimeRange.D1,
             onRangeSelected = { },
-            displayableComments = sampleHierarchicalComments,
+            displayableComments = PreviewMocks.sampleHierarchicalComments,
             commentsLoading = false,
             commentsError = null,
             onNavigateToUserProfile = { },
@@ -1185,7 +376,7 @@ private fun EventDetailsContentPreviewTemplate(uiState: EventDetailUiState) {
 @Composable
 private fun EventDetailScreenPreviewSuccess() {
     EventDetailsContentPreviewTemplate(
-        uiState = EventDetailUiState.Success(sampleEvent)
+        uiState = EventDetailUiState.Success(PreviewMocks.sampleEvent)
     )
 }
 
@@ -1203,20 +394,4 @@ private fun EventDetailScreenPreviewError() {
     EventDetailsContentPreviewTemplate(
         uiState = EventDetailUiState.Error("Failed to load event data.")
     )
-}
-
-@Preview(showBackground = true, name = "Event Detail - Markets")
-@Composable
-private fun EventDetailMarketsPreview() {
-    LazyColumn(
-        Modifier.fillMaxWidth(),
-    ) {
-        marketsListSection(
-            sortedMarkets = sampleEvent.markets,
-            isMarketListExpanded = false,
-            showMarketImages = true,
-            onMarketExpandToggle = { },
-            onMarketClick = { }
-        )
-    }
 }
