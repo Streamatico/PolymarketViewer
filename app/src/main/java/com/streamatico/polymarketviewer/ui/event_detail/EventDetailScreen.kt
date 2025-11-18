@@ -35,8 +35,8 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -62,13 +62,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
@@ -99,7 +99,7 @@ import com.streamatico.polymarketviewer.data.model.CommentCreatorProfileDto
 import com.streamatico.polymarketviewer.data.model.CommentDto
 import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.EventType
-import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
+import com.streamatico.polymarketviewer.data.model.MarketDto
 import com.streamatico.polymarketviewer.data.model.MarketResolutionStatus
 import com.streamatico.polymarketviewer.data.model.PositionDto
 import com.streamatico.polymarketviewer.data.model.TagDto
@@ -108,6 +108,8 @@ import com.streamatico.polymarketviewer.data.model.getResolutionStatus
 import com.streamatico.polymarketviewer.data.model.getTitleOrDefault
 import com.streamatico.polymarketviewer.data.model.getYesTitle
 import com.streamatico.polymarketviewer.data.model.yesPrice
+import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
+import com.streamatico.polymarketviewer.ui.event_detail.components.ChangePercentIndicator
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
@@ -121,6 +123,7 @@ import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlin.math.abs
 
 // Define constant for market limit
 private const val MARKET_DISPLAY_LIMIT = 5
@@ -204,12 +207,8 @@ private fun EventDetailsContent(
     eventOutcomeTokensMap: Map<String, String>,
     eventTokenToGroupTitleMap: Map<String, String>
 ) {
-    val context = LocalContext.current
-    // Get current configuration and primary locale
-    val configuration = LocalConfiguration.current
-    val primaryLocale = configuration.locales[0]
     // Determine if the device language is English
-    val isEnglishLocale = primaryLocale.language == "en"
+    val isEnglishLocale = Locale.current.language == "en"
 
     // Hoist LazyListState here
     val listState = rememberLazyListState()
@@ -337,23 +336,9 @@ private fun EventDetailsContentSuccess(
     // Add state for market list expansion
     var isMarketListExpanded by rememberSaveable { mutableStateOf(false) }
 
-    val marketPrices = remember(event.markets) {
-        event.markets.associate { market ->
-            market.id to market.yesPrice()
-        }
-    }
     val sortedMarkets = remember(event.markets) {
          event.markets.sortedByViewPriority(event.sortByEnum)
     }
-    val totalEventVolume = event.volume
-
-    // Determine which markets to display
-    val visibleMarkets = if (sortedMarkets.size > MARKET_DISPLAY_LIMIT && !isMarketListExpanded) {
-        sortedMarkets.take(MARKET_DISPLAY_LIMIT)
-    } else {
-        sortedMarkets
-    }
-    val hiddenMarketCount = sortedMarkets.size - MARKET_DISPLAY_LIMIT
 
     LazyColumn(
         state = listState, // Use passed state
@@ -460,62 +445,15 @@ private fun EventDetailsContentSuccess(
         }
 
         // Event markets (outcomes)
-        if (visibleMarkets.isNotEmpty()) {
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp, bottom = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Outcome".uppercase(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                    Text(
-                        text = "% Chance".uppercase(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                }
-                HorizontalDivider()
-            }
-
-            items(visibleMarkets, key = { it.id }) { market ->
-                val price = marketPrices[market.id]
-
-                val outcomeText = if (sortedMarkets.size == 1) market.getYesTitle()
-                else market.getTitleOrDefault("Unknown")
-
-                EventMarketRow(
-                    outcomeText = outcomeText,
-                    iconUrl = market.iconUrl,
-                    resolutionStatus = market.getResolutionStatus(),
-                    price = price,
-                    volume = market.volume ?: totalEventVolume,
-                    showIcon = event.showMarketImages && event.eventType != EventType.BinaryEvent,
-                    onClick = { onMarketClick(market.id) }
-                )
-            }
-
-            // Add "Show More/Less" button if needed
-            if (sortedMarkets.size > MARKET_DISPLAY_LIMIT) {
-                item {
-                    Text(
-                        text = if (isMarketListExpanded) "Show less" else "+ $hiddenMarketCount more outcomes",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .clickable { isMarketListExpanded = !isMarketListExpanded }
-                    )
-                }
-            }
-        }
+        marketsListSection(
+            sortedMarkets = sortedMarkets,
+            showMarketImages = event.showMarketImages && event.eventType != EventType.BinaryEvent,
+            isMarketListExpanded = isMarketListExpanded,
+            onMarketExpandToggle = {
+                isMarketListExpanded = !isMarketListExpanded
+            },
+            onMarketClick = onMarketClick
+        )
 
         commentsSection(
             displayableComments = displayableComments,
@@ -555,6 +493,99 @@ private fun EventDetailsContentSuccess(
                     onLoadMoreComments()
                 }
             }
+    }
+}
+
+private fun LazyListScope.marketsListSection(
+    sortedMarkets: List<MarketDto>,
+    isMarketListExpanded: Boolean,
+    showMarketImages: Boolean,
+    onMarketExpandToggle: () -> Unit,
+    onMarketClick: (String) -> Unit
+) {
+    val marketPrices =
+        sortedMarkets.associate { market ->
+            market.id to market.yesPrice()
+        }
+
+    // Determine which markets to display
+    val visibleMarkets = if (sortedMarkets.size > MARKET_DISPLAY_LIMIT && !isMarketListExpanded) {
+        sortedMarkets.take(MARKET_DISPLAY_LIMIT)
+    } else {
+        sortedMarkets
+    }
+
+    val trendIndicatorEndPadding = visibleMarkets
+        .any { x -> x.oneDayPriceChange != null && displayOneDayPriceChange(x.oneDayPriceChange) }
+        .let {
+            if(it) 40.dp else 0.dp
+        }
+
+    val hiddenMarketCount = sortedMarkets.size - MARKET_DISPLAY_LIMIT
+
+    item {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(end = trendIndicatorEndPadding)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Outcome".uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+                Text(
+                    text = "% Chance".uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+            HorizontalDivider()
+        }
+    }
+
+    val isSingleMarket = sortedMarkets.size == 1
+
+    items(visibleMarkets, key = { it.id }) { market ->
+        val price = marketPrices[market.id]
+
+        val outcomeText = if (isSingleMarket) market.getYesTitle()
+        else market.getTitleOrDefault("Unknown")
+
+        EventMarketRow(
+            outcomeText = outcomeText,
+            iconUrl = market.iconUrl,
+            resolutionStatus = market.getResolutionStatus(),
+            price = price,
+            oneDayPriceChange = market.oneDayPriceChange,
+            volume = market.volume,
+            showIcon = showMarketImages,
+            trendIndicatorEndPadding = trendIndicatorEndPadding,
+            onClick = { onMarketClick(market.id) }
+        )
+    }
+
+    // Add "Show More/Less" button if needed
+    if (sortedMarkets.size > MARKET_DISPLAY_LIMIT) {
+        item {
+            Text(
+                text = if (isMarketListExpanded) "Show less" else "+ $hiddenMarketCount more outcomes",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .clickable { onMarketExpandToggle() }
+            )
+        }
     }
 }
 
@@ -715,8 +746,10 @@ private fun EventMarketRow(
     iconUrl: String?,
     resolutionStatus: MarketResolutionStatus?,
     price: Double?,
+    oneDayPriceChange: Double?,
     volume: Double?,
     showIcon: Boolean,
+    trendIndicatorEndPadding: Dp,
     onClick: () -> Unit
 ) {
     Column(
@@ -778,20 +811,46 @@ private fun EventMarketRow(
                  }
             }
             Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = UiFormatter.formatPriceAsPercentage(price),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            val chanceColor = if (price != null && price < 0.01) {
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            }
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = UiFormatter.formatPriceAsPercentage(price),
+                        style = MaterialTheme.typography.titleLarge,
+                        //fontWeight = FontWeight.Bold,
+                        color = chanceColor
+                    )
+
+                    Box(Modifier.widthIn(min = trendIndicatorEndPadding)) {
+                        if(oneDayPriceChange != null && displayOneDayPriceChange(oneDayPriceChange)) {
+                            val priceChangePercent = (oneDayPriceChange * 100).toInt()
+                            ChangePercentIndicator(priceChangePercent)
+                        }
+                    }
+                }
+            }
         }
         price?.let {
             Spacer(modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
                 progress = { it.toFloat() },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = trendIndicatorEndPadding)
             )
         }
     }
+}
+
+private fun displayOneDayPriceChange(oneDayPriceChange: Double): Boolean {
+    return abs(oneDayPriceChange) >= 0.01
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -944,7 +1003,6 @@ private fun rememberEventChartLegend(
     )
 }
 
-
 // --- Previews --- //
 
 private val sampleUserProfile = CommentCreatorProfileDto(
@@ -1018,7 +1076,7 @@ private val sampleHierarchicalComments = listOf(
 
 private val sampleMarket1 = demoMarketDto(
     id = "market-1",
-    question = "Will the price reach $100k?",
+    groupItemTitle = "Will the price reach $100k?",
     slug = "price-100k",
     description = "Market for price prediction.",
     startDate = OffsetDateTime.now().minusDays(5),
@@ -1030,11 +1088,12 @@ private val sampleMarket1 = demoMarketDto(
     outcomePricesJson = "[\"0.65\", \"0.35\"]",
     active = true,
     closed = false,
+    oneDayPriceChange = 0.116,
 )
 
 private val sampleMarket2 = demoMarketDto(
     id = "market-2",
-    question = "Will it close above $90k?",
+    groupItemTitle = "Will it close above $90k?",
     slug = "price-90k",
     outcomesJson = "[\"Yes\", \"No\"]",
     outcomePricesJson = "[\"0.80\", \"0.20\"]",
@@ -1044,6 +1103,21 @@ private val sampleMarket2 = demoMarketDto(
     lastTradePrice = 0.79,
     bestBid = 0.78,
     bestAsk = 0.81
+)
+
+private val sampleMarket3 = demoMarketDto(
+    id = "market-3",
+    groupItemTitle = "Will it close above $80k?",
+    slug = "price-80k",
+    outcomesJson = "[\"Yes\", \"No\"]",
+    outcomePricesJson = "[\"0.14\", \"0.25\"]",
+    volume = 200000.0,
+    liquidity = 10000.0,
+    lastTradePrice = 0.14,
+    active = true,
+    closed = false,
+    oneDayPriceChange = -0.05,
+    umaResolutionStatus = "resolved"
 )
 
 private val sampleEvent = EventDto(
@@ -1061,7 +1135,11 @@ private val sampleEvent = EventDto(
     startDate = OffsetDateTime.now().minusDays(10),
     endDate = OffsetDateTime.now().plusDays(60),
     resolutionSource = "Multiple Exchanges Average",
-    rawMarkets = listOf(sampleMarket1, sampleMarket2),
+    rawMarkets = listOf(
+        sampleMarket1,
+        sampleMarket2,
+        sampleMarket3
+    ),
     featured = true,
     featuredOrder = 1,
     tags = listOf(TagDto(id = "tag-crypto", label = "Crypto", slug = "crypto", forceShow = false))
@@ -1121,4 +1199,20 @@ private fun EventDetailScreenPreviewError() {
     EventDetailsContentPreviewTemplate(
         uiState = EventDetailUiState.Error("Failed to load event data.")
     )
+}
+
+@Preview(showBackground = true, name = "Event Detail - Markets")
+@Composable
+private fun EventDetailMarketsPreview() {
+    LazyColumn(
+        Modifier.fillMaxWidth(),
+    ) {
+        marketsListSection(
+            sortedMarkets = sampleEvent.markets,
+            isMarketListExpanded = false,
+            showMarketImages = true,
+            onMarketExpandToggle = { },
+            onMarketClick = { }
+        )
+    }
 }

@@ -80,6 +80,10 @@ data class MarketDto(
     @SerialName("bestAsk") override val bestAsk: Double? = null,
     @SerialName("automaticallyActive") val automaticallyActive: Boolean = false,
 
+    @SerialName("oneDayPriceChange") override val oneDayPriceChange: Double? = null,
+    @SerialName("oneWeekPriceChange") override val oneWeekPriceChange: Double? = null,
+    @SerialName("oneMonthPriceChange") override val oneMonthPriceChange: Double? = null,
+
     @SerialName("seriesColor") val seriesColor: String? = null,
     @SerialName("showGmpSeries") val showGmpSeries: Boolean = false,
     @SerialName("showGmpOutcome") val showGmpOutcome: Boolean = false,
@@ -143,6 +147,7 @@ data class MarketDto(
     volume1yr: Double? = null,
 
     groupItemThreshold: Int? = null,
+    oneDayPriceChange: Double? = null,
 ): MarketDto =
     MarketDto(
         id = id,
@@ -187,6 +192,8 @@ data class MarketDto(
         imageUrl = null,
         iconUrl = null,
         questionId = null,
+
+        oneDayPriceChange = oneDayPriceChange,
 
         volume24hr = volume24hr,
         volume1wk = volume1wk,

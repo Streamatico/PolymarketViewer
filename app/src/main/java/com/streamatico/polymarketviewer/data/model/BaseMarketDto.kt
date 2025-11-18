@@ -14,6 +14,10 @@ interface BaseMarketDto {
     val bestAsk: Double?
     val lastTradePrice: Double?
 
+    val oneDayPriceChange: Double?
+    val oneWeekPriceChange: Double?
+    val oneMonthPriceChange: Double?
+
     val active: Boolean
     val closed: Boolean
     val isArchived: Boolean

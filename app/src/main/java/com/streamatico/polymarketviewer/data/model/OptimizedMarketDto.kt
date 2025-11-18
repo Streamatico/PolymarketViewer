@@ -18,6 +18,10 @@ data class OptimizedMarketDto(
     @SerialName("bestAsk") override val bestAsk: Double? = null,
     @SerialName("lastTradePrice") override val lastTradePrice: Double? = null,
 
+    @SerialName("oneDayPriceChange") override val oneDayPriceChange: Double? = null,
+    @SerialName("oneWeekPriceChange") override val oneWeekPriceChange: Double? = null,
+    @SerialName("oneMonthPriceChange") override val oneMonthPriceChange: Double? = null,
+
     @SerialName("active") override val active: Boolean, // Whether market is active
     @SerialName("closed") override val closed: Boolean, // Whether closed (event occurred)
     @SerialName("archived") override val isArchived: Boolean,
