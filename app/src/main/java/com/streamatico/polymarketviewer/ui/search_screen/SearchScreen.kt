@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.OptimizedEventDto
-import com.streamatico.polymarketviewer.ui.event_list.EventListItem
+import com.streamatico.polymarketviewer.ui.event_list.components.EventListItem
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold

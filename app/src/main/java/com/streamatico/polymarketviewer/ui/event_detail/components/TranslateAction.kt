@@ -1,4 +1,4 @@
-package com.streamatico.polymarketviewer.ui.event_detail
+package com.streamatico.polymarketviewer.ui.event_detail.components
 
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -153,4 +153,4 @@ fun TranslateAction(
             }
         )
     }
-} 
+}

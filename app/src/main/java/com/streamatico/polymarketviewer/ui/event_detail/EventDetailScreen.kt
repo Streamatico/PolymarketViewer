@@ -110,6 +110,10 @@ import com.streamatico.polymarketviewer.data.model.getYesTitle
 import com.streamatico.polymarketviewer.data.model.yesPrice
 import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
 import com.streamatico.polymarketviewer.ui.event_detail.components.ChangePercentIndicator
+import com.streamatico.polymarketviewer.ui.event_detail.components.CommentItem
+import com.streamatico.polymarketviewer.ui.event_detail.components.EventChartRangeProvider
+import com.streamatico.polymarketviewer.ui.event_detail.components.TranslateAction
+import com.streamatico.polymarketviewer.ui.event_detail.components.rememberChartMarker
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox

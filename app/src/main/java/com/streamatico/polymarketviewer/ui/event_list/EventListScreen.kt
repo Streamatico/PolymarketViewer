@@ -80,6 +80,7 @@ import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.TagDto
 import com.streamatico.polymarketviewer.domain.repository.PolymarketEventsSortOrder
+import com.streamatico.polymarketviewer.ui.event_list.components.EventListItem
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold

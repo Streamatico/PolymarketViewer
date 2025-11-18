@@ -1,4 +1,4 @@
-package com.streamatico.polymarketviewer.ui.event_detail
+package com.streamatico.polymarketviewer.ui.event_detail.components
 
 import android.text.Layout
 import androidx.compose.material3.MaterialTheme

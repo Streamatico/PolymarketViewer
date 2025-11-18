@@ -1,4 +1,4 @@
-package com.streamatico.polymarketviewer.ui.event_detail
+package com.streamatico.polymarketviewer.ui.event_detail.components
 
 // --- Imports needed for Comment Composables --- //
 import androidx.compose.foundation.background
@@ -64,7 +64,7 @@ private enum class PositionBadgeType { YES, NO, DEFAULT }
 // Make CommentItem internal so it can be called from EventDetailScreen
 @Composable
 internal fun CommentItem(
-    hierarchicalComment: HierarchicalComment,
+    hierarchicalComment: com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment,
     eventOutcomeTokensMap: Map<String, String>,
     eventTokenToGroupTitleMap: Map<String, String>,
     isBinaryEvent: Boolean,
@@ -353,22 +353,28 @@ private val previewReply = CommentDto(
     parentCommentID = "preview-comment-1" // Link to parent
 )
 
-private val previewHierarchicalCommentWithReply = HierarchicalComment(
-    comment = previewComment,
-    replies = listOf(previewReply)
-)
+private val previewHierarchicalCommentWithReply =
+    _root_ide_package_.com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment(
+        comment = previewComment,
+        replies = listOf(previewReply)
+    )
 
-private val previewHierarchicalCommentNoReply = HierarchicalComment(
-    comment = previewComment.copy(id = "preview-comment-2", reactionCount = 0, body = "A shorter comment with no replies."),
-    replies = emptyList()
-)
+private val previewHierarchicalCommentNoReply =
+    _root_ide_package_.com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment(
+        comment = previewComment.copy(
+            id = "preview-comment-2",
+            reactionCount = 0,
+            body = "A shorter comment with no replies."
+        ),
+        replies = emptyList()
+    )
 
 private val previewOutcomeMap = mapOf("token-yes" to "Yes", "token-no" to "No", "token-other" to "Maybe")
 private val previewTitleMap = mapOf("token-yes" to "Outcome Yes", "token-no" to "Outcome No", "token-other" to "Outcome Maybe")
 
 @Composable
 private fun CommentItemPreviewTemplate(
-    hierarchicalComment: HierarchicalComment,
+    hierarchicalComment: com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment,
 ) {
     MaterialTheme {
         CommentItem(

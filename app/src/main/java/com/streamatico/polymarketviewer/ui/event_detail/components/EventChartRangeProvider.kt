@@ -1,4 +1,4 @@
-package com.streamatico.polymarketviewer.ui.event_detail
+package com.streamatico.polymarketviewer.ui.event_detail.components
 
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
