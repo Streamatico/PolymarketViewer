@@ -95,10 +95,19 @@ class PolymarketRepositoryImpl @Inject constructor(
     override suspend fun getMarketTimeseries(
         marketTokenId: String,
         interval: String,
-        resolutionInMinutes: Int?
+        resolutionInMinutes: Int?,
+        startTimestamp: Long?,
+        endTimestamp: Long?
     ): Result<List<TimeseriesPointDto>> {
-        return safeApiCall { clobApiClient.getPricesHistory(marketTokenId, interval, resolutionInMinutes) }
-            .map { responseDto -> responseDto.history }
+        return safeApiCall {
+            clobApiClient.getPricesHistory(
+                marketTokenId = marketTokenId,
+                interval = interval,
+                fidelity = resolutionInMinutes,
+                startTs = startTimestamp,
+                endTs = endTimestamp
+            )
+        }.map { responseDto -> responseDto.history }
     }
 
     override suspend fun getComments(

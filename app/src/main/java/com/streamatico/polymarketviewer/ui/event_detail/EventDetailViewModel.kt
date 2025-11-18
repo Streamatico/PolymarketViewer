@@ -7,10 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.streamatico.polymarketviewer.data.model.CommentDto
 import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.MarketDto
 import com.streamatico.polymarketviewer.data.model.TimeseriesPointDto
-import com.streamatico.polymarketviewer.data.model.CommentDto
 import com.streamatico.polymarketviewer.data.model.getTitleOrDefault
 import com.streamatico.polymarketviewer.data.model.yesPrice
 import com.streamatico.polymarketviewer.domain.repository.CommentsParentEntityId
@@ -22,45 +22,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
-
-// UI state for event details screen
-sealed interface EventDetailUiState {
-    data object Loading : EventDetailUiState
-    data class Success(val event: EventDto) : EventDetailUiState // Contains EventDto
-    data class Error(val message: String) : EventDetailUiState
-}
-
-enum class TimeRange(val apiInterval: String, val apiResolutionMins: Int) {
-    H1("1h", 5),
-    H6("6h", 10),
-    D1("1d", 15),
-    W1("1w", 60),
-    M1("1m", 60*4),
-    ALL("max", 60*12)
-}
-
-// --- Label for timeline data (dates) --- //
-// val xToDateMapKey = ExtraStore.Key<Map<Float, Long>>()
-
-//private const val CHART_UPDATE_INTERVAL_MINUTES = 15
-private const val DEFAULT_COMMENTS_LIMIT = 40
-
-internal val LegendLabelKey = ExtraStore.Key<Set<OrderedChartLabel>>()
-internal data class OrderedChartLabel(val order: Int, val label: String)
-
-// --- Data class for Hierarchical Comments --- //
-data class HierarchicalComment(
-    val comment: CommentDto,
-    val replies: List<CommentDto> = emptyList()
-)
 
 @HiltViewModel
 class EventDetailViewModel @Inject constructor(
@@ -171,17 +140,17 @@ class EventDetailViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                Log.e("EventDetailViewModel", "Failed to parse token/outcome JSON for market ${market.id}", e)
+                Log.e(TAG, "Failed to parse token/outcome JSON for market ${market.id}", e)
             }
         }
-        Log.d("EventDetailViewModel", "Built token maps. OutcomeMap: ${outcomeMap.size}, TitleMap: ${titleMap.size} for event ${event.id}")
+        Log.d(TAG, "Built token maps. OutcomeMap: ${outcomeMap.size}, TitleMap: ${titleMap.size} for event ${event.id}")
         return Pair(outcomeMap, titleMap)
     }
 
     // --- Chart Loading --- //
-    private fun loadChartData(range: TimeRange) {
+    private fun loadChartData(timeRange: TimeRange) {
         val currentEvent = (uiState.value as? EventDetailUiState.Success)?.event ?: return
-        Log.d("EventDetailVM", "Loading chart data for range: $range")
+        Log.d(TAG, "Loading chart data for range: $timeRange")
 
         val topMarkets = currentEvent.markets
             .filter { it.yesPrice().let { price -> price != null && price > 0.0 } }
@@ -196,7 +165,7 @@ class EventDetailViewModel @Inject constructor(
                     market.clobTokenIds?.let { jsonParser.decodeFromString<List<String>>(it) }
                 } catch (e: Exception) {
                     Log.e(
-                        "EventDetailVM",
+                        TAG,
                         "Failed to parse clobTokenIds for market ${market.id}: ${market.clobTokenIds}",
                         e
                     )
@@ -204,15 +173,14 @@ class EventDetailViewModel @Inject constructor(
                 }
                 val tokenId = tokenIds?.firstOrNull()
                 if (tokenId == null) {
-                    Log.w("EventDetailVM", "No valid clobTokenId found for market ${market.id}")
+                    Log.w(TAG, "No valid clobTokenId found for market ${market.id}")
                     null
                 } else {
-                    //val timeseriesParams = getTimeSeriesInterval(range)
                     async { // Restore repository call
                         polymarketRepository.getMarketTimeseries(
                             marketTokenId = tokenId,
-                            interval = range.apiInterval,
-                            resolutionInMinutes = range.apiResolutionMins
+                            interval = timeRange.apiInterval,
+                            resolutionInMinutes = timeRange.apiResolutionMins,
                         )
                     }
                 }
@@ -221,21 +189,20 @@ class EventDetailViewModel @Inject constructor(
             // --- Process results --- //
             val results = deferredResults.awaitAll()
 
-            //val allChartPoints = mutableMapOf<Float, Long>() // Map: X-axis value (timestamp as Float) -> Original timestamp (Long)
             val combinedMarketsResults = mutableListOf<InternalMarketTimeseries>()
 
             results.forEachIndexed { originalIndex, result: Result<List<TimeseriesPointDto>> ->
                 result.onSuccess { pointsDto: List<TimeseriesPointDto> ->
                     val market = topMarkets[originalIndex]
                     Log.d(
-                        "EventDetailVM",
+                        TAG,
                         "Received ${pointsDto.size} points for market ${market.id}"
                     )
 
                     val chartEntries = pointsDto.map { point ->
                         point.close.let { price ->
                             // Convert timestamp (assumed seconds) to milliseconds for the chart's X-axis
-                            val xValue = point.timestamp // Timestamp in seconds
+                            val xValue = roundEpochToTimeRange(point.timestamp, timeRange) // Timestamp in seconds
                             val yValue = price.toFloat() * 100f
                             // Populate the map for the axis formatter, using milliseconds for consistency
                             //allChartPoints[xValue] = timestampMillis
@@ -254,7 +221,7 @@ class EventDetailViewModel @Inject constructor(
                 }.onFailure { error ->
                     val market = topMarkets[originalIndex]
                     Log.e(
-                        "EventDetailVM",
+                        TAG,
                         "Failed to load timeseries for market ${market.id}",
                         error
                     )
@@ -283,9 +250,8 @@ class EventDetailViewModel @Inject constructor(
                                 }.toSet()
                         }
                     }
-                    //Log.d("EventDetailVM", "Real chart data updated. X-axis map size: ${allChartPoints.size}")
                 } catch (e: Throwable) {
-                    Log.e("EventDetailVM", "Error during runTransaction with real data", e)
+                    Log.e(TAG, "Error during runTransaction with real data", e)
                 }
             } else {
                 _isChartAvailable.value = false
@@ -322,14 +288,14 @@ class EventDetailViewModel @Inject constructor(
                 // order and ascending can be added if needed
             )
 
-            result.onSuccess {
-                val topLevelCommentsCount = it.count { comment -> comment.parentCommentID == null }
+            result.onSuccess { comments ->
+                val topLevelCommentsCount = comments.count { comment -> comment.parentCommentID == null }
                 _canLoadMoreComments.value = topLevelCommentsCount == DEFAULT_COMMENTS_LIMIT
-                _commentsState.value = if (reset) it else _commentsState.value + it
-                commentsOffset = _commentsState.value.count { it.parentCommentID == null }
+                _commentsState.value = if (reset) comments else _commentsState.value + comments
+                commentsOffset = _commentsState.value.count { comment -> comment.parentCommentID == null }
                 if (reset) _commentsError.value = null // Clear error on successful refresh
             }.onFailure {
-                Log.e("EventDetailViewModel", "Failed to load comments for event $eventId", it)
+                Log.e(TAG, "Failed to load comments for event $eventId", it)
                 // Show error only if it's an initial load/refresh or list is empty
                 if (reset || _commentsState.value.isEmpty()) {
                     _commentsError.value = it.message ?: "Failed to load comments"
@@ -401,4 +367,50 @@ class EventDetailViewModel @Inject constructor(
             )
         } // Consider sorting topLevelComments by createdAt if needed
     }
+
+    companion object {
+        private const val TAG = "EventDetailViewModel"
+    }
 }
+
+// UI state for event details screen
+sealed interface EventDetailUiState {
+    data object Loading : EventDetailUiState
+    data class Success(val event: EventDto) : EventDetailUiState // Contains EventDto
+    data class Error(val message: String) : EventDetailUiState
+}
+
+enum class TimeRange(val apiInterval: String, val apiResolutionMins: Int) {
+    H1("1h", 5),
+    H6("6h", 10),
+    D1("1d", 15),
+    W1("1w", 60),
+    M1("1m", 60*4),
+    ALL("max", 60*12)
+}
+
+private fun roundEpochToTimeRange(epochSeconds: Long, timeRange: TimeRange): Long {
+    return roundEpochToMinutes(epochSeconds, timeRange.apiResolutionMins)
+}
+
+private fun roundEpochToMinutes(epochSeconds: Long, minutes: Int): Long {
+    val interval = minutes * 60L       // длина интервала в секундах
+    val half = interval / 2            // половина интервала для мат. округления
+    return ((epochSeconds + half) / interval) * interval
+}
+
+
+// --- Label for timeline data (dates) --- //
+// val xToDateMapKey = ExtraStore.Key<Map<Float, Long>>()
+
+//private const val CHART_UPDATE_INTERVAL_MINUTES = 15
+private const val DEFAULT_COMMENTS_LIMIT = 40
+
+internal val LegendLabelKey = ExtraStore.Key<Set<OrderedChartLabel>>()
+internal data class OrderedChartLabel(val order: Int, val label: String)
+
+// --- Data class for Hierarchical Comments --- //
+data class HierarchicalComment(
+    val comment: CommentDto,
+    val replies: List<CommentDto> = emptyList()
+)

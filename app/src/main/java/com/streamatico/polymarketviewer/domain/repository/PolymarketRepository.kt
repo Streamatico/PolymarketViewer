@@ -55,8 +55,8 @@ interface PolymarketRepository {
         marketTokenId: String,
         interval: String,
         resolutionInMinutes: Int?,
-        //limit: Int,
-        //timestampGt: Long?
+        startTimestamp: Long? = null,
+        endTimestamp: Long? = null
     ): Result<List<TimeseriesPointDto>>
 
     /**

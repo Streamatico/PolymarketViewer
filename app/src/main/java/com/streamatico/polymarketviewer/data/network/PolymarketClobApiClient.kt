@@ -19,12 +19,17 @@ class PolymarketClobApiClient @Inject constructor(
     suspend fun getPricesHistory(
         marketTokenId: String, // the CLOB token id
         interval: String,      // e.g., "all", "h1", "d1"
-        fidelity: Int? = null  // resolution in minutes
+        fidelity: Int? = null,  // resolution in minutes
+        startTs: Long? = null,  // start timestamp in seconds
+        endTs: Long? = null     // end timestamp in seconds
+
     ): PriceHistoryResponseDto {
         return client.get("prices-history") {
             parameter("market", marketTokenId)
             parameter("interval", interval)
             parameter("fidelity", fidelity)
+            parameter("startTs", startTs)
+            parameter("endTs", endTs)
         }.body()
     }
 }
