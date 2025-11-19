@@ -1,20 +1,19 @@
 [versions]
-#noinspection AndroidGradlePluginVersion
-agp = "8.11.1" # F-droid supports up to AGP 8.11.1 Issue: https://github.com/Streamatico/PolymarketViewer/issues/3
+agp = "8.13.1"
 
-kotlin = "2.2.21" # Required compatibility "ksp"
+kotlin = "2.2.21"
 ksp = "2.3.0"
 
 coreKtx = "1.17.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
-activityCompose = "1.11.0"
-datastore = "1.1.7"
+activityCompose = "1.12.0"
+datastore = "1.2.0"
 
-composeBom = "2025.11.00"
+composeBom = "2025.11.01"
 
-lifecycleVersion = "2.9.4"
+lifecycleVersion = "2.10.0"
 navigationCompose = "2.9.6"
 coil = "3.3.0"
 coroutines = "1.10.2"
