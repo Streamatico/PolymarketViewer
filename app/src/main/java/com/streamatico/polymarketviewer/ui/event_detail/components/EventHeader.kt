@@ -60,42 +60,53 @@ fun EventHeader(
         }
 
         // Event description and tags
-        val description = event.description//event.description?.takeIf { it.isNotBlank() }
+        val description = event.description?.trim()//event.description?.takeIf { it.isNotBlank() }
 
         if (description != null || !event.tags.isNullOrEmpty()) {
             var isDescriptionExpanded by remember { mutableStateOf(false) }
-            var isDescriptionOverflowing by remember { mutableStateOf(false) }
+            var isDescriptionOverflowing by remember { mutableStateOf<Boolean?>(null) }
 
             Column {
-                if (description != null) {
-                    SelectionContainer {
-                        Text(
-                            text = description,
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = if (isDescriptionExpanded) Int.MAX_VALUE else 5,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.animateContentSize(),
-                            onTextLayout = { layoutResult ->
-                                // Check if the text was cut (overflow)
-                                if (!isDescriptionExpanded) {
-                                    isDescriptionOverflowing = layoutResult.hasVisualOverflow
-                                }
-                            },
-                        )
+                // Event description and tags
+                Column(
+                    modifier = Modifier
+                        .let {
+                            if (isDescriptionOverflowing != null) it.animateContentSize()
+                            else it
+                        }
+                ) {
+                    if (description != null) {
+                        SelectionContainer {
+                            Text(
+                                text = description,
+                                style = MaterialTheme.typography.bodyMedium,
+                                maxLines = if (isDescriptionExpanded) Int.MAX_VALUE else 5,
+                                overflow = TextOverflow.Ellipsis,
+                                //modifier = Modifier.animateContentSize(),
+                                onTextLayout = { layoutResult ->
+                                    // Check if the text was cut (overflow)
+                                    //if (!isDescriptionExpanded) {
+                                        isDescriptionOverflowing = layoutResult.hasVisualOverflow
+                                    //}
+                                },
+                            )
+                        }
+                    }
+
+                    // Show tags if description is short (or empty) OR if it is expanded
+                    if(isDescriptionOverflowing != null) {
+                        if (isDescriptionOverflowing == false || isDescriptionExpanded) {
+                            if (!event.tags.isNullOrEmpty()) {
+                                EventTags(
+                                    tags = event.tags,
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
+                        }
                     }
                 }
 
-                // Show tags if description is short (or empty) OR if it is expanded
-                if (!isDescriptionOverflowing || isDescriptionExpanded) {
-                    if(!event.tags.isNullOrEmpty()) {
-                        EventTags(
-                            tags = event.tags,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-                }
-
-                if(isDescriptionOverflowing) {
+                if(isDescriptionOverflowing == true || isDescriptionExpanded) {
                     val showMoreText = if (isDescriptionExpanded) "Show less" else "Show more"
                     Text(
                         text = showMoreText,
