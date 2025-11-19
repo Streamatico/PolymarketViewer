@@ -44,12 +44,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.streamatico.polymarketviewer.data.model.MarketDto
-import com.streamatico.polymarketviewer.data.model.demoMarketDto
 import com.streamatico.polymarketviewer.data.model.getTitleOrDefault
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
+import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 import java.time.OffsetDateTime
 
 // Market details screen
@@ -288,39 +288,10 @@ private fun MarketOutcomeRow(
 
 // --- Previews --- //
 
-// Reusable sample MarketDto for previews
-private val sampleMarket = demoMarketDto(
-    id = "1",
-    question = "Will this sample market preview work correctly?",
-    slug = "will-this-sample-market-preview-work-correctly",
-    description = "This is a sample description for the market preview. It can be quite long to test the expansion logic. Let's add more lines. Line 3. Line 4. Line 5. Line 6. Line 7.",
-    startDate = OffsetDateTime.now().minusDays(1), // Yesterday
-    endDate = OffsetDateTime.now().plusDays(7), // Next week
-    resolutionSource = "Developer decision",
-    volume = 1234567.89,
-    liquidity = 98765.43,
-    outcomesJson = """["Yes", "No"]""",
-    outcomePricesJson = """["0.75", "0.25"]""",
-    active = true,
-    closed = false,
-    createdAt = OffsetDateTime.now().minusDays(2),
-    updatedAt = OffsetDateTime.now().minusHours(1),
-    groupItemThreshold = null,
-
-    volume24hr = 100000.0,
-    volume1wk = 500000.0,
-    volume1mo = 1000000.0,
-    volume1yr = 5000000.0,
-
-    lastTradePrice = 0.74,
-    bestBid = 0.73,
-    bestAsk = 0.76,
-)
-
 @Preview(showBackground = true, name = "Success - Short Description")
 @Composable
 private fun MarketDetailViewPreviewSuccessShortDesc() {
-    val shortDescMarket = demoMarketDto( // Use copy for modifications
+    val shortDescMarket = PreviewMocks.sampleMarket1.copy(
         id = "2",
         question = "Market with short description?",
         slug = "market-with-short-description",
@@ -344,14 +315,9 @@ private fun MarketDetailViewPreviewSuccessShortDesc() {
 @Preview(showBackground = true, name = "Success - No Volume/Liquidity")
 @Composable
 private fun MarketDetailViewPreviewSuccessNoMetrics() {
-    val noMetricsMarket = demoMarketDto( // Use copy for modifications
-        id = "3",
+    val noMetricsMarket = PreviewMocks.sampleMarket1.copy(
         question = "Market without volume/liquidity?",
-        slug = "market-without-metrics",
         description = "Description here.",
-        startDate = OffsetDateTime.now(),
-        endDate = OffsetDateTime.now().plusDays(1),
-        resolutionSource = "API",
         volume = null, // No volume
         liquidity = null, // No liquidity
         outcomesJson = """["Outcome A", "Outcome B"]""", // For scalar, might be different
@@ -383,7 +349,7 @@ private fun MarketDetailViewPreviewLoading() {
 private fun MarketDetailViewPreviewSuccess() { // Removed PreviewParameter
     MaterialTheme { // Wrap preview in MaterialTheme
         MarketDetailContent(
-            uiState = MarketDetailUiState.Success(sampleMarket), // Use the sample market directly
+            uiState = MarketDetailUiState.Success(PreviewMocks.sampleMarket1), // Use the sample market directly
             onNavigateBack = {},
             onRetry = {}
         )

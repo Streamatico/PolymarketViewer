@@ -53,7 +53,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -77,19 +76,18 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 import com.streamatico.polymarketviewer.R
-import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.TagDto
 import com.streamatico.polymarketviewer.domain.repository.PolymarketEventsSortOrder
 import com.streamatico.polymarketviewer.ui.event_list.components.EventListItem
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
+import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventListScreen(
     viewModel: EventListViewModel = hiltViewModel(),
@@ -341,14 +339,14 @@ fun EventListContent(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                when (val state = uiState) {
+                when (uiState) {
                     is EventListUiState.Loading -> {
                         // Always show LoadingBox when uiState is Loading,
                         // regardless of tags loading status.
                         LoadingBox()
                     }
                     is EventListUiState.Success -> {
-                        if (state.events.isEmpty() && !isLoadingMore) {
+                        if (uiState.events.isEmpty() && !isLoadingMore) {
                             Text("No events found for selected tag.")
                         } else {
                             PullToRefreshBox(
@@ -372,7 +370,7 @@ fun EventListContent(
                                         modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
                                         //contentPadding = PaddingValues(vertical = 8.dp)
                                     ) {
-                                        items(state.events, key = { it.id }) { event ->
+                                        items(uiState.events, key = { it.id }) { event ->
                                             EventListItem(
                                                 event = event,
                                                 onEventClick = onNavigateToEventDetail
@@ -396,7 +394,7 @@ fun EventListContent(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
-                                        items(state.events, key = { it.id }) { event ->
+                                        items(uiState.events, key = { it.id }) { event ->
                                             EventListItem(
                                                 event = event,
                                                 onEventClick = onNavigateToEventDetail
@@ -414,7 +412,8 @@ fun EventListContent(
                                 }
 
                                 // Logic for loading more items
-                                LaunchedEffect(listState, gridState, canLoadMore, isLoadingMore, isRefreshing, state.events, useGrid) {
+                                LaunchedEffect(listState, gridState, canLoadMore, isLoadingMore, isRefreshing,
+                                    uiState.events, useGrid) {
                                     snapshotFlow { if (useGrid) gridState.layoutInfo else listState.layoutInfo }
                                         .map { layoutInfo ->
                                             // Explicitly get visibleItemsInfo based on type
@@ -432,7 +431,7 @@ fun EventListContent(
                                                     is LazyGridItemInfo -> lastItem.index
                                                     else -> -1
                                                 }
-                                                val totalDataItems = state.events.size
+                                                val totalDataItems = uiState.events.size
                                                 // Adjust threshold based on grid layout if needed, currently uses 5
                                                 totalDataItems > 0 && lastVisibleItemIndex != -1 && lastVisibleItemIndex >= totalDataItems - (if (useGrid) 10 else 5)
                                             }
@@ -450,7 +449,7 @@ fun EventListContent(
                     }
                     is EventListUiState.Error -> {
                         ErrorBox(
-                            message = state.message,
+                            message = uiState.message,
                             onRetry = onRetry,
                         )
                     }
@@ -511,7 +510,6 @@ private fun getIconForSortOrder(orderKey: PolymarketEventsSortOrder): ImageVecto
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TagsRow(
     tags: List<TagDto>,
@@ -559,14 +557,13 @@ private fun TagsRow(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(showBackground = true)
 @Composable
 private fun EventListScreenPreview_Success() {
     val sampleEvents = listOf(
-        createSampleEventDto(id = "1", title = "Will event 1 happen?", slug = "event-1", volume = 100.0, liquidity = 50.0),
-        createSampleEventDto(id = "2", title = "What about event 2?", slug = "event-2", volume = 200.0, liquidity = 100.0, featured = true, featuredOrder = 1),
-        createSampleEventDto(id = "3", title = "A third event?", slug = "event-3", volume = 300.0, liquidity = 150.0)
+        PreviewMocks.sampleEvent.copy(id = "1", title = "Will event 1 happen?", slug = "event-1", volume = 100.0, liquidity = 50.0, featured = false),
+        PreviewMocks.sampleEvent.copy(id = "2", title = "What about event 2?", slug = "event-2", volume = 200.0, liquidity = 100.0, featured = true, featuredOrder = 1),
+        PreviewMocks.sampleEvent.copy(id = "3", title = "A third event?", slug = "event-3", volume = 300.0, liquidity = 150.0, featured = false)
     )
     val sampleTags = listOf(
         TagDto(id = "tag1", label = "Politics", slug = "politics", forceShow = false),
@@ -599,7 +596,6 @@ private fun EventListScreenPreview_Success() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(showBackground = true, name = "Loading State")
 @Composable
 private fun EventListScreenPreview_Loading() {
@@ -628,7 +624,6 @@ private fun EventListScreenPreview_Loading() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(showBackground = true, name = "Error State")
 @Composable
 private fun EventListScreenPreview_Error() {
@@ -655,27 +650,4 @@ private fun EventListScreenPreview_Error() {
             onNavigateToSearch = {},
         )
     }
-}
-
-private fun createSampleEventDto(id: String, title: String, slug: String, volume: Double? = null, liquidity: Double? = null, featured: Boolean = false, featuredOrder: Int? = null): EventDto {
-    return EventDto(
-        id = id,
-        title = title,
-        slug = slug,
-        description = "Sample description for $title",
-        category = "Sample Category",
-        imageUrl = null,
-        iconUrl = null,
-        active = true,
-        closed = false,
-        volume = volume,
-        liquidity = liquidity,
-        startDate = null,
-        endDate = null,
-        resolutionSource = "Sample Source",
-        rawMarkets = emptyList(),
-        featured = featured,
-        featuredOrder = featuredOrder,
-        tags = listOf(TagDto("sample", "Sample Tag", "sample-tag", false))
-    )
 }

@@ -32,7 +32,7 @@ class EventListViewModel  @Inject constructor(
     // --- Tags --- //
     private val _tagsState = MutableStateFlow<List<TagDto>>(emptyList())
     val tagsState: StateFlow<List<TagDto>> = _tagsState.asStateFlow()
-    private val _selectedTagSlug = MutableStateFlow<String>(POLYMARKET_EVENTS_SLUG_ALL)
+    private val _selectedTagSlug = MutableStateFlow(POLYMARKET_EVENTS_SLUG_ALL)
     val selectedTagSlug: StateFlow<String> = _selectedTagSlug.asStateFlow()
     private val _areTagsLoading = MutableStateFlow(true)
     val areTagsLoading: StateFlow<Boolean> = _areTagsLoading.asStateFlow()
@@ -137,14 +137,14 @@ class EventListViewModel  @Inject constructor(
 
                     // Keep client-side featured sorting for now, might need adjustment
                     val sortedList = uniqueList
-                        .let {
+                        .let { events ->
                             if(currentOrder == PolymarketEventsSortOrder.DEFAULT_SORT_ORDER) {
                                 // Sort by featured order first, then by default order
-                                it.sortedWith(
+                                events.sortedWith(
                                     compareBy { if(it.featured == true) it.featuredOrder else 1000}
                                 )
                             } else {
-                                it
+                                events
                             }
                         }
 

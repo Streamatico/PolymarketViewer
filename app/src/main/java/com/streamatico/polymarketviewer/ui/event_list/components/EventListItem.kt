@@ -36,10 +36,6 @@ import com.streamatico.polymarketviewer.data.model.BaseEventDto
 import com.streamatico.polymarketviewer.data.model.BaseMarketDto
 import com.streamatico.polymarketviewer.data.model.EventType
 import com.streamatico.polymarketviewer.data.model.MarketResolutionStatus
-import com.streamatico.polymarketviewer.data.model.demoEventDto
-import com.streamatico.polymarketviewer.data.model.demoMarketDto
-import com.streamatico.polymarketviewer.data.model.demoOptimizedEventDto
-import com.streamatico.polymarketviewer.data.model.demoOptimizedMarketDto
 import com.streamatico.polymarketviewer.data.model.getResolutionStatus
 import com.streamatico.polymarketviewer.data.model.getTitleOrDefault
 import com.streamatico.polymarketviewer.data.model.getYesTitle
@@ -48,7 +44,7 @@ import com.streamatico.polymarketviewer.ui.shared.ComposableUiFormatter
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.sortedByViewPriority
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
-import java.time.OffsetDateTime
+import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 
 // Constant for maximum number of visible markets
 private const val MAX_VISIBLE_MARKETS = 3
@@ -391,69 +387,16 @@ private fun OutcomeTextRow(
 @Preview(showBackground = true, name = "Binary Event Preview")
 @Composable
 private fun BinaryEventListItemPreview() {
-    val previewMarket = demoMarketDto(
-        id = "m1",
-        question = "Will binary preview work?",
-        slug = "m1-slug",
-        description = "Binary test description",
-        active = true,
-        closed = false,
-        resolutionSource = "Source B1",
-        startDate = null,
-        endDate = null,
-        volume = 1000.0,
-
-        liquidity = 50.0,
-        outcomesJson = "[\"Yes\", \"No\"]",
-        outcomePricesJson = "[\"0.65\", \"0.35\"]",
-        groupItemTitle = "Binary Test",
-
-        umaResolutionStatus = "disputed" // Example status
-    )
-    val previewEvent = demoEventDto(
-        id = "event-bin",
-        title = "Binary Event Example",
-        slug = "event-bin-slug",
-        description = "Event description for binary",
-        category = "Test",
-        imageUrl = "https://via.placeholder.com/150",
-        iconUrl = null,
-        resolutionSource = "Preview Source 1",
-        active = true,
-        closed = false,
-        volume = 1000.0,
-        liquidity = 50.0,
-        featured = false,
-        endDate = OffsetDateTime.now().plusHours(2),
-        rawMarkets = listOf(previewMarket)
-    )
     PolymarketAppTheme {
-        EventListItem(event = previewEvent, onEventClick = {})
+        EventListItem(event = PreviewMocks.sampleBinaryEvent, onEventClick = {})
     }
 }
 
 @Preview(showBackground = true, name = "Multi Market Event Preview (Corrected)")
 @Composable
 private fun MultiMarketEventListItemPreview() {
-    val previewMarket1 = demoOptimizedMarketDto("Will Mark Carney be the next Canadian Prime Minister?", "m1-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.77, 0.23), groupItemTitle = "Mark Carney")
-    val previewMarket2 = demoOptimizedMarketDto("Will Pierre Poilievre be the next Canadian Prime Minister?", "m2-slug", active = true, closed = true, listOf("Yes", "No"), listOf(0.24, 0.76), groupItemTitle = "Pierre Poilievre")
-    val previewMarket3 = demoOptimizedMarketDto("Will Jagmeet Singh be the next Canadian Prime Minister?", "m3-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.01, 0.99), groupItemTitle = "Jagmeet Singh")
-    val previewMarket4 = demoOptimizedMarketDto("Will Someone Else be the next Canadian Prime Minister?", "m4-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.01, 0.99), groupItemTitle = "Someone Else")
-    val previewMarket5 = demoOptimizedMarketDto("Will Yet Another Candidate be the next Canadian Prime Minister?", "m5-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.00, 1.00), groupItemTitle = "Yet Another Candidate")
-
-    val previewEvent = demoOptimizedEventDto(
-        id = "event-multi",
-        title = "Next Prime Minister of Canada after the election?",
-        slug = "event-multi-slug",
-        imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Canada_%28Pantone%29.svg/160px-Flag_of_Canada_%28Pantone%29.svg.png",
-        startDate = null,
-        endDate = OffsetDateTime.now().minusDays(5),
-        active = true,
-        closed = true,
-        rawMarkets = listOf(previewMarket1, previewMarket2, previewMarket3, previewMarket4, previewMarket5)
-    )
     PolymarketAppTheme {
-        EventListItem(event = previewEvent, onEventClick = {})
+        EventListItem(event = PreviewMocks.sampleMultiMarketEvent, onEventClick = {})
     }
 }
 
@@ -461,23 +404,7 @@ private fun MultiMarketEventListItemPreview() {
 @Preview(showBackground = true, name = "Categorical Event Preview")
 @Composable
 private fun CategoricalEventListItemPreview() {
-    val previewMarket = demoOptimizedMarketDto(
-        slug = "m-cat-slug",
-        active = true,
-        closed = false,
-    )
-    val previewEvent = demoOptimizedEventDto(
-        id = "event-cat",
-        title = "Game Award Winner",
-        slug = "event-cat-slug",
-        imageUrl = "https://via.placeholder.com/150/0000FF/FFFFFF?Text=Game",
-        startDate = null,
-        endDate = OffsetDateTime.now().plusDays(30),
-        active = true,
-        closed = false,
-        rawMarkets = listOf(previewMarket)
-    )
     PolymarketAppTheme {
-        EventListItem(event = previewEvent, onEventClick = {})
+        EventListItem(event = PreviewMocks.sampleCategoricalEvent, onEventClick = {})
     }
 }

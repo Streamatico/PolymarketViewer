@@ -6,7 +6,10 @@ import com.streamatico.polymarketviewer.data.model.CommentDto
 import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.PositionDto
 import com.streamatico.polymarketviewer.data.model.TagDto
+import com.streamatico.polymarketviewer.data.model.demoEventDto
 import com.streamatico.polymarketviewer.data.model.demoMarketDto
+import com.streamatico.polymarketviewer.data.model.demoOptimizedEventDto
+import com.streamatico.polymarketviewer.data.model.demoOptimizedMarketDto
 import com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment
 import java.time.OffsetDateTime
 
@@ -80,6 +83,24 @@ internal object PreviewMocks {
         HierarchicalComment(sampleComment2)
     )
 
+    // Additional Comment Mocks
+    val sampleHierarchicalCommentWithReply = HierarchicalComment(
+        comment = sampleComment1,
+        replies = listOf(sampleReply1)
+    )
+
+    val sampleHierarchicalCommentNoReply = HierarchicalComment(
+        comment = sampleComment1.copy(
+            id = "preview-comment-2",
+            reactionCount = 0,
+            body = "A shorter comment with no replies."
+        ),
+        replies = emptyList()
+    )
+
+    val sampleOutcomeMap = mapOf("token-yes-1" to "Yes", "token-no-2" to "No")
+    val sampleTitleMap = mapOf("token-yes-1" to "Outcome Yes", "token-no-2" to "Outcome No")
+
     val sampleMarket1 = demoMarketDto(
         id = "market-1",
         groupItemTitle = "Will the price reach $100k?",
@@ -152,5 +173,59 @@ internal object PreviewMocks {
 
     // Mock ChartModelProducer for previews
     val previewChartModelProducer = CartesianChartModelProducer()
-}
 
+    // Additional Mocks for EventListItem
+    val sampleBinaryEvent = demoEventDto(
+        id = "event-bin",
+        title = "Binary Event Example",
+        slug = "event-bin-slug",
+        description = "Event description for binary",
+        category = "Test",
+        imageUrl = "https://via.placeholder.com/150",
+        iconUrl = null,
+        resolutionSource = "Preview Source 1",
+        active = true,
+        closed = false,
+        volume = 1000.0,
+        liquidity = 50.0,
+        featured = false,
+        endDate = OffsetDateTime.now().plusHours(2),
+        rawMarkets = listOf(sampleMarket1.copy(outcomesJson = "[\"Yes\", \"No\"]", outcomePricesJson = "[\"0.65\", \"0.35\"]"))
+    )
+
+    val sampleCategoricalEvent = demoOptimizedEventDto(
+        id = "event-cat",
+        title = "Game Award Winner",
+        slug = "event-cat-slug",
+        imageUrl = "https://via.placeholder.com/150/0000FF/FFFFFF?Text=Game",
+        startDate = null,
+        endDate = OffsetDateTime.now().plusDays(30),
+        active = true,
+        closed = false,
+        rawMarkets = listOf(
+            demoOptimizedMarketDto(
+                slug = "m-cat-slug",
+                active = true,
+                closed = false,
+            )
+        )
+    )
+
+    val sampleMultiMarketEvent = demoOptimizedEventDto(
+        id = "event-multi",
+        title = "Next Prime Minister of Canada after the election?",
+        slug = "event-multi-slug",
+        imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Canada_%28Pantone%29.svg/160px-Flag_of_Canada_%28Pantone%29.svg.png",
+        startDate = null,
+        endDate = OffsetDateTime.now().minusDays(5),
+        active = true,
+        closed = true,
+        rawMarkets = listOf(
+            demoOptimizedMarketDto("Will Mark Carney be the next Canadian Prime Minister?", "m1-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.77, 0.23), groupItemTitle = "Mark Carney"),
+            demoOptimizedMarketDto("Will Pierre Poilievre be the next Canadian Prime Minister?", "m2-slug", active = true, closed = true, listOf("Yes", "No"), listOf(0.24, 0.76), groupItemTitle = "Pierre Poilievre"),
+            demoOptimizedMarketDto("Will Jagmeet Singh be the next Canadian Prime Minister?", "m3-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.01, 0.99), groupItemTitle = "Jagmeet Singh"),
+            demoOptimizedMarketDto("Will Someone Else be the next Canadian Prime Minister?", "m4-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.01, 0.99), groupItemTitle = "Someone Else"),
+            demoOptimizedMarketDto("Will Yet Another Candidate be the next Canadian Prime Minister?", "m5-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.00, 1.00), groupItemTitle = "Yet Another Candidate")
+        )
+    )
+}

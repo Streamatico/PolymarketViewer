@@ -40,15 +40,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.streamatico.polymarketviewer.data.model.CommentCreatorProfileDto
 import com.streamatico.polymarketviewer.data.model.CommentDto
 import com.streamatico.polymarketviewer.data.model.PolymarketUserProfile
 import com.streamatico.polymarketviewer.data.model.getDisplayName
+import com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment
 import com.streamatico.polymarketviewer.ui.shared.ComposableUiFormatter
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.theme.ExtendedTheme
+import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 import java.math.BigDecimal
-import java.time.OffsetDateTime
 
 // --- Helper data class for Position Badge --- //
 private data class PositionBadgeData(
@@ -64,7 +64,7 @@ private enum class PositionBadgeType { YES, NO, DEFAULT }
 // Make CommentItem internal so it can be called from EventDetailScreen
 @Composable
 internal fun CommentItem(
-    hierarchicalComment: com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment,
+    hierarchicalComment: HierarchicalComment,
     eventOutcomeTokensMap: Map<String, String>,
     eventTokenToGroupTitleMap: Map<String, String>,
     isBinaryEvent: Boolean,
@@ -319,68 +319,15 @@ private fun ReplyItem(
 
 // --- Previews for Comment Composables --- //
 
-private val previewUserProfile = CommentCreatorProfileDto(
-    name = "Preview User",
-    pseudonym = "PreviewUser",
-    profileImage = "https://via.placeholder.com/150/771796", // Example image URL
-    proxyWallet = "0xpreviewwallet",
-    positions = listOf(
-        com.streamatico.polymarketviewer.data.model.PositionDto(
-            tokenId = "token-yes",
-            positionSize = "750000000" // 750 USDC
-        )
-    ),
-    displayUsernamePublic = true,
-    bio = "Just a preview user."
-)
-
-private val previewComment = CommentDto(
-    id = "preview-comment-1",
-    body = "This is a sample comment text for preview purposes. It might be a bit long to see how text wrapping behaves.",
-    createdAt = OffsetDateTime.now().minusHours(3),
-    profile = previewUserProfile,
-    reactionCount = 15,
-    parentCommentID = null // Top-level comment
-    // Other fields can be null or default for preview
-)
-
-private val previewReply = CommentDto(
-    id = "preview-reply-1",
-    body = "This is a reply to the sample comment.",
-    createdAt = OffsetDateTime.now().minusMinutes(45),
-    profile = previewUserProfile.copy(name = "Replier User", proxyWallet = "0xreplywallet", profileImage = "https://via.placeholder.com/150/d32776"),
-    reactionCount = 2,
-    parentCommentID = "preview-comment-1" // Link to parent
-)
-
-private val previewHierarchicalCommentWithReply =
-    _root_ide_package_.com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment(
-        comment = previewComment,
-        replies = listOf(previewReply)
-    )
-
-private val previewHierarchicalCommentNoReply =
-    _root_ide_package_.com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment(
-        comment = previewComment.copy(
-            id = "preview-comment-2",
-            reactionCount = 0,
-            body = "A shorter comment with no replies."
-        ),
-        replies = emptyList()
-    )
-
-private val previewOutcomeMap = mapOf("token-yes" to "Yes", "token-no" to "No", "token-other" to "Maybe")
-private val previewTitleMap = mapOf("token-yes" to "Outcome Yes", "token-no" to "Outcome No", "token-other" to "Outcome Maybe")
-
 @Composable
 private fun CommentItemPreviewTemplate(
-    hierarchicalComment: com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment,
+    hierarchicalComment: HierarchicalComment,
 ) {
     MaterialTheme {
         CommentItem(
             hierarchicalComment = hierarchicalComment,
-            eventOutcomeTokensMap = previewOutcomeMap,
-            eventTokenToGroupTitleMap = previewTitleMap,
+            eventOutcomeTokensMap = PreviewMocks.sampleOutcomeMap,
+            eventTokenToGroupTitleMap = PreviewMocks.sampleTitleMap,
             isBinaryEvent = false,
             onUserProfileClick = { }
         )
@@ -391,7 +338,7 @@ private fun CommentItemPreviewTemplate(
 @Composable
 private fun CommentItemWithReplyPreview() {
     CommentItemPreviewTemplate(
-        hierarchicalComment = previewHierarchicalCommentWithReply,
+        hierarchicalComment = PreviewMocks.sampleHierarchicalCommentWithReply,
     )
 }
 
@@ -399,7 +346,7 @@ private fun CommentItemWithReplyPreview() {
 @Composable
 private fun CommentItemNoReplyPreview() {
     CommentItemPreviewTemplate(
-        hierarchicalComment = previewHierarchicalCommentNoReply,
+        hierarchicalComment = PreviewMocks.sampleHierarchicalCommentNoReply,
     )
 }
 
@@ -408,17 +355,17 @@ private fun CommentItemNoReplyPreview() {
 private fun ReplyItemStandalonePreview() {
     // Previewing ReplyItem directly by calling CommentContent with reply parameters
     val badgeData = rememberPositionBadgeData(
-        comment = previewReply.copy(profile = previewUserProfile.copy(
-            positions = listOf(com.streamatico.polymarketviewer.data.model.PositionDto("token-no", "120000000")) // Example 'No' position
+        comment = PreviewMocks.sampleReply1.copy(profile = PreviewMocks.sampleUserProfile.copy(
+            positions = listOf(com.streamatico.polymarketviewer.data.model.PositionDto("token-no-2", "120000000")) // Example 'No' position
         )),
-        eventOutcomeTokensMap = previewOutcomeMap,
-        eventTokenToGroupTitleMap = previewTitleMap,
+        eventOutcomeTokensMap = PreviewMocks.sampleOutcomeMap,
+        eventTokenToGroupTitleMap = PreviewMocks.sampleTitleMap,
         isBinaryEvent = true // Example binary context
     )
     MaterialTheme {
         CommentContent(
             modifier = Modifier.padding(start = 16.dp), // Typical reply indentation
-            comment = previewReply,
+            comment = PreviewMocks.sampleReply1,
             badgeData = badgeData,
             avatarSize = 24.dp,
             onUserProfileClick = { },
