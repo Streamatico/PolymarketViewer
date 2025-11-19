@@ -150,7 +150,7 @@ internal object PreviewMocks {
         id = "event-1",
         title = "Bitcoin Price Prediction End of Year",
         slug = "bitcoin-price-prediction-eoy",
-        description = "Predict the price of Bitcoin by the end of the current year. This event covers multiple price targets.",
+        description = "This market will resolve according to the date (ET) Donald Trump first signs the Epstein Disclosure Bill, the bill passed by United States House of Representatives on November 18, into law.\n\nThe resolution source for this market will be a consensus of credible reporting.",
         category = "Crypto",
         imageUrl = "https://via.placeholder.com/600x300/0000FF/FFFFFF?Text=Event+Image",
         iconUrl = null,
@@ -168,7 +168,13 @@ internal object PreviewMocks {
         ),
         featured = true,
         featuredOrder = 1,
-        tags = listOf(TagDto(id = "tag-crypto", label = "Crypto", slug = "crypto", forceShow = false))
+        tags = listOf(
+            TagDto(id = "tag-crypto", label = "Crypto", slug = "crypto", forceShow = false),
+            TagDto(id = "tag-prediction", label = "Prediction", slug = "prediction", forceShow = false),
+            TagDto(id = "tag-end-of-year", label = "End of Year", slug = "end-of-year", forceShow = false),
+            TagDto(id = "tag-multiple-exchanges", label = "Multiple Exchanges", slug = "multiple-exchanges", forceShow = false),
+            TagDto(id = "tag-average", label = "Average", slug = "average", forceShow = false)
+        )
     )
 
     // Mock ChartModelProducer for previews
