@@ -70,9 +70,10 @@ data class EventDto(
     @SerialName("competitive") val competitive: Double? = null,
     @SerialName("commentCount") val commentCount: Long = 0,
 
-    @SerialName("sortBy") val sortBy: String? = null,
+    @SerialName("sortBy") override val sortBy: String? = null,
 
     @SerialName("series") val series: List<SeriesDto>? = null,
+    @SerialName("gameId") override val gameId: Long? = null,
 
     // Add other fields as needed (volume24hr, etc.)
 ): BaseEventDto {
@@ -94,19 +95,14 @@ data class EventDto(
         markets
     }
 
+    // TODO: Remove duplicated code (EventDto and OptimizedEventDto)
     override val eventType: EventType by lazy {
         when {
             rawMarkets.size == 1 && rawMarkets[0].isBinaryMarket -> EventType.BinaryEvent
-            rawMarkets.size == 1 -> EventType.CategoricalMarket
+            rawMarkets.size == 1 || gameId != null -> EventType.CategoricalMarket
             else -> EventType.MultiMarket
         }
     }
-
-    override val sortByEnum: EventMarketsSortBy
-        get() = when (sortBy) {
-            "price" -> EventMarketsSortBy.Price
-            else -> EventMarketsSortBy.None
-        }
 }
 
 enum class EventType {

@@ -38,10 +38,15 @@ internal object UiFormatter {
         }
     }
 
+    fun isPriceLow1Percent(price: Double?): Boolean {
+        if(price == null) return false
+        return price > 0 && price < 0.005
+    }
+
     fun formatPriceAsPercentage(price: Double?): String {
         if (price == null) return "- " // Space instead of percentage sign
 
-        if(price > 0 && price < 0.005) {
+        if(isPriceLow1Percent(price)) {
             return "<1%"
         }
 

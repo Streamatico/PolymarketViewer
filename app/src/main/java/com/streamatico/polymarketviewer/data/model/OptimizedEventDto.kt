@@ -36,7 +36,10 @@ data class OptimizedEventDto(
 
     @SerialName("tags") override val tags: List<TagDto>? = null, // List of event tags (categories)
 
-    override val sortByEnum: EventMarketsSortBy = EventMarketsSortBy.None,
+    @SerialName("sortBy") override val sortBy: String? = null,
+
+    @SerialName("gameId") override val gameId: Long? = null,
+
     override val volume: Double? = null,
 
     // Add other fields as needed (volume24hr, etc.)
@@ -50,10 +53,11 @@ data class OptimizedEventDto(
         markets
     }
 
+    // TODO: Remove duplicated code (EventDto and OptimizedEventDto)
     override val eventType: EventType by lazy {
         when {
             rawMarkets.size == 1 && rawMarkets[0].isBinaryMarket -> EventType.BinaryEvent
-            rawMarkets.size == 1 -> EventType.CategoricalMarket
+            rawMarkets.size == 1 || gameId != null -> EventType.CategoricalMarket
             else -> EventType.MultiMarket
         }
     }

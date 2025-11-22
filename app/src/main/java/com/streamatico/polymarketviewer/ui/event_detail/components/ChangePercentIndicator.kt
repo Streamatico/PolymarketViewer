@@ -1,11 +1,8 @@
 package com.streamatico.polymarketviewer.ui.event_detail.components
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,14 +11,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import coil3.size.Size
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.ui.theme.ExtendedTheme
 import kotlin.math.abs
 
 @Composable
 internal fun ChangePercentIndicator(
-    priceChangePercent: Int
+    priceChangePercent: Int,
+    modifier: Modifier = Modifier
 ) {
     val changeColor: Color
     val changeIcon: ImageVector
@@ -29,30 +29,32 @@ internal fun ChangePercentIndicator(
     when {
         priceChangePercent > 0 -> {
             changeColor = ExtendedTheme.colors.onTrendUpContainer
-            changeIcon = Icons.Default.ArrowDropUp
+            changeIcon = ImageVector.vectorResource(R.drawable.ic_trend_up)
         }
 
         else -> {
             changeColor = ExtendedTheme.colors.onTrendDownContainer
-            changeIcon = Icons.Default.ArrowDropDown
+            changeIcon = ImageVector.vectorResource(R.drawable.ic_trend_down)
         }
     }
 
     Row(
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        //Text("X")
         Icon(
             imageVector = changeIcon,
             contentDescription = null,
             tint = changeColor,
-            modifier = Modifier.size(24.dp)
-                .offset(x = 4.dp)
+            modifier = Modifier
+                .size(10.dp)
         )
+        Spacer(Modifier.size(1.dp))
         Text(
             text = "${abs(priceChangePercent)}%",
             style = MaterialTheme.typography.labelLarge,
             color = changeColor,
-            fontWeight = FontWeight.SemiBold
         )
     }
 }

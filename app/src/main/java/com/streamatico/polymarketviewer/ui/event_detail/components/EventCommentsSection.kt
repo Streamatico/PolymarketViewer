@@ -42,7 +42,7 @@ import com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 
 @OptIn(ExperimentalMaterial3Api::class)
-fun LazyListScope.EventCommentsSection(
+fun LazyListScope.eventCommentsSection(
     displayableComments: List<HierarchicalComment>,
     commentsLoading: Boolean,
     commentsError: String?,
@@ -183,7 +183,7 @@ fun LazyListScope.EventCommentsSection(
 @Composable
 private fun EventCommentsSectionPreview() {
     LazyColumn {
-        EventCommentsSection(
+        eventCommentsSection(
             displayableComments = PreviewMocks.sampleHierarchicalComments,
             commentsLoading = false,
             commentsError = null,

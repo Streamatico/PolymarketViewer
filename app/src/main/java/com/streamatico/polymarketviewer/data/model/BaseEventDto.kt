@@ -1,6 +1,5 @@
 package com.streamatico.polymarketviewer.data.model
 
-import kotlinx.serialization.SerialName
 import java.time.OffsetDateTime
 
 interface BaseEventDto {
@@ -26,7 +25,16 @@ interface BaseEventDto {
     val tags: List<TagDto>?
 
     val eventType: EventType
-    val sortByEnum: EventMarketsSortBy
 
     val baseMarkets: List<BaseMarketDto>
+
+    val sortBy: String?
+    val gameId: Long?
+
+    val sortByEnum: EventMarketsSortBy
+        get() =
+            when (sortBy) {
+                "price" -> EventMarketsSortBy.Price
+                else -> EventMarketsSortBy.None
+            }
 }

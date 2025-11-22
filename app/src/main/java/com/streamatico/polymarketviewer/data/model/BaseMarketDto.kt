@@ -6,6 +6,8 @@ interface BaseMarketDto {
     val question: String
     val slug: String
 
+    val marketType: String?
+
     val outcomes: List<String>
     val outcomePrices: List<Double>
 
@@ -43,7 +45,7 @@ fun BaseMarketDto.yesPrice(): Double? {
     return if(outcomes.size == 2 && outcomePrices.size == 2) {
         if(isYesOutcome(outcomes[0])) outcomePrices[0]
         else if(isYesOutcome(outcomes[1])) outcomePrices[1]
-        else null
+        else outcomePrices[0] // Fallback: Return first price if not yes outcome
     } else {
         null
     }
@@ -73,4 +75,14 @@ fun BaseMarketDto.getTitleOrDefault(defaultTitle: String): String {
     if(!title.isNullOrEmpty()) return title
 
     return defaultTitle
+}
+
+fun BaseMarketDto.getResolvedOutcome(): String? {
+    if(getResolutionStatus() != MarketResolutionStatus.RESOLVED) return null
+
+    // Get index of outcome with max price
+    val maxPriceIndex = outcomePrices.indices.maxByOrNull { outcomePrices[it] }
+        ?: return null
+
+    return outcomes[maxPriceIndex]
 }

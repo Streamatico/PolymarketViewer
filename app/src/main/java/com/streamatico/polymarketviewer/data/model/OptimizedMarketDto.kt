@@ -10,6 +10,8 @@ data class OptimizedMarketDto(
     @SerialName("question") override val question: String, // Title/market question
     @SerialName("slug") override val slug: String, // Used for URL
 
+    @SerialName("marketType") override val marketType: String? = null,
+
     @SerialName("outcomes") override val outcomes: List<String>,
     @SerialName("outcomePrices") override val outcomePrices: List<Double>,
 
@@ -54,6 +56,7 @@ fun demoOptimizedMarketDto(
     bestAsk: Double? = null,
 
     isArchived: Boolean = false,
+    umaResolutionStatus: String? = null
 ): OptimizedMarketDto =
     OptimizedMarketDto(
         question = question,
@@ -68,4 +71,6 @@ fun demoOptimizedMarketDto(
         bestAsk = bestAsk,
         outcomes = outcomes,
         outcomePrices = outcomePrices,
+
+        umaResolutionStatus = umaResolutionStatus
     )

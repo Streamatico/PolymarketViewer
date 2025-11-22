@@ -14,6 +14,8 @@ data class MarketDto(
     @SerialName("slug") override val slug: String, // Used for URL
     @SerialName("resolutionSource") val resolutionSource: String? = null,
 
+    @SerialName("marketType") override val marketType: String? = null,
+
     @Serializable(with = OffsetDateTimeSerializer::class)
     @SerialName("startDate") val startDate: OffsetDateTime? = null,
     @Serializable(with = OffsetDateTimeSerializer::class)
@@ -91,6 +93,13 @@ data class MarketDto(
 
     // Allowed values: "disputed", "resolved", ...
     @SerialName("umaResolutionStatus") override val umaResolutionStatus: String? = null,
+
+    @Serializable(with = OffsetDateTimeSerializer::class)
+    @SerialName("gameStartTime") val gameStartTime: OffsetDateTime? = null,
+
+    @SerialName("sportsMarketType") val sportsMarketType: String? = null,
+    @SerialName("line") val line: Double? = null,
+
 ) : BaseMarketDto {
     override val outcomes: List<String> by lazy {
         JsonUtils.parsedJsonList(outcomesJson) ?: emptyList()

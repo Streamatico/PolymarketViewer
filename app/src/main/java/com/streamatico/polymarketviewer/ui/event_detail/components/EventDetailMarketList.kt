@@ -36,27 +36,24 @@ import coil3.compose.AsyncImage
 import com.streamatico.polymarketviewer.data.model.MarketDto
 import com.streamatico.polymarketviewer.data.model.MarketResolutionStatus
 import com.streamatico.polymarketviewer.data.model.getResolutionStatus
+import com.streamatico.polymarketviewer.data.model.getResolvedOutcome
 import com.streamatico.polymarketviewer.data.model.getTitleOrDefault
 import com.streamatico.polymarketviewer.data.model.getYesTitle
 import com.streamatico.polymarketviewer.data.model.yesPrice
+import com.streamatico.polymarketviewer.ui.event_list.components.priceAlpha
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 import kotlin.math.abs
 
 private const val MARKET_DISPLAY_LIMIT = 5
 
-fun LazyListScope.EventMarketsList(
+fun LazyListScope.eventDetailMarketList(
     sortedMarkets: List<MarketDto>,
     isMarketListExpanded: Boolean,
     showMarketImages: Boolean,
     onMarketExpandToggle: () -> Unit,
     onMarketClick: (String) -> Unit
 ) {
-    val marketPrices =
-        sortedMarkets.associate { market ->
-            market.id to market.yesPrice()
-        }
-
     // Determine which markets to display
     val visibleMarkets = if (sortedMarkets.size > MARKET_DISPLAY_LIMIT && !isMarketListExpanded) {
         sortedMarkets.take(MARKET_DISPLAY_LIMIT)
@@ -103,18 +100,9 @@ fun LazyListScope.EventMarketsList(
     val isSingleMarket = sortedMarkets.size == 1
 
     items(visibleMarkets, key = { it.id }) { market ->
-        val price = marketPrices[market.id]
-
-        val outcomeText = if (isSingleMarket) market.getYesTitle()
-        else market.getTitleOrDefault("Unknown")
-
-        EventMarketRow(
-            outcomeText = outcomeText,
-            iconUrl = market.iconUrl,
-            resolutionStatus = market.getResolutionStatus(),
-            price = price,
-            oneDayPriceChange = market.oneDayPriceChange,
-            volume = market.volume,
+        EventDetailMarketRow(
+            market = market,
+            isSingleMarket = isSingleMarket,
             showIcon = showMarketImages,
             trendIndicatorEndPadding = trendIndicatorEndPadding,
             onClick = { onMarketClick(market.id) }
@@ -139,17 +127,23 @@ fun LazyListScope.EventMarketsList(
 }
 
 @Composable
-private fun EventMarketRow(
-    outcomeText: String,
-    iconUrl: String?,
-    resolutionStatus: MarketResolutionStatus?,
-    price: Double?,
-    oneDayPriceChange: Double?,
-    volume: Double?,
+private fun EventDetailMarketRow(
+    market: MarketDto,
+    isSingleMarket: Boolean,
     showIcon: Boolean,
     trendIndicatorEndPadding: Dp,
     onClick: () -> Unit
 ) {
+    val outcomeText = if (isSingleMarket) market.getYesTitle()
+    else market.getTitleOrDefault(market.question)
+
+    val iconUrl = market.iconUrl
+    val resolutionStatus = market.getResolutionStatus()
+    val price = market.yesPrice()
+    val oneDayPriceChange = market.oneDayPriceChange
+    val volume = market.volume
+
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -182,13 +176,25 @@ private fun EventMarketRow(
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    volume?.let {
+                        Text(
+                            text = UiFormatter.formatLargeValueUsd(it, suffix = " Vol."),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
 
                     if(resolutionStatus != null) {
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        val resolutionText = when (resolutionStatus) {
-                            MarketResolutionStatus.DISPUTED -> "(Disputed)"
+                        val resolutionText = when(resolutionStatus) {
                             MarketResolutionStatus.RESOLVED -> "(Resolved)"
+                            MarketResolutionStatus.DISPUTED -> "(Disputed)"
                         }
 
                         Text(
@@ -198,43 +204,45 @@ private fun EventMarketRow(
                         )
                     }
                 }
-
-                 volume?.let {
-                     Text(
-                         text = UiFormatter.formatLargeValueUsd(it, suffix = " Vol."),
-                         style = MaterialTheme.typography.bodySmall,
-                         color = MaterialTheme.colorScheme.outline,
-                         modifier = Modifier.padding(top = 2.dp)
-                     )
-                 }
             }
             Spacer(modifier = Modifier.width(16.dp))
-            val chanceColor = if (price != null && price < 0.01) {
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            }
+
+            // Chance
             Column(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    val isResolved = resolutionStatus == MarketResolutionStatus.RESOLVED
+
+                    val chanceText: String = if (isResolved) {
+                        market.getResolvedOutcome() ?: "??"
+                    } else {
+                        UiFormatter.formatPriceAsPercentage(price)
+                    }
+
                     Text(
-                        text = UiFormatter.formatPriceAsPercentage(price),
+                        modifier = Modifier.priceAlpha(price, isResolved),
+                        text = chanceText,
                         style = MaterialTheme.typography.titleLarge,
-                        //fontWeight = FontWeight.Bold,
-                        color = chanceColor
+                        fontWeight = FontWeight.Bold,
                     )
 
-                    Box(Modifier.widthIn(min = trendIndicatorEndPadding)) {
-                        if(oneDayPriceChange != null && displayOneDayPriceChange(oneDayPriceChange)) {
+                    Box(
+                        Modifier.widthIn(min = trendIndicatorEndPadding)
+                    ) {
+                        if (!isResolved && oneDayPriceChange != null && displayOneDayPriceChange(oneDayPriceChange)) {
                             val priceChangePercent = (oneDayPriceChange * 100).toInt()
-                            ChangePercentIndicator(priceChangePercent)
+                            ChangePercentIndicator(
+                                priceChangePercent,
+                                Modifier.padding(start = 4.dp)
+                            )
                         }
                     }
                 }
             }
         }
+
         price?.let {
             Spacer(modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
@@ -255,11 +263,12 @@ private fun displayOneDayPriceChange(oneDayPriceChange: Double): Boolean {
 @Composable
 private fun EventMarketsListPreview() {
     LazyColumn {
-        EventMarketsList(
+        eventDetailMarketList(
             sortedMarkets = listOf(
                 PreviewMocks.sampleMarket1,
                 PreviewMocks.sampleMarket2,
-                PreviewMocks.sampleMarket3
+                PreviewMocks.sampleMarket3,
+                PreviewMocks.sampleMarket4LowPrice
             ),
             isMarketListExpanded = false,
             showMarketImages = true,

@@ -40,9 +40,9 @@ import com.streamatico.polymarketviewer.data.model.EventDto
 import com.streamatico.polymarketviewer.data.model.EventType
 import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
 import com.streamatico.polymarketviewer.ui.event_detail.components.EventChartSection
-import com.streamatico.polymarketviewer.ui.event_detail.components.EventCommentsSection
+import com.streamatico.polymarketviewer.ui.event_detail.components.eventCommentsSection
 import com.streamatico.polymarketviewer.ui.event_detail.components.EventHeader
-import com.streamatico.polymarketviewer.ui.event_detail.components.EventMarketsList
+import com.streamatico.polymarketviewer.ui.event_detail.components.eventDetailMarketList
 import com.streamatico.polymarketviewer.ui.event_detail.components.TranslateAction
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
@@ -289,7 +289,7 @@ private fun EventDetailsContentSuccess(
         }
 
         // Event markets (outcomes)
-        EventMarketsList(
+        eventDetailMarketList(
             sortedMarkets = sortedMarkets,
             showMarketImages = event.showMarketImages && event.eventType != EventType.BinaryEvent,
             isMarketListExpanded = isMarketListExpanded,
@@ -299,7 +299,7 @@ private fun EventDetailsContentSuccess(
             onMarketClick = onMarketClick
         )
 
-        EventCommentsSection(
+        eventCommentsSection(
             displayableComments = displayableComments,
             // Receive other states/callbacks
             commentsLoading = commentsLoading,

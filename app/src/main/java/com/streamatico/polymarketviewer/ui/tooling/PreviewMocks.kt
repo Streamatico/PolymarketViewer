@@ -133,7 +133,7 @@ internal object PreviewMocks {
 
     val sampleMarket3 = demoMarketDto(
         id = "market-3",
-        groupItemTitle = "Will it close above $80k?",
+        groupItemTitle = "Will it close above $80k? This is a long text",
         slug = "price-80k",
         outcomesJson = "[\"Yes\", \"No\"]",
         outcomePricesJson = "[\"0.14\", \"0.25\"]",
@@ -145,6 +145,21 @@ internal object PreviewMocks {
         oneDayPriceChange = -0.05,
         umaResolutionStatus = "resolved"
     )
+
+    val sampleMarket4LowPrice = demoMarketDto(
+        id = "market-4",
+        groupItemTitle = $$"Will it close above $XXX?",
+        slug = "market-4-slug",
+        outcomesJson = "[\"Yes\", \"No\"]",
+        outcomePricesJson = "[\"0.003\", \"0.997\"]",
+        volume = 123.0,
+        liquidity = 10000.0,
+        lastTradePrice = 0.14,
+        active = true,
+        closed = false,
+        oneDayPriceChange = -0.05,
+    )
+
 
     val sampleEvent = EventDto(
         id = "event-1",
@@ -229,9 +244,9 @@ internal object PreviewMocks {
         rawMarkets = listOf(
             demoOptimizedMarketDto("Will Mark Carney be the next Canadian Prime Minister?", "m1-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.77, 0.23), groupItemTitle = "Mark Carney"),
             demoOptimizedMarketDto("Will Pierre Poilievre be the next Canadian Prime Minister?", "m2-slug", active = true, closed = true, listOf("Yes", "No"), listOf(0.24, 0.76), groupItemTitle = "Pierre Poilievre"),
-            demoOptimizedMarketDto("Will Jagmeet Singh be the next Canadian Prime Minister?", "m3-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.01, 0.99), groupItemTitle = "Jagmeet Singh"),
+            demoOptimizedMarketDto("Will Jagmeet Singh be the next Canadian Prime Minister?", "m3-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.01, 0.99), groupItemTitle = "Jagmeet Singh", umaResolutionStatus = "resolved"),
             demoOptimizedMarketDto("Will Someone Else be the next Canadian Prime Minister?", "m4-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.01, 0.99), groupItemTitle = "Someone Else"),
-            demoOptimizedMarketDto("Will Yet Another Candidate be the next Canadian Prime Minister?", "m5-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.00, 1.00), groupItemTitle = "Yet Another Candidate")
+            //demoOptimizedMarketDto("Will Yet Another Candidate be the next Canadian Prime Minister?", "m5-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.00, 1.00), groupItemTitle = "Yet Another Candidate")
         )
     )
 }

@@ -22,7 +22,18 @@ fun <T : BaseMarketDto> List<T>.sortedByViewPriority(sortByEnum: EventMarketsSor
                 // Sort by yesPrice descending
                 // Move resolved markets to the end
                 compareBy<T> { if (it.getResolutionStatus() != MarketResolutionStatus.RESOLVED) 0 else 1 }
-                    .thenByDescending { it.yesPrice() }
+                    .thenByDescending { it.yesPrice() ?: 0.0 }
             )
     }
+}
+
+fun List<BaseMarketDto>.sortedForShortView(limit: Int): List<BaseMarketDto> {
+    return this
+        //.filter { !it.closed } 
+        
+        .sortedByViewPriority(EventMarketsSortBy.Price)
+        
+        .take(limit)
+        
+        .sortedBy { it.groupItemThreshold }
 }
