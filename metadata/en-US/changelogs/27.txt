@@ -1,0 +1,3 @@
+- Added tags to event details
+- Improved markets sorting within events
+- Improved sports markets display (still not fully supported)
