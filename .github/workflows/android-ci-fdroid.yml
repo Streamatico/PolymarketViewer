@@ -103,7 +103,8 @@ jobs:
         tag_name: ${{ github.ref_name }}
         release_name: Polymarket Viewer ${{ steps.version.outputs.VERSION }}
         body: |
-          ## Polymarket Viewer ${{ steps.version.outputs.VERSION }}
+          ### Changes
+          See [metadata/en-US/changelogs/](https://github.com/${{ github.repository }}/tree/main/metadata/en-US/changelogs) for details.
           
           ### Installation Options
           
@@ -117,10 +118,7 @@ jobs:
                alt="Get it on F-Droid"
                height="80">](https://f-droid.org/packages/com.streamatico.polymarketviewer/)
           
-          Note: F-Droid and GitHub versions use the same signature (Reproducible Builds), so you can switch between them freely.
-          
-          ### Changes
-          See [metadata/en-US/changelogs/](https://github.com/${{ github.repository }}/tree/main/metadata/en-US/changelogs) for details.
+          Note: F-Droid and GitHub versions use the same signature (Reproducible Builds), so you can switch between them freely.          
         draft: false
         prerelease: false
 
