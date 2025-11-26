@@ -33,10 +33,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,6 +43,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.streamatico.polymarketviewer.BuildConfig
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.preferences.UserPreferencesRepository
+import com.streamatico.polymarketviewer.ui.shared.components.AppLogoIcon
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
 import kotlinx.coroutines.launch
@@ -109,12 +108,7 @@ private fun AboutScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // App Header
-            Icon(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = stringResource(id = R.string.app_logo_content_description),
-                modifier = Modifier.size(96.dp),
-                tint = Color.Unspecified
-            )
+            AppLogoIcon(96.dp)
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(id = R.string.app_name),

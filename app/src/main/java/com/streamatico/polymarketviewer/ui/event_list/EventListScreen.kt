@@ -64,10 +64,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -79,6 +77,7 @@ import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.TagDto
 import com.streamatico.polymarketviewer.domain.repository.PolymarketEventsSortOrder
 import com.streamatico.polymarketviewer.ui.event_list.components.EventListItem
+import com.streamatico.polymarketviewer.ui.shared.components.AppLogoIcon
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
@@ -295,15 +294,7 @@ fun EventListContent(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                navigationIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                        contentDescription = "Logo",
-                        tint = Color.Unspecified,
-                        modifier = Modifier
-                            .size(52.dp)
-                    )
-                },
+                navigationIcon = { AppLogoIcon(52.dp) },
                 title = { Text(stringResource(R.string.app_name), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 actions = {
                         IconButton(onClick = onSearchClick) {
