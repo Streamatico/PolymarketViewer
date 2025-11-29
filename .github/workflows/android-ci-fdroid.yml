@@ -3,9 +3,14 @@ name: Android CI/CD for F-Droid
 on:
   push:
     branches: [ "main" ]
-    tags: [ "v*" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Create draft release with signed APK'
+        type: boolean
+        default: false
 
 permissions:
   contents: write  # Required for creating releases and uploading assets
@@ -64,9 +69,9 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    name: Create GitHub Release
+    name: Create Draft Release on GitHub
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'workflow_dispatch' && inputs.release == true
     
     steps:
     - uses: actions/checkout@v4
@@ -77,7 +82,7 @@ jobs:
         name: app-release-unsigned
         path: app/build/outputs/apk/release
 
-    - name: Sign APK for GitHub users
+    - name: Sign APK
       id: sign_apk
       uses: ilharp/sign-android-release@v1
       with:
@@ -94,18 +99,20 @@ jobs:
         VERSION=$(grep -w "versionName" app/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Rename signed APK
+      run: |
+        mv "${{ steps.sign_apk.outputs.signedFile }}" "app/build/outputs/apk/release/polymarket-viewer-${{ steps.version.outputs.VERSION }}-signed.apk"
+
+    - name: Create draft release on GitHub
+      uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ github.ref_name }}
-        release_name: Polymarket Viewer ${{ steps.version.outputs.VERSION }}
+        name: Polymarket Viewer ${{ steps.version.outputs.VERSION }}
+        tag_name: v${{ steps.version.outputs.VERSION }}
+        target_commitish: ${{ github.sha }}
+        draft: true
+        generate_release_notes: true
+        files: app/build/outputs/apk/release/polymarket-viewer-${{ steps.version.outputs.VERSION }}-signed.apk
         body: |
-          ### Changes
-          See [metadata/en-US/changelogs/](https://github.com/${{ github.repository }}/tree/main/metadata/en-US/changelogs) for details.
-          
           ### Installation Options
           
           #### 📱 Direct Install
@@ -118,16 +125,4 @@ jobs:
                alt="Get it on F-Droid"
                height="80">](https://f-droid.org/packages/com.streamatico.polymarketviewer/)
           
-          Note: F-Droid and GitHub versions use the same signature (Reproducible Builds), so you can switch between them freely.          
-        draft: false
-        prerelease: false
-
-    - name: Upload Signed APK (for users)
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.sign_apk.outputs.signedFile }}
-        asset_name: polymarket-viewer-${{ steps.version.outputs.VERSION }}-signed.apk
-        asset_content_type: application/vnd.android.package-archive
+          Note: F-Droid and GitHub versions use the same signature (Reproducible Builds), so you can switch between them freely.
