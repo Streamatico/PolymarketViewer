@@ -148,7 +148,7 @@ internal object PreviewMocks {
 
     val sampleMarket4LowPrice = demoMarketDto(
         id = "market-4",
-        groupItemTitle = "Will it close above \$XXX?",
+        groupItemTitle = $$"Will it close above $XXX?",
         slug = "market-4-slug",
         outcomesJson = "[\"Yes\", \"No\"]",
         outcomePricesJson = "[\"0.003\", \"0.997\"]",

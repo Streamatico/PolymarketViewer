@@ -205,7 +205,7 @@ internal object ProfilePreviewMocks {
         asset = "",
         side = "",
         outcomeIndex = 999,
-        title = "Will the Monad public sale commitments be less than \$400M?",
+        title = $$"Will the Monad public sale commitments be less than $400M?",
         slug = "will-the-monad-public-sale-commitments-be-less-than-400m",
         icon = "https://polymarket-upload.s3.us-east-2.amazonaws.com/monad-market-cap-fdv-one-day-after-launch-x1c2OPi_BSut.jpg",
         eventSlug = "monad-public-sale-total-commitments-339",
@@ -217,5 +217,5 @@ internal object ProfilePreviewMocks {
         profileImageOptimized = ""
     )
 
-    val sampleUserActivities = listOf(sampleUserActivityTrade, sampleUserActivityRedeem)
+    //val sampleUserActivities = listOf(sampleUserActivityTrade, sampleUserActivityRedeem)
 }

@@ -16,11 +16,6 @@ internal object UiFormatter {
         return dateTime.format(formatter)
     }
 
-    fun formatDateTimeShort(dateTime: OffsetDateTime): String {
-        val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-        return dateTime.format(formatter)
-    }
-
     // Format like: 12 Oct 2024
     fun formatDateOnly(dateTime: OffsetDateTime): String {
         val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy")

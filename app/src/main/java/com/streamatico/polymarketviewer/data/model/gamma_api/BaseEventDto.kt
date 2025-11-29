@@ -1,6 +1,5 @@
 package com.streamatico.polymarketviewer.data.model.gamma_api
 
-import com.streamatico.polymarketviewer.data.model.gamma_api.TagDto
 import java.time.OffsetDateTime
 
 interface BaseEventDto {
