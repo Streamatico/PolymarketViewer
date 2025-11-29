@@ -26,6 +26,7 @@ import javax.inject.Singleton
 
 private const val BASE_GAMMA_URL = "https://gamma-api.polymarket.com/"
 private const val BASE_CLOB_URL = "https://clob.polymarket.com/"
+private const val BASE_DATA_URL = "https://data-api.polymarket.com/"
 
 // Custom Logger implementation using Android Logcat
 private object AndroidLogger : Logger {
@@ -57,6 +58,13 @@ object NetworkModule {
     @Named(PolymarketHttpClientNames.CLOB_CLIENT)
     fun provideClobHttpClient(@ApplicationContext context: Context): HttpClient {
         return createHttpClient(context, BASE_CLOB_URL)
+    }
+
+    @Provides
+    @Singleton
+    @Named(PolymarketHttpClientNames.DATA_CLIENT)
+    fun provideDataHttpClient(@ApplicationContext context: Context): HttpClient {
+        return createHttpClient(context, BASE_DATA_URL)
     }
 
     @Provides

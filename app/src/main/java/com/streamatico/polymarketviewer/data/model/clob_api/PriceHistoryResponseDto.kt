@@ -1,4 +1,4 @@
-package com.streamatico.polymarketviewer.data.model
+package com.streamatico.polymarketviewer.data.model.clob_api
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

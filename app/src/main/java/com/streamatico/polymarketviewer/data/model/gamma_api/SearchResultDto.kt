@@ -1,4 +1,4 @@
-package com.streamatico.polymarketviewer.data.model
+package com.streamatico.polymarketviewer.data.model.gamma_api
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -20,7 +20,7 @@ data class SearchResultOptimizedDto(
  * Returns events, profiles, and tags with detailed pagination information.
  */
 @Serializable
-data class SearchResultFullDto(
+data class SearchResultDto(
     @SerialName("events") val events: List<EventDto>? = null,
     @SerialName("profiles") val profiles: List<UserProfileDto>? = null,
     @SerialName("tags") val tags: List<TagDto>? = null,

@@ -1,6 +1,7 @@
 package com.streamatico.polymarketviewer.ui.user_profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,11 +22,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,38 +42,81 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.streamatico.polymarketviewer.R
-import com.streamatico.polymarketviewer.data.model.UserProfileDto
-import com.streamatico.polymarketviewer.data.model.getDisplayName
+import com.streamatico.polymarketviewer.data.model.data_api.UserActivityDto
+import com.streamatico.polymarketviewer.data.model.data_api.UserClosedPositionDto
+import com.streamatico.polymarketviewer.data.model.data_api.UserPositionDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.UserProfileDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.getDisplayName
+import com.streamatico.polymarketviewer.ui.shared.PaginatedDataLoader
+import com.streamatico.polymarketviewer.ui.shared.PaginatedList
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.OpenInBrowserIconButton
+import com.streamatico.polymarketviewer.ui.tooling.ProfilePreviewMocks
+import com.streamatico.polymarketviewer.ui.user_profile.components.UserActivityItem
+import com.streamatico.polymarketviewer.ui.user_profile.components.ClosedPositionItem
+import com.streamatico.polymarketviewer.ui.user_profile.components.PaginatedListContent
+import com.streamatico.polymarketviewer.ui.user_profile.components.PositionItem
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(
     viewModel: UserProfileViewModel = hiltViewModel(),
+    onEventClick: (eventId: String) -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val profileState by viewModel.profileState.collectAsState()
+    val totalPositionsValue by viewModel.totalPositionsValue.collectAsState()
+    val userTraded by viewModel.userTraded.collectAsState()
 
-    val successUserProfile = (uiState as? UserProfileUiState.Success)?.userProfile
+    UserProfileScaffold(
+        profileState = profileState,
+        totalPositionsValue = totalPositionsValue,
+        userTraded = userTraded,
+        onNavigateBack = onNavigateBack,
+        onRetryLoadProfile = viewModel::retryLoadProfile,
+        onEventClick = onEventClick,
+
+        activePositions = viewModel.activePositions,
+        closedPositions = viewModel.closedPositions,
+        activity = viewModel.activity
+    )
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun UserProfileScaffold(
+    profileState: UserProfileState,
+    totalPositionsValue: Double?,
+    userTraded: Int?,
+    onNavigateBack: () -> Unit,
+    onRetryLoadProfile: () -> Unit,
+    onEventClick: (String) -> Unit,
+
+    activePositions: PaginatedList<UserPositionDto>,
+    closedPositions: PaginatedList<UserClosedPositionDto>,
+    activity: PaginatedList<UserActivityDto>,
+) {
+    val successState = profileState as? UserProfileState.Success
+    val userProfile = successState?.userProfile
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    val displayName = successUserProfile?.getDisplayName()
                     Text(
-                        text = displayName ?: stringResource(R.string.user_profile_title),
-                        overflow = TextOverflow.Ellipsis)
+                        text = stringResource(R.string.user_profile_title),
+                        overflow = TextOverflow.Ellipsis
+                    )
                 },
                 actions = {
-                    if(successUserProfile != null) {
+                    if (userProfile != null) {
                         OpenInBrowserIconButton(
-                            "https://polymarket.com/profile/${successUserProfile.proxyWallet}"
+                            "https://polymarket.com/profile/${userProfile.proxyWallet}"
                         )
                     }
                 },
@@ -77,21 +129,29 @@ fun UserProfileScreen(
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            when (val state = uiState) {
-                is UserProfileUiState.Loading -> {
+            when (profileState) {
+                is UserProfileState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                is UserProfileUiState.Success -> {
-                    UserProfileContent(userProfile = state.userProfile)
+                is UserProfileState.Success -> {
+                    UserProfileContent(
+                        userProfile = profileState.userProfile,
+                        portfolioValue = totalPositionsValue,
+                        userTraded = userTraded,
+                        activePositions = activePositions,
+                        closedPositions = closedPositions,
+                        activity = activity,
+                        onEventClick = onEventClick,
+                    )
                 }
-                is UserProfileUiState.Error -> {
+                is UserProfileState.Error -> {
                     Column(
                         modifier = Modifier.align(Alignment.Center).padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(state.message, color = MaterialTheme.colorScheme.error)
+                        Text(profileState.message, color = MaterialTheme.colorScheme.error)
                         Spacer(Modifier.height(8.dp))
-                        Button(onClick = { viewModel.retryLoad() }) { Text("Retry") }
+                        Button(onClick = onRetryLoadProfile) { Text("Retry") }
                     }
                 }
             }
@@ -100,59 +160,265 @@ fun UserProfileScreen(
 }
 
 @Composable
-fun UserProfileContent(userProfile: UserProfileDto, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        AsyncImage(
-            model = userProfile.profileImage,
-            contentDescription = "${userProfile.getDisplayName()}'s avatar",
-            modifier = Modifier
-                .size(120.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentScale = ContentScale.Crop
+private fun UserProfileContent(
+    userProfile: UserProfileDto,
+    portfolioValue: Double?,
+    userTraded: Int?,
+    activePositions: PaginatedList<UserPositionDto>,
+    closedPositions: PaginatedList<UserClosedPositionDto>,
+    activity: PaginatedList<UserActivityDto>,
+    onEventClick: (String) -> Unit,
+) {
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val tabs = listOf("Positions", "Activity")
+
+    // Lazy loading effect based on selected tab
+    LaunchedEffect(selectedTabIndex) {
+        when (selectedTabIndex) {
+            0 -> activePositions.loadIfNeeded() // Load active positions by default when entering tab
+            1 -> activity.loadIfNeeded()        // Load activity when entering tab
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Header
+        UserProfileHeader(
+            userProfile = userProfile,
+            portfolioValue = portfolioValue,
+            userTraded = userTraded,
         )
-        Spacer(modifier = Modifier.height(32.dp))
 
-        if(!userProfile.name.isNullOrEmpty()) {
-            InfoRow("Name",userProfile.name)
+        // Tabs
+        SecondaryTabRow(selectedTabIndex = selectedTabIndex) {
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    selected = selectedTabIndex == index,
+                    onClick = { selectedTabIndex = index },
+                    text = { Text(title) }
+                )
+            }
         }
 
-        if(!userProfile.pseudonym.isNullOrEmpty()) {
-            InfoRow("Pseudonym",userProfile.pseudonym)
-        }
-
-        InfoRow("Address",userProfile.proxyWallet)
-
-        // Add more fields as needed
-        if(userProfile.createdAt != null) {
-            InfoRow(
-                "Joined",
-                UiFormatter.formatDateTimeLong(userProfile.createdAt)
+        // Content
+        when (selectedTabIndex) {
+            0 -> PositionsTab(
+                activePositions = activePositions,
+                closedPositions = closedPositions,
+                onEventClick = onEventClick
+            )
+            1 -> ActivityTab(
+                activityList = activity,
+                onClick = {
+                    // TODO: onEventClick(it.eventId)
+                }
             )
         }
     }
 }
 
-// Reusable InfoRow (similar to the one in EventDetailScreen)
 @Composable
-private fun InfoRow(label: String, value: String) {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+private fun UserProfileHeader(
+    userProfile: UserProfileDto,
+    portfolioValue: Double?,
+    userTraded: Int?
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Avatar and Name Row
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            AsyncImage(
+                model = userProfile.profileImage,
+                contentDescription = "${userProfile.getDisplayName()}'s avatar",
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentScale = ContentScale.Crop
+            )
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                val displayName = userProfile.getDisplayName()
+                Text(
+                    text = displayName,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (!userProfile.pseudonym.isNullOrEmpty() && userProfile.pseudonym != displayName) {
+                    Text(
+                        text = "@${userProfile.pseudonym}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+
+                if(userProfile.createdAt != null) {
+                    Text(
+                        text = "Joined ${UiFormatter.formatDateOnly(userProfile.createdAt)}",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+
+                // Example: Joined date could go here if available in DTO
+                // Text("Joined Nov 2025", style = MaterialTheme.typography.bodySmall)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Stats Grid
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            StatItem(
+                label = "Positions Value",
+                value = portfolioValue.let {
+                    if(it != null) UiFormatter.formatCurrency(it)
+                    else "—"
+                }
+            )
+            StatItem(label = "Predictions", value = userTraded?.toString() ?: "—")
+        }
+    }
+}
+
+@Composable
+private fun StatItem(label: String, value: String) {
+    Column {
         Text(
-            text = "$label: ",
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.width(100.dp) // Align labels
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            //fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
         )
     }
-    Spacer(modifier = Modifier.height(4.dp))
 }
+
+@Composable
+private fun PositionsTab(
+    activePositions: PaginatedList<UserPositionDto>,
+    closedPositions: PaginatedList<UserClosedPositionDto>,
+    onEventClick: (eventId: String) -> Unit,
+) {
+    var showActive by remember { mutableStateOf(true) }
+
+    // Load closed positions when switched to closed tab
+    LaunchedEffect(showActive) {
+        if (!showActive) {
+            closedPositions.loadIfNeeded()
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+                //.padding(8.dp),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            FilterChip(selected = showActive, onClick = { showActive = true }, label = "Active")
+            Spacer(modifier = Modifier.width(8.dp))
+            FilterChip(selected = !showActive, onClick = { showActive = false }, label = "Closed")
+        }
+
+        if (showActive) {
+            PaginatedListContent(
+                paginatedList = activePositions
+            ) { position ->
+                PositionItem(
+                    position = position,
+                    onClick = { position.eventId?.also { onEventClick(it) } }
+                )
+            }
+        } else {
+            PaginatedListContent(
+                paginatedList = closedPositions
+            ) { position ->
+                ClosedPositionItem(
+                    position = position,
+                    onClick = {
+                        // TODO: Implement open by event slug
+                    }
+                )
+            }
+        }
+
+    }
+}
+
+@Composable
+private fun FilterChip(selected: Boolean, onClick: () -> Unit, label: String) {
+    androidx.compose.material3.FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label) }
+    )
+}
+
+@Composable
+private fun ActivityTab(
+    activityList: PaginatedList<UserActivityDto>,
+    onClick: (userActivity: UserActivityDto) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp, vertical = 16.dp)
+    ) {
+        PaginatedListContent(
+            paginatedList = activityList
+        ) { item ->
+            UserActivityItem(
+                userActivity = item,
+                onClick = { onClick(item) },
+            )
+        }
+    }
+}
+
+
+// === Previews ===
+
+@Preview
+@Composable
+fun UserProfileScreenPreview() {
+    val coroutineScope = rememberCoroutineScope()
+
+    UserProfileScaffold(
+        profileState = UserProfileState.Success(ProfilePreviewMocks.profileSample),
+        totalPositionsValue = 10000.0,
+        userTraded = 5,
+        onNavigateBack = {},
+        onRetryLoadProfile = {},
+        onEventClick = {},
+        activePositions = PaginatedList(
+            PaginatedDataLoader(coroutineScope, {Result.success(ProfilePreviewMocks.positionsSample)})
+        ),
+        closedPositions = PaginatedList(
+            PaginatedDataLoader(coroutineScope, {Result.success(emptyList())})
+        ),
+        activity = PaginatedList(
+            PaginatedDataLoader(coroutineScope, {Result.success(emptyList())})
+        ),
+    )
+}
+

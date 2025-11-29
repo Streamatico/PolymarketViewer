@@ -1,6 +1,6 @@
 package com.streamatico.polymarketviewer.data.network
 
-import com.streamatico.polymarketviewer.data.model.PriceHistoryResponseDto
+import com.streamatico.polymarketviewer.data.model.clob_api.PriceHistoryResponseDto
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*

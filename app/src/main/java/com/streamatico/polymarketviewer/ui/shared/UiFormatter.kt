@@ -16,25 +16,50 @@ internal object UiFormatter {
         return dateTime.format(formatter)
     }
 
+    // Format like: 12 Oct 2024
+    fun formatDateOnly(dateTime: OffsetDateTime): String {
+        val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
+        return dateTime.format(formatter)
+    }
+
+    fun formatCurrency(value: Double): String {
+        val format = NumberFormat.getCurrencyInstance(Locale.US)
+        return format.format(value)
+    }
+
     // --- Helper function for formatting position size --- //
     fun formatPositionSize(size: String?): String? {
         if (size == null) return null
         return try {
             val number = BigDecimal(size)
-            // Assuming the size represents value in smallest units (e.g., cents/wei)
-            // Adjust divisor based on actual currency/token decimals (e.g., 10^6 for USDC, 10^18 for ETH)
-            // Using 10^6 (USDC) as a guess
-            val divisor = BigDecimal("1000000")
-            val value = number.divide(divisor)
-
-            when {
-                value >= BigDecimal(1_000_000) -> String.format(Locale.US, "%.1fM", value.divide(BigDecimal(1_000_000)))
-                value >= BigDecimal(1_000) -> String.format(Locale.US, "%.1fK", value.divide(BigDecimal(1_000)))
-                else -> String.format(Locale.US, "%.0f", value) // Show whole number if less than 1K
-            }
+            return internalFormatPositionSize(number)
         } catch (e: Exception) {
             Log.w("Formatting", "Failed to format position size: $size", e)
             null // Return null on error
+        }
+    }
+
+    fun formatPositionSize(size: Double?): String? {
+        if (size == null) return null
+        return String.format(Locale.getDefault(), "%.1f", size)
+    }
+
+    fun formatPriceCents(price: Double): String {
+        val priceCents = (price * 100).toInt()
+        return "${priceCents}¢"
+    }
+
+    private fun internalFormatPositionSize(number: BigDecimal): String {
+        // Assuming the size represents value in smallest units (e.g., cents/wei)
+        // Adjust divisor based on actual currency/token decimals (e.g., 10^6 for USDC, 10^18 for ETH)
+        // Using 10^6 (USDC) as a guess
+        val divisor = BigDecimal("1000000")
+        val value = number.divide(divisor)
+
+        return when {
+            value >= BigDecimal(1_000_000) -> String.format(Locale.US, "%.1fM", value.divide(BigDecimal(1_000_000)))
+            value >= BigDecimal(1_000) -> String.format(Locale.US, "%.1fK", value.divide(BigDecimal(1_000)))
+            else -> String.format(Locale.US, "%.0f", value) // Show whole number if less than 1K
         }
     }
 

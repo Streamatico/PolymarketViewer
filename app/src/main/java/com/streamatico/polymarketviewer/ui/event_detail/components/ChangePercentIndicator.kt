@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import coil3.size.Size
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.ui.theme.ExtendedTheme
 import kotlin.math.abs

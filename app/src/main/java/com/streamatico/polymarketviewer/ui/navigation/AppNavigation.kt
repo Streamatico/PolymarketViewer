@@ -89,7 +89,10 @@ fun AppNavigation(
             arguments = listOf(navArgument(AppDestinations.USER_ADDRESS_ARG) { type = NavType.StringType })
         ) {
              UserProfileScreen(
-                 onNavigateBack = { navController.popBackStack() }
+                 onNavigateBack = { navController.popBackStack() },
+                 onEventClick = { eventId ->
+                     navController.navigate("${AppDestinations.EVENT_DETAIL}/$eventId")
+                 }
              )
         }
 

@@ -1,0 +1,221 @@
+package com.streamatico.polymarketviewer.ui.tooling
+
+import com.streamatico.polymarketviewer.data.model.data_api.UserActivityDto
+import com.streamatico.polymarketviewer.data.model.data_api.UserClosedPositionDto
+import com.streamatico.polymarketviewer.data.model.data_api.UserPositionDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.UserAssociationDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.UserProfileDto
+import java.time.OffsetDateTime
+import kotlin.collections.listOf
+
+internal object ProfilePreviewMocks {
+    val profileSample = UserProfileDto(
+        id = "12345",
+        createdAt = OffsetDateTime.parse("2025-10-12T11:35:17.27782Z"),
+        proxyWallet = "0xf2375d351877xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        profileImage = "https://polymarket-upload.s3.us-east-2.amazonaws.com/fallback-image.png",
+        displayUsernamePublic = true,
+        pseudonym = "pseudo-Zeus",
+        name = "John Doe",
+        users = listOf(
+            UserAssociationDto(id = "4088796", creator = false, mod = false)
+        ),
+        verifiedBadge = false
+    )
+
+    val positionsSample = listOf(
+        UserPositionDto(
+            proxyWallet = "0x1111111111111x1",
+            asset = "1111111111111x2",
+            conditionId = "1111111111111x3",
+            size = 2346.414147,
+            avgPrice = 0.046274,
+            initialValue = 108.577968238278,
+            currentValue = 119.667121497,
+            cashPnl = 11.089153258722,
+            percentPnl = 10.2130786186627,
+            totalBought = 2346.414147,
+            realizedPnl = 0.0,
+            percentRealizedPnl = 10.2130786186627,
+            curPrice = 0.051,
+            redeemable = false,
+            mergeable = false,
+            title = "Will José Antonio Kast win the Chilean presidential election?",
+            slug = "will-jos-antonio-kast-win-the-chilean-presidential-election",
+            icon = "https://polymarket-upload.s3.us-east-2.amazonaws.com/will-jos-antonio-kast-win-the-chilean-presidential-election-DlHl8J4eVpCw.jpg",
+            eventId = "23947",
+            eventSlug = "chile-presidential-election",
+            outcome = "No",
+            outcomeIndex = 1,
+            oppositeOutcome = "Yes",
+            oppositeAsset = "11111111111111111111111x4",
+            endDate = "2025-11-16",
+            negativeRisk = true
+        ),
+        UserPositionDto(
+            proxyWallet = "0x2222222222222x1",
+            asset = "2222222222222x2",
+            conditionId = "2222222222222x3",
+            size = 885.0,
+            avgPrice = 0.39,
+            initialValue = 345.15,
+            currentValue = 349.575,
+            cashPnl = 4.425,
+            percentPnl = 1.28205128205128,
+            totalBought = 885.0,
+            realizedPnl = 0.0,
+            percentRealizedPnl = 1.28205128205128,
+            curPrice = 0.395,
+            redeemable = false,
+            mergeable = false,
+            title = "Will Timothée Chalamet win Best Actor at the 98th Academy Awards?",
+            slug = "will-timothe-chalamet-win-best-actor-at-the-98th-academy-awards",
+            icon = "https://polymarket-upload.s3.us-east-2.amazonaws.com/oscars-2026-best-picture-nominations-uExlgIhppb3W.jpg",
+            eventId = "50282",
+            eventSlug = "oscars-2026-best-actor-winner",
+            outcome = "Yes",
+            outcomeIndex = 1,
+            oppositeOutcome = "Yes",
+            oppositeAsset = "22222222222222222222",
+            endDate = "2026-03-15",
+            negativeRisk = true
+        ),
+        UserPositionDto(
+            proxyWallet = "0x3333333333333x1",
+            asset = "3333333333333x2",
+            conditionId = "3333333333333x3",
+            size = 76.136362,
+            avgPrice = 0.043999,
+            initialValue = 3.349923791638,
+            currentValue = 4.225568091,
+            cashPnl = 0.875644299362,
+            percentPnl = 26.1392304370554,
+            totalBought = 76.136362,
+            realizedPnl = 0.0,
+            percentRealizedPnl = 26.1392304370554,
+            curPrice = 0.0555,
+            redeemable = false,
+            mergeable = false,
+            title = "Will Trump win FIFA Peace Prize?",
+            slug = "will-trump-win-fifa-peace-prize",
+            icon = "https://polymarket-upload.s3.us-east-2.amazonaws.com/will-trump-win-fifa-peace-prize-uMJm-9ZvF7Tc.jpg",
+            eventId = "74450",
+            eventSlug = "will-trump-win-fifa-peace-prize",
+            outcome = "No",
+            outcomeIndex = 1,
+            oppositeOutcome = "Yes",
+            oppositeAsset = "333333333333333333333333",
+            endDate = "2025-12-05",
+            negativeRisk = false
+        )
+    )
+
+    val closedPositionsSample = listOf(
+        UserClosedPositionDto(
+            proxyWallet = "0x5dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxa5073",
+            asset = "93079xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx636909",
+            conditionId = "0x077xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxb9339",
+            avgPrice = 0.441421146133716,
+            totalBought = 685.060049,
+            realizedPnl = 154.231542,
+            curPrice = 1.0,
+            title = "Will the government shutdown end November 12?",
+            slug = "will-the-government-shutdown-end-november-12-365",
+            icon = "https://polymarket-upload.s3.us-east-2.amazonaws.com/what-day-will-the-government-shutdown-end-zMesYVn8zpvK.jpg",
+            eventSlug = "what-day-will-the-government-shutdown-end",
+            outcome = "No",
+            outcomeIndex = 1,
+            oppositeOutcome = "Yes",
+            oppositeAsset = "75569xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx3972960",
+            endDate = "2025-11-21T00:00:00Z",
+            timestamp = OffsetDateTime.parse("2025-11-13T06:19:44Z")
+        ),
+        UserClosedPositionDto(
+            proxyWallet = "0x5d867xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxa5073",
+            asset = "1739xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx8381",
+            conditionId = "0xd7bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx8a33d4",
+            avgPrice = 0.571087703258628,
+            totalBought = 679.755461,
+            realizedPnl = 69.015533,
+            curPrice = 1.0,
+            title = "Will the government shutdown end November 13?",
+            slug = "will-the-government-shutdown-end-november-13-182",
+            icon = "https://polymarket-upload.s3.us-east-2.amazonaws.com/what-day-will-the-government-shutdown-end-zMesYVn8zpvK.jpg",
+            eventSlug = "what-day-will-the-government-shutdown-end",
+            outcome = "Yes",
+            outcomeIndex = 0,
+            oppositeOutcome = "No",
+            oppositeAsset = "96670xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx814376894",
+            endDate = "2025-11-21T00:00:00Z",
+            timestamp = OffsetDateTime.parse("2025-11-13T06:27:20Z")
+        ),
+        UserClosedPositionDto(
+            proxyWallet = "0x5d8xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxa5073",
+            asset = "5236555xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx28248932",
+            conditionId = "0xbea5d5174cb5355eaf0f8cee780e67d0b22a6ff614ef7ec82cc2fe6ce8f4b111",
+            avgPrice = 0.70742132144027,
+            totalBought = 122.458838,
+            realizedPnl = 28.179543,
+            curPrice = 0.925,
+            title = "US x Venezuela military engagement by November 30?",
+            slug = "us-x-venezuela-military-engagement-by-november-30-216-397-226-467-735-374-192-441-421-482-389",
+            icon = "https://polymarket-upload.s3.us-east-2.amazonaws.com/us-x-venezuela-military-engagement-by-october-31-vTvJcKGlVvkm.jpg",
+            eventSlug = "us-x-venezuela-military-engagement-by-october-31",
+            outcome = "No",
+            outcomeIndex = 1,
+            oppositeOutcome = "Yes",
+            oppositeAsset = "52495530xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx00186",
+            endDate = "2025-11-30T00:00:00Z",
+            timestamp = OffsetDateTime.parse("2025-11-24T22:26:11Z")
+        )
+    )
+
+    val sampleUserActivityTrade = UserActivityDto(
+        proxyWallet = "0x5dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx73",
+        timestamp = OffsetDateTime.parse("2025-11-28T19:23:05Z"),
+        conditionId = "0x62b0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx45f",
+        type = "TRADE",
+        size = 11.0,
+        usdcSize = 7.15,
+        transactionHash = "0xfe165ab8e455bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxa1450d4055983121c29",
+        price = 0.65,
+        asset = "8612705xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx6070",
+        side = "SELL",
+        outcomeIndex = 1,
+        title = "US x Venezuela military engagement by December 31?",
+        slug = "us-x-venezuela-military-engagement-by-december-31-391-819-722-945-174-285-817-971-353-859-836-598-255",
+        icon = "https://polymarket-upload.s3.us-east-2.amazonaws.com/us-x-venezuela-military-engagement-by-october-31-vTvJcKGlVvkm.jpg",
+        eventSlug = "us-x-venezuela-military-engagement-by-october-31",
+        outcome = "No",
+        name = "Some user name",
+        pseudonym = "Test_pseudo",
+        bio = "leader-of-dreams, watcher-by-night",
+        profileImage = "https://polymarket-upload.s3.us-east-2.amazonaws.com/profile-image-1111111111111.jpeg",
+        profileImageOptimized = ""
+    )
+    val sampleUserActivityRedeem = UserActivityDto(
+        proxyWallet = "0x5dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx73",
+        timestamp = OffsetDateTime.parse("2025-11-27T09:12:22Z"),
+        conditionId = "0x62bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxbd45f",
+        type = "REDEEM",
+        size = 906.119876,
+        usdcSize = 906.119876,
+        transactionHash = "0xf20xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxe58f75",
+        price = 0.0,
+        asset = "",
+        side = "",
+        outcomeIndex = 999,
+        title = $$"Will the Monad public sale commitments be less than $400M?",
+        slug = "will-the-monad-public-sale-commitments-be-less-than-400m",
+        icon = "https://polymarket-upload.s3.us-east-2.amazonaws.com/monad-market-cap-fdv-one-day-after-launch-x1c2OPi_BSut.jpg",
+        eventSlug = "monad-public-sale-total-commitments-339",
+        outcome = "",
+        name = "Some user name",
+        pseudonym = "Test_pseudo",
+        bio = "example of bio",
+        profileImage = "https://polymarket-upload.s3.us-east-2.amazonaws.com/profile-image-2222222222.jpeg",
+        profileImageOptimized = ""
+    )
+
+    //val sampleUserActivities = listOf(sampleUserActivityTrade, sampleUserActivityRedeem)
+}

@@ -1,4 +1,4 @@
-package com.streamatico.polymarketviewer.data.model
+package com.streamatico.polymarketviewer.data.model.clob_api
 
 import com.streamatico.polymarketviewer.data.serializers.OffsetDateTimeSerializer
 import kotlinx.serialization.SerialName

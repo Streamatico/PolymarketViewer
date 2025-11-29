@@ -40,9 +40,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.streamatico.polymarketviewer.data.model.CommentDto
-import com.streamatico.polymarketviewer.data.model.PolymarketUserProfile
-import com.streamatico.polymarketviewer.data.model.getDisplayName
+import com.streamatico.polymarketviewer.data.model.gamma_api.CommentDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.PolymarketUserProfile
+import com.streamatico.polymarketviewer.data.model.gamma_api.ProfilePositionDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.getDisplayName
 import com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment
 import com.streamatico.polymarketviewer.ui.shared.ComposableUiFormatter
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
@@ -356,7 +357,7 @@ private fun ReplyItemStandalonePreview() {
     // Previewing ReplyItem directly by calling CommentContent with reply parameters
     val badgeData = rememberPositionBadgeData(
         comment = PreviewMocks.sampleReply1.copy(profile = PreviewMocks.sampleUserProfile.copy(
-            positions = listOf(com.streamatico.polymarketviewer.data.model.PositionDto("token-no-2", "120000000")) // Example 'No' position
+            positions = listOf(ProfilePositionDto("token-no-2", "10000")) // Example 'No' position
         )),
         eventOutcomeTokensMap = PreviewMocks.sampleOutcomeMap,
         eventTokenToGroupTitleMap = PreviewMocks.sampleTitleMap,

@@ -1,10 +1,10 @@
 package com.streamatico.polymarketviewer.ui.shared
 
-import com.streamatico.polymarketviewer.data.model.EventMarketsSortBy
-import com.streamatico.polymarketviewer.data.model.BaseMarketDto
-import com.streamatico.polymarketviewer.data.model.MarketResolutionStatus
-import com.streamatico.polymarketviewer.data.model.getResolutionStatus
-import com.streamatico.polymarketviewer.data.model.yesPrice
+import com.streamatico.polymarketviewer.data.model.gamma_api.EventMarketsSortBy
+import com.streamatico.polymarketviewer.data.model.gamma_api.BaseMarketDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.MarketResolutionStatus
+import com.streamatico.polymarketviewer.data.model.gamma_api.getResolutionStatus
+import com.streamatico.polymarketviewer.data.model.gamma_api.yesPrice
 
 fun <T : BaseMarketDto> List<T>.sortedByViewPriority(sortByEnum: EventMarketsSortBy): List<T> {
     return when(sortByEnum) {
@@ -29,11 +29,11 @@ fun <T : BaseMarketDto> List<T>.sortedByViewPriority(sortByEnum: EventMarketsSor
 
 fun List<BaseMarketDto>.sortedForShortView(limit: Int): List<BaseMarketDto> {
     return this
-        //.filter { !it.closed } 
-        
+        //.filter { !it.closed }
+
         .sortedByViewPriority(EventMarketsSortBy.Price)
-        
+
         .take(limit)
-        
+
         .sortedBy { it.groupItemThreshold }
 }

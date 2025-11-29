@@ -3,7 +3,7 @@ package com.streamatico.polymarketviewer.ui.search_screen
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.streamatico.polymarketviewer.data.model.OptimizedEventDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.OptimizedEventDto
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -16,16 +16,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-private const val SEARCH_DEBOUNCE_MS = 1000L
-private const val MIN_QUERY_LENGTH = 2
-
-sealed interface SearchUiState {
-    data object Empty : SearchUiState
-    data object Loading : SearchUiState
-    data class Success(val events: List<OptimizedEventDto>) : SearchUiState
-    data class Error(val message: String) : SearchUiState
-}
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -50,20 +40,19 @@ class SearchViewModel @Inject constructor(
                 .map { it.trim() }
                 .distinctUntilChanged()
                 .collectLatest { query ->
-                    val trimmedQuery = query
 
-                    if (trimmedQuery.isEmpty()) {
+                    if (query.isEmpty()) {
                         _uiState.value = SearchUiState.Empty
                         return@collectLatest
                     }
 
-                    if (trimmedQuery.length < MIN_QUERY_LENGTH) {
+                    if (query.length < MIN_QUERY_LENGTH) {
                         return@collectLatest
                     }
 
                     _uiState.value = SearchUiState.Loading
 
-                    performSearch(trimmedQuery)
+                    performSearch(query)
                 }
         }
     }
@@ -92,11 +81,9 @@ class SearchViewModel @Inject constructor(
             result.onSuccess { searchResult ->
                 val events = searchResult.events ?: emptyList()
 
-                if (events.isEmpty()) {
-                    _uiState.value = SearchUiState.Success(emptyList())
-                } else {
-                    _uiState.value = SearchUiState.Success(events)
-                }
+                _uiState.value = SearchUiState.Success(
+                    events = searchResult.events ?: emptyList(),
+                )
 
                 Log.d("SearchViewModel", "Found ${events.size} events")
             }
@@ -124,4 +111,14 @@ class SearchViewModel @Inject constructor(
             }
         }
     }
+}
+
+private const val SEARCH_DEBOUNCE_MS = 1000L
+private const val MIN_QUERY_LENGTH = 2
+
+sealed interface SearchUiState {
+    data object Empty : SearchUiState
+    data object Loading : SearchUiState
+    data class Success(val events: List<OptimizedEventDto>) : SearchUiState
+    data class Error(val message: String) : SearchUiState
 }

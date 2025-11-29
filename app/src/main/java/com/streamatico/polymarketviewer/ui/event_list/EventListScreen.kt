@@ -74,7 +74,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 import com.streamatico.polymarketviewer.R
-import com.streamatico.polymarketviewer.data.model.TagDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.TagDto
 import com.streamatico.polymarketviewer.domain.repository.PolymarketEventsSortOrder
 import com.streamatico.polymarketviewer.ui.event_list.components.EventListItem
 import com.streamatico.polymarketviewer.ui.shared.components.AppLogoIcon
@@ -552,9 +552,9 @@ private fun TagsRow(
 @Composable
 private fun EventListScreenPreview_Success() {
     val sampleEvents = listOf(
-        PreviewMocks.sampleEvent.copy(id = "1", title = "Will event 1 happen?", slug = "event-1", volume = 100.0, liquidity = 50.0, featured = false),
-        PreviewMocks.sampleEvent.copy(id = "2", title = "What about event 2?", slug = "event-2", volume = 200.0, liquidity = 100.0, featured = true, featuredOrder = 1),
-        PreviewMocks.sampleEvent.copy(id = "3", title = "A third event?", slug = "event-3", volume = 300.0, liquidity = 150.0, featured = false)
+        PreviewMocks.sampleEvent1.copy(id = "1", title = "Will event 1 happen?", slug = "event-1", volume = 100.0, liquidity = 50.0, featured = false),
+        PreviewMocks.sampleEvent1.copy(id = "2", title = "What about event 2?", slug = "event-2", volume = 200.0, liquidity = 100.0, featured = true, featuredOrder = 1),
+        PreviewMocks.sampleEvent1.copy(id = "3", title = "A third event?", slug = "event-3", volume = 300.0, liquidity = 150.0, featured = false)
     )
     val sampleTags = listOf(
         TagDto(id = "tag1", label = "Politics", slug = "politics", forceShow = false),

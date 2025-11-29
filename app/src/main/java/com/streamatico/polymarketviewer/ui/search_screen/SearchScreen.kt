@@ -36,12 +36,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.streamatico.polymarketviewer.R
-import com.streamatico.polymarketviewer.data.model.OptimizedEventDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.OptimizedEventDto
 import com.streamatico.polymarketviewer.ui.event_list.components.EventListItem
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
+import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -242,6 +243,26 @@ private fun SearchResultsList(
 }
 
 // === Previews ===
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true, name = "Success")
+@Composable
+private fun SearchScreenPreview_Success() {
+    PolymarketAppTheme {
+        SearchScreenContent(
+            uiState = SearchUiState.Success(
+                PreviewMocks.sampleOptimizedEvents
+            ),
+            searchQuery = "xyz123",
+            onSearchQueryChange = {},
+            onClearSearch = {},
+            onNavigateBack = {},
+            onNavigateToEventDetail = {},
+            onRetry = {}
+        )
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, name = "Empty State")

@@ -20,7 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
-import com.streamatico.polymarketviewer.data.model.EventDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
 
 // --- Utility Functions (moved from TranslateUtils) ---
 
