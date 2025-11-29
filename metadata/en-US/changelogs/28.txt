@@ -1,0 +1,2 @@
+- Improved user profile screen (opened from event comments), added user positions and activity 
+- Added adaptive app icon
