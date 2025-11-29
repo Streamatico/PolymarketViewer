@@ -1,13 +1,13 @@
 package com.streamatico.polymarketviewer.data.network
 
-import com.streamatico.polymarketviewer.data.model.CommentDto
-import com.streamatico.polymarketviewer.data.model.EventDto
-import com.streamatico.polymarketviewer.data.model.MarketDto
-import com.streamatico.polymarketviewer.data.model.PaginationDataDto
-import com.streamatico.polymarketviewer.data.model.SearchResultOptimizedDto
-import com.streamatico.polymarketviewer.data.model.SearchResultFullDto
-import com.streamatico.polymarketviewer.data.model.TagDto
-import com.streamatico.polymarketviewer.data.model.UserProfileDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.CommentDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.MarketDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.PaginationDataDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.SearchResultDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.SearchResultOptimizedDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.TagDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.UserProfileDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -138,7 +138,7 @@ class PolymarketGammaApiClient @Inject constructor(
         searchProfiles: Boolean = true,
         cache: Boolean = true,
         eventsStatus: String = "active"
-    ): SearchResultFullDto {
+    ): SearchResultDto {
         return client.get("public-search") {
             parameter("q", query)
             parameter("optimized", false)

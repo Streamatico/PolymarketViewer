@@ -32,15 +32,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.streamatico.polymarketviewer.data.model.BaseEventDto
-import com.streamatico.polymarketviewer.data.model.BaseMarketDto
-import com.streamatico.polymarketviewer.data.model.EventType
-import com.streamatico.polymarketviewer.data.model.MarketResolutionStatus
-import com.streamatico.polymarketviewer.data.model.getResolutionStatus
-import com.streamatico.polymarketviewer.data.model.getResolvedOutcome
-import com.streamatico.polymarketviewer.data.model.getTitleOrDefault
-import com.streamatico.polymarketviewer.data.model.getYesTitle
-import com.streamatico.polymarketviewer.data.model.yesPrice
+import com.streamatico.polymarketviewer.data.model.gamma_api.BaseEventDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.BaseMarketDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.EventType
+import com.streamatico.polymarketviewer.data.model.gamma_api.MarketResolutionStatus
+import com.streamatico.polymarketviewer.data.model.gamma_api.getResolutionStatus
+import com.streamatico.polymarketviewer.data.model.gamma_api.getResolvedOutcome
+import com.streamatico.polymarketviewer.data.model.gamma_api.getTitleOrDefault
+import com.streamatico.polymarketviewer.data.model.gamma_api.getYesTitle
+import com.streamatico.polymarketviewer.data.model.gamma_api.yesPrice
 import com.streamatico.polymarketviewer.ui.shared.ComposableUiFormatter
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.sortedByViewPriority
@@ -421,7 +421,7 @@ private fun BinaryEventListItemPreview() {
 @Composable
 private fun MultiMarketEventListItemPreview() {
     PolymarketAppTheme {
-        EventListItem(event = PreviewMocks.sampleMultiMarketEvent, onEventClick = {})
+        EventListItem(event = PreviewMocks.sampleMultiMarketOptimizedEvent, onEventClick = {})
     }
 }
 

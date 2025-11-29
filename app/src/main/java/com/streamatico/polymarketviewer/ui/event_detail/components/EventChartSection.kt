@@ -43,7 +43,7 @@ import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.core.common.Legend
 import com.patrykandpatrick.vico.core.common.LegendItem
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
-import com.streamatico.polymarketviewer.data.model.EventDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
 import com.streamatico.polymarketviewer.ui.event_detail.LegendLabelKey
 import com.streamatico.polymarketviewer.ui.event_detail.TimeRange
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
@@ -198,7 +198,7 @@ private fun rememberEventChartLegend(
 private fun EventChartSectionPreview() {
     EventChartSection(
         chartModelProducer = PreviewMocks.previewChartModelProducer,
-        event = PreviewMocks.sampleEvent,
+        event = PreviewMocks.sampleEvent1,
         selectedRange = TimeRange.D1,
         onRangeSelected = {}
     )

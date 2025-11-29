@@ -10,7 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.streamatico.polymarketviewer.data.model.TagDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.TagDto
 
 @Composable
 fun EventTags(

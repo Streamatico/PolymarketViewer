@@ -1,4 +1,4 @@
-package com.streamatico.polymarketviewer.data.model
+package com.streamatico.polymarketviewer.data.model.gamma_api
 
 import java.time.OffsetDateTime
 

@@ -1,15 +1,20 @@
 package com.streamatico.polymarketviewer.domain.repository
 
-import com.streamatico.polymarketviewer.data.model.EventDto
-import com.streamatico.polymarketviewer.data.model.MarketDto
-import com.streamatico.polymarketviewer.data.model.SearchResultOptimizedDto
-import com.streamatico.polymarketviewer.data.model.SearchResultFullDto
-import com.streamatico.polymarketviewer.data.model.TagDto
-import com.streamatico.polymarketviewer.data.model.TimeseriesPointDto
-import com.streamatico.polymarketviewer.data.model.CommentDto
-import com.streamatico.polymarketviewer.data.model.PaginationDataDto
-import com.streamatico.polymarketviewer.data.model.UserProfileDto
-import kotlin.Result
+import com.streamatico.polymarketviewer.data.model.data_api.UserActivityDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.CommentDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
+import com.streamatico.polymarketviewer.data.model.data_api.LeaderBoardDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.MarketDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.PaginationDataDto
+import com.streamatico.polymarketviewer.data.model.data_api.UserPositionDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.SearchResultDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.SearchResultOptimizedDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.TagDto
+import com.streamatico.polymarketviewer.data.model.clob_api.TimeseriesPointDto
+import com.streamatico.polymarketviewer.data.model.data_api.UserClosedPositionDto
+import com.streamatico.polymarketviewer.data.model.data_api.UserTotalPositionValueDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.UserProfileDto
+import com.streamatico.polymarketviewer.data.model.data_api.UserTradedDto
 
 /**
  * Repository interface for getting data from Polymarket API.
@@ -91,7 +96,38 @@ interface PolymarketRepository {
         query: String,
         limitPerType: Int = 6,
         eventsStatus: String = "active"
-    ): Result<SearchResultFullDto>
+    ): Result<SearchResultDto>
+
+    suspend fun getPositions(
+        address: String,
+        limit: Int = 10,
+        offset: Int = 0
+    ): Result<List<UserPositionDto>>
+
+    suspend fun getClosedPositions(
+        address: String,
+        limit: Int = 10,
+        offset: Int = 0
+    ): Result<List<UserClosedPositionDto>>
+
+    suspend fun getTotalPositionsValue(
+        userAddress: String,
+        markets: List<String>? = null
+    ): Result<List<UserTotalPositionValueDto>>
+
+    suspend fun getUserLeaderBoard(
+        userAddress: String,
+    ) : Result<LeaderBoardDto?>
+
+    suspend fun getUserTraded(
+        userAddress: String,
+    ): Result<UserTradedDto>
+
+    suspend fun getActivity(
+        address: String,
+        limit: Int = 20,
+        offset: Int = 0
+    ): Result<List<UserActivityDto>>
 }
 
 data class CommentsParentEntityId(

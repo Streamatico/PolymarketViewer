@@ -1,8 +1,8 @@
-package com.streamatico.polymarketviewer.data.model
+package com.streamatico.polymarketviewer.data.model.gamma_api
 
 import com.streamatico.polymarketviewer.data.serializers.OffsetDateTimeSerializer
-import kotlinx.serialization.SerialName // Import Kotlinx Serialization
-import kotlinx.serialization.Serializable // Import Kotlinx Serialization
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import java.time.OffsetDateTime
 
 /**

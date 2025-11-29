@@ -36,7 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.streamatico.polymarketviewer.data.model.EventType
+import com.streamatico.polymarketviewer.data.model.gamma_api.EventType
 import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
 import com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks

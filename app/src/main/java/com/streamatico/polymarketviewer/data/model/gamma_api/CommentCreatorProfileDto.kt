@@ -1,4 +1,4 @@
-package com.streamatico.polymarketviewer.data.model
+package com.streamatico.polymarketviewer.data.model.gamma_api
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -52,5 +52,11 @@ data class CommentCreatorProfileDto(
 
     // User positions
     // Assuming PositionDto will also be made @Serializable
-    @SerialName("positions") val positions: List<PositionDto>? = null // Added positions list
+    @SerialName("positions") val positions: List<ProfilePositionDto>? = null // Added positions list
 ): PolymarketUserProfile
+
+@Serializable
+data class ProfilePositionDto(
+    @SerialName("tokenId") val tokenId: String, // ID of the market outcome token
+    @SerialName("positionSize") val positionSize: String? // Size of the position (comes as string)
+)

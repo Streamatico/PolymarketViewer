@@ -1,15 +1,22 @@
 package com.streamatico.polymarketviewer.data.repository
 
-import com.streamatico.polymarketviewer.data.model.CommentDto
-import com.streamatico.polymarketviewer.data.model.EventDto
-import com.streamatico.polymarketviewer.data.model.MarketDto
-import com.streamatico.polymarketviewer.data.model.PaginationDataDto
-import com.streamatico.polymarketviewer.data.model.SearchResultOptimizedDto
-import com.streamatico.polymarketviewer.data.model.SearchResultFullDto
-import com.streamatico.polymarketviewer.data.model.TagDto
-import com.streamatico.polymarketviewer.data.model.TimeseriesPointDto
-import com.streamatico.polymarketviewer.data.model.UserProfileDto
+import com.streamatico.polymarketviewer.data.model.data_api.UserActivityDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.CommentDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
+import com.streamatico.polymarketviewer.data.model.data_api.LeaderBoardDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.MarketDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.PaginationDataDto
+import com.streamatico.polymarketviewer.data.model.data_api.UserPositionDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.SearchResultDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.SearchResultOptimizedDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.TagDto
+import com.streamatico.polymarketviewer.data.model.clob_api.TimeseriesPointDto
+import com.streamatico.polymarketviewer.data.model.data_api.UserClosedPositionDto
+import com.streamatico.polymarketviewer.data.model.data_api.UserTotalPositionValueDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.UserProfileDto
+import com.streamatico.polymarketviewer.data.model.data_api.UserTradedDto
 import com.streamatico.polymarketviewer.data.network.PolymarketClobApiClient
+import com.streamatico.polymarketviewer.data.network.PolymarketDataApiClient
 import com.streamatico.polymarketviewer.data.network.PolymarketGammaApiClient
 import com.streamatico.polymarketviewer.domain.repository.CommentsParentEntityId
 import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
@@ -22,7 +29,8 @@ import javax.inject.Inject
 
 class PolymarketRepositoryImpl @Inject constructor(
     private val gammaApiClient: PolymarketGammaApiClient,
-    private val clobApiClient: PolymarketClobApiClient
+    private val clobApiClient: PolymarketClobApiClient,
+    private val dataApiClient: PolymarketDataApiClient,
 ) : PolymarketRepository {
 
     private suspend fun <T> safeApiCall(apiCall: suspend () -> T): Result<T> {
@@ -168,12 +176,100 @@ class PolymarketRepositoryImpl @Inject constructor(
         query: String,
         limitPerType: Int,
         eventsStatus: String
-    ): Result<SearchResultFullDto> {
+    ): Result<SearchResultDto> {
         return safeApiCall {
             gammaApiClient.searchPublicFull(
                 query = query,
                 limitPerType = limitPerType,
                 eventsStatus = eventsStatus
+            )
+        }
+    }
+
+    override suspend fun getPositions(
+        address: String,
+        limit: Int,
+        offset: Int
+    ): Result<List<UserPositionDto>> {
+        return safeApiCall {
+            dataApiClient.getPositions(
+                address = address,
+                limit = limit,
+                offset = offset,
+                sortBy = "CURRENT",
+                sortDirection = "DESC",
+                sizeThreshold = 0.1
+            )
+        }
+    }
+
+    override suspend fun getClosedPositions(
+        address: String,
+        limit: Int,
+        offset: Int
+    ): Result<List<UserClosedPositionDto>> {
+        return safeApiCall {
+            dataApiClient.getClosedPositions(
+                address = address,
+                limit = limit,
+                offset = offset,
+                sortBy = "realizedpnl",
+                sortDirection = "DESC"
+            )
+        }
+    }
+
+    override suspend fun getTotalPositionsValue(
+        userAddress: String,
+        markets: List<String>?
+    ): Result<List<UserTotalPositionValueDto>> {
+        return safeApiCall {
+            dataApiClient.getTotalPositionsValue(
+                user = userAddress,
+                markets = markets
+            )
+        }
+    }
+
+    override suspend fun getUserLeaderBoard(
+        userAddress: String,
+    ) : Result<LeaderBoardDto?> {
+        val result = safeApiCall {
+            dataApiClient.getLeaderBoard(
+                user = userAddress
+            )
+        }
+
+        return result.fold(
+            onSuccess = {
+                Result.success(it.firstOrNull())
+            },
+            onFailure = {
+                Result.failure(it)
+            }
+        )
+    }
+
+    override suspend fun getUserTraded(
+        userAddress: String,
+    ): Result<UserTradedDto> {
+        return safeApiCall {
+            dataApiClient.getUserTraded(
+                user = userAddress
+            )
+        }
+    }
+
+    override suspend fun getActivity(
+        address: String,
+        limit: Int,
+        offset: Int
+    ): Result<List<UserActivityDto>> {
+        return safeApiCall {
+            dataApiClient.getActivity(
+                address = address,
+                limit = limit,
+                offset = offset
             )
         }
     }

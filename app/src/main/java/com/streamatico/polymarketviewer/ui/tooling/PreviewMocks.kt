@@ -1,15 +1,15 @@
 package com.streamatico.polymarketviewer.ui.tooling
 
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.streamatico.polymarketviewer.data.model.CommentCreatorProfileDto
-import com.streamatico.polymarketviewer.data.model.CommentDto
-import com.streamatico.polymarketviewer.data.model.EventDto
-import com.streamatico.polymarketviewer.data.model.PositionDto
-import com.streamatico.polymarketviewer.data.model.TagDto
-import com.streamatico.polymarketviewer.data.model.demoEventDto
-import com.streamatico.polymarketviewer.data.model.demoMarketDto
-import com.streamatico.polymarketviewer.data.model.demoOptimizedEventDto
-import com.streamatico.polymarketviewer.data.model.demoOptimizedMarketDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.CommentCreatorProfileDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.CommentDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.ProfilePositionDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.TagDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.demoEventDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.demoMarketDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.demoOptimizedEventDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.demoOptimizedMarketDto
 import com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment
 import java.time.OffsetDateTime
 
@@ -20,11 +20,11 @@ internal object PreviewMocks {
         profileImage = "https://via.placeholder.com/150/0000FF/808080?Text=User+Avatar",
         proxyWallet = "0x123abc456def7890",
         positions = listOf(
-            PositionDto(
+            ProfilePositionDto(
                 tokenId = "token-yes-1",
                 positionSize = "500000000" // 500 USDC
             ),
-            PositionDto(
+            ProfilePositionDto(
                 tokenId = "token-no-2",
                 positionSize = "1000000000" // 1000 USDC
             )
@@ -148,7 +148,7 @@ internal object PreviewMocks {
 
     val sampleMarket4LowPrice = demoMarketDto(
         id = "market-4",
-        groupItemTitle = $$"Will it close above $XXX?",
+        groupItemTitle = "Will it close above \$XXX?",
         slug = "market-4-slug",
         outcomesJson = "[\"Yes\", \"No\"]",
         outcomePricesJson = "[\"0.003\", \"0.997\"]",
@@ -161,7 +161,7 @@ internal object PreviewMocks {
     )
 
 
-    val sampleEvent = EventDto(
+    val sampleEvent1 = EventDto(
         id = "event-1",
         title = "Bitcoin Price Prediction End of Year",
         slug = "bitcoin-price-prediction-eoy",
@@ -173,8 +173,8 @@ internal object PreviewMocks {
         closed = false,
         volume = 800000.0, // Sum of market volumes
         liquidity = 35000.0, // Sum of market liquidities
-        startDate = OffsetDateTime.now().minusDays(10),
-        endDate = OffsetDateTime.now().plusDays(60),
+        startDate = OffsetDateTime.parse("2023-08-01T07:22:00Z"),
+        endDate = OffsetDateTime.parse("2024-09-01T23:55:00Z"),
         resolutionSource = "Multiple Exchanges Average",
         rawMarkets = listOf(
             sampleMarket1,
@@ -185,7 +185,7 @@ internal object PreviewMocks {
         featuredOrder = 1,
         tags = listOf(
             TagDto(id = "tag-crypto", label = "Crypto", slug = "crypto", forceShow = false),
-            TagDto(id = "tag-prediction", label = "Prediction", slug = "prediction", forceShow = false),
+            TagDto(id = "tag-prediction", label = "Prediction", slug = "prediction", forceShow = true),
             TagDto(id = "tag-end-of-year", label = "End of Year", slug = "end-of-year", forceShow = false),
             TagDto(id = "tag-multiple-exchanges", label = "Multiple Exchanges", slug = "multiple-exchanges", forceShow = false),
             TagDto(id = "tag-average", label = "Average", slug = "average", forceShow = false)
@@ -232,7 +232,7 @@ internal object PreviewMocks {
         )
     )
 
-    val sampleMultiMarketEvent = demoOptimizedEventDto(
+    val sampleMultiMarketOptimizedEvent = demoOptimizedEventDto(
         id = "event-multi",
         title = "Next Prime Minister of Canada after the election?",
         slug = "event-multi-slug",
@@ -248,5 +248,11 @@ internal object PreviewMocks {
             demoOptimizedMarketDto("Will Someone Else be the next Canadian Prime Minister?", "m4-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.01, 0.99), groupItemTitle = "Someone Else"),
             //demoOptimizedMarketDto("Will Yet Another Candidate be the next Canadian Prime Minister?", "m5-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.00, 1.00), groupItemTitle = "Yet Another Candidate")
         )
+    )
+
+    val sampleOptimizedEvents = listOf(
+        sampleMultiMarketOptimizedEvent.copy(id = "event-1", title = "Active event"),
+        sampleMultiMarketOptimizedEvent.copy(id = "event-2", title = "Inactive event", active = false),
+        sampleMultiMarketOptimizedEvent.copy(id = "event-3", title = "Inactive close event", active = false, closed = true),
     )
 }

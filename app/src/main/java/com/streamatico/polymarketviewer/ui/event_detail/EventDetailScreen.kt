@@ -36,8 +36,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.streamatico.polymarketviewer.data.model.EventDto
-import com.streamatico.polymarketviewer.data.model.EventType
+import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
+import com.streamatico.polymarketviewer.data.model.gamma_api.EventType
 import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
 import com.streamatico.polymarketviewer.ui.event_detail.components.EventChartSection
 import com.streamatico.polymarketviewer.ui.event_detail.components.eventCommentsSection
@@ -376,7 +376,7 @@ private fun EventDetailsContentPreviewTemplate(uiState: EventDetailUiState) {
 @Composable
 private fun EventDetailScreenPreviewSuccess() {
     EventDetailsContentPreviewTemplate(
-        uiState = EventDetailUiState.Success(PreviewMocks.sampleEvent)
+        uiState = EventDetailUiState.Success(PreviewMocks.sampleEvent1)
     )
 }
 
