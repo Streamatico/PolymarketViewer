@@ -22,7 +22,7 @@ object AppDestinations {
     const val ABOUT_APP = "aboutApp"
     const val SEARCH = "search"
     const val MARKET_ID_ARG = "marketId"
-    const val EVENT_ID_ARG = "eventId"
+    const val EVENT_SLUG_ARG = "eventSlug"
     const val USER_ADDRESS_ARG = "userAddress"
 }
 
@@ -34,7 +34,6 @@ fun AppNavigation(
         // Event list screen
         composable(AppDestinations.EVENT_LIST) {
             EventListScreen(
-                // Use eventId for the new route
                 onNavigateToEventDetail = { eventId ->
                     navController.navigate("${AppDestinations.EVENT_DETAIL}/$eventId")
                 },
@@ -47,8 +46,8 @@ fun AppNavigation(
         composable(AppDestinations.SEARCH) {
             SearchScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToEventDetail = { eventId ->
-                    navController.navigate("${AppDestinations.EVENT_DETAIL}/$eventId")
+                onNavigateToEventDetail = { eventSlug ->
+                    navController.navigate("${AppDestinations.EVENT_DETAIL}/$eventSlug")
                 },
             )
         }
@@ -58,25 +57,21 @@ fun AppNavigation(
             route = "${AppDestinations.MARKET_DETAIL}/{${AppDestinations.MARKET_ID_ARG}}",
             arguments = listOf(navArgument(AppDestinations.MARKET_ID_ARG) { type = NavType.StringType })
         ) {
-            // val marketId = it.arguments?.getString(AppDestinations.MARKET_ID_ARG)
             MarketDetailScreen(
-                // marketId is no longer passed directly, ViewModel gets it from SavedStateHandle
                 onNavigateBack = { navController.popBackStack() } // Add "Back" handler
             )
         }
 
         // Event details screen
         composable(
-            route = "${AppDestinations.EVENT_DETAIL}/{${AppDestinations.EVENT_ID_ARG}}",
-            arguments = listOf(navArgument(AppDestinations.EVENT_ID_ARG) { type = NavType.StringType })
+            route = "${AppDestinations.EVENT_DETAIL}/{${AppDestinations.EVENT_SLUG_ARG}}",
+            arguments = listOf(navArgument(AppDestinations.EVENT_SLUG_ARG) { type = NavType.StringType })
         ) {
             EventDetailScreen(
                 onNavigateBack = { navController.popBackStack() },
-                // Pass lambda for navigation to specific MARKET details from this screen
                 onNavigateToMarketDetail = { marketId ->
                      navController.navigate("${AppDestinations.MARKET_DETAIL}/$marketId")
                 },
-                // Pass lambda for navigation to user profile
                 onNavigateToUserProfile = { userAddress ->
                     navController.navigate("${AppDestinations.USER_PROFILE}/$userAddress")
                 }
@@ -90,8 +85,8 @@ fun AppNavigation(
         ) {
              UserProfileScreen(
                  onNavigateBack = { navController.popBackStack() },
-                 onEventClick = { eventId ->
-                     navController.navigate("${AppDestinations.EVENT_DETAIL}/$eventId")
+                 onEventClick = { eventSlug ->
+                     navController.navigate("${AppDestinations.EVENT_DETAIL}/$eventSlug")
                  }
              )
         }

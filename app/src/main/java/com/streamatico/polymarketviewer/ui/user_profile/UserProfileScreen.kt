@@ -65,7 +65,7 @@ import com.streamatico.polymarketviewer.ui.user_profile.components.PositionItem
 @Composable
 fun UserProfileScreen(
     viewModel: UserProfileViewModel = hiltViewModel(),
-    onEventClick: (eventId: String) -> Unit,
+    onEventClick: (eventSlug: String) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val profileState by viewModel.profileState.collectAsState()
@@ -82,7 +82,7 @@ fun UserProfileScreen(
 
         activePositions = viewModel.activePositions,
         closedPositions = viewModel.closedPositions,
-        activity = viewModel.activity
+        activities = viewModel.activities
     )
 }
 
@@ -95,11 +95,11 @@ private fun UserProfileScaffold(
     userTraded: Int?,
     onNavigateBack: () -> Unit,
     onRetryLoadProfile: () -> Unit,
-    onEventClick: (String) -> Unit,
+    onEventClick: (eventSlug: String) -> Unit,
 
     activePositions: PaginatedList<UserPositionDto>,
     closedPositions: PaginatedList<UserClosedPositionDto>,
-    activity: PaginatedList<UserActivityDto>,
+    activities: PaginatedList<UserActivityDto>,
 ) {
     val successState = profileState as? UserProfileState.Success
     val userProfile = successState?.userProfile
@@ -140,7 +140,7 @@ private fun UserProfileScaffold(
                         userTraded = userTraded,
                         activePositions = activePositions,
                         closedPositions = closedPositions,
-                        activity = activity,
+                        activities = activities,
                         onEventClick = onEventClick,
                     )
                 }
@@ -166,8 +166,8 @@ private fun UserProfileContent(
     userTraded: Int?,
     activePositions: PaginatedList<UserPositionDto>,
     closedPositions: PaginatedList<UserClosedPositionDto>,
-    activity: PaginatedList<UserActivityDto>,
-    onEventClick: (String) -> Unit,
+    activities: PaginatedList<UserActivityDto>,
+    onEventClick: (eventSlug: String) -> Unit,
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf("Positions", "Activity")
@@ -176,7 +176,7 @@ private fun UserProfileContent(
     LaunchedEffect(selectedTabIndex) {
         when (selectedTabIndex) {
             0 -> activePositions.loadIfNeeded() // Load active positions by default when entering tab
-            1 -> activity.loadIfNeeded()        // Load activity when entering tab
+            1 -> activities.loadIfNeeded()        // Load activity when entering tab
         }
     }
 
@@ -207,9 +207,9 @@ private fun UserProfileContent(
                 onEventClick = onEventClick
             )
             1 -> ActivityTab(
-                activityList = activity,
-                onClick = {
-                    // TODO: onEventClick(it.eventId)
+                activityList = activities,
+                onClick = { activityItem ->
+                    onEventClick(activityItem.eventSlug)
                 }
             )
         }
@@ -268,9 +268,6 @@ private fun UserProfileHeader(
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
-
-                // Example: Joined date could go here if available in DTO
-                // Text("Joined Nov 2025", style = MaterialTheme.typography.bodySmall)
             }
         }
 
@@ -313,7 +310,7 @@ private fun StatItem(label: String, value: String) {
 private fun PositionsTab(
     activePositions: PaginatedList<UserPositionDto>,
     closedPositions: PaginatedList<UserClosedPositionDto>,
-    onEventClick: (eventId: String) -> Unit,
+    onEventClick: (eventSlug: String) -> Unit,
 ) {
     var showActive by remember { mutableStateOf(true) }
 
@@ -332,7 +329,6 @@ private fun PositionsTab(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-                //.padding(8.dp),
             horizontalArrangement = Arrangement.Start
         ) {
             FilterChip(selected = showActive, onClick = { showActive = true }, label = "Active")
@@ -346,7 +342,7 @@ private fun PositionsTab(
             ) { position ->
                 PositionItem(
                     position = position,
-                    onClick = { position.eventId?.also { onEventClick(it) } }
+                    onClick = { onEventClick(position.eventSlug) }
                 )
             }
         } else {
@@ -356,7 +352,7 @@ private fun PositionsTab(
                 ClosedPositionItem(
                     position = position,
                     onClick = {
-                        // TODO: Implement open by event slug
+                        onEventClick(position.eventSlug)
                     }
                 )
             }
@@ -416,7 +412,7 @@ fun UserProfileScreenPreview() {
         closedPositions = PaginatedList(
             PaginatedDataLoader(coroutineScope, {Result.success(emptyList())})
         ),
-        activity = PaginatedList(
+        activities = PaginatedList(
             PaginatedDataLoader(coroutineScope, {Result.success(emptyList())})
         ),
     )

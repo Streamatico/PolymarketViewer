@@ -66,8 +66,7 @@ internal fun <T> PaginatedListContent(
 
     LazyColumn(
         state = listState,
-        //contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         items(state.items) { item ->
             itemContent(item)

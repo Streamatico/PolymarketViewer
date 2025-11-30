@@ -3,13 +3,15 @@ package com.streamatico.polymarketviewer.ui.user_profile.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Card
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,36 +37,30 @@ internal fun UserActivityItem(
     userActivity: UserActivityDto,
     onClick: () -> Unit
 ) {
-    Card(
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
     ) {
         Row(
             Modifier
-                .fillMaxWidth(),
-            //horizontalArrangement = Arrangement.SpaceBetween
+                .fillMaxWidth()
+                .padding(8.dp),
         ) {
             if (userActivity.icon != null) {
                 AsyncImage(
                     model = userActivity.icon,
                     contentDescription = null,
                     modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .size(64.dp)
+                        .size(48.dp)
                         .clip(MaterialTheme.shapes.small)
-                        .padding(8.dp),
+                        .align(Alignment.CenterVertically),
                     contentScale = ContentScale.Crop
                 )
-                //Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(8.dp))
             }
             // Middle: Market Info
-            Column(
-                modifier =
-                    Modifier
-                        .padding(8.dp)
-                        .weight(1f)
-            ) {
+            Column(Modifier.weight(1f)) {
                 Text(
                     text = userActivity.title,
                     style = MaterialTheme.typography.bodyLarge,
@@ -74,15 +70,14 @@ internal fun UserActivityItem(
                 )
                 Spacer(Modifier.height(8.dp))
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+                FlowRow(
+                    itemVerticalAlignment = Alignment.CenterVertically,
                 ) {
                     val textStyle = MaterialTheme.typography.bodyMedium
 
                     if(userActivity.type == "TRADE") {
                         Text(
-                            text = (userActivity.side?.lowercase()?.capitalize(Locale.current)
-                                ?: "") + " ",
+                            text = (userActivity.side?.lowercase()?.capitalize(Locale.current)?: "") + " ",
                             style = textStyle,
                         )
 
@@ -105,6 +100,8 @@ internal fun UserActivityItem(
                     Text(
                         text = " ${UiFormatter.formatPositionSize(userActivity.size)} shares",
                         style = textStyle,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
@@ -112,8 +109,6 @@ internal fun UserActivityItem(
 
             // Right: Amount + Time
             Column(
-                modifier = Modifier
-                    .padding(8.dp),
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Center,
             ) {

@@ -55,8 +55,7 @@ class PolymarketRepositoryImpl @Inject constructor(
         archived: Boolean?,
         closed: Boolean?,
         order: PolymarketEventsSortOrder,
-        eventId: String?,
-        excludeTagId: Long?
+        excludeTagIds: List<Long>?
     ): Result<PaginationDataDto<EventDto>> {
         val orderString = when (order) {
             PolymarketEventsSortOrder.VOLUME_24H -> "volume24hr"
@@ -82,8 +81,7 @@ class PolymarketRepositoryImpl @Inject constructor(
                 closed = closed,
                 order = orderString,
                 ascending = isAscending,
-                eventId = eventId,
-                excludeTagId = excludeTagId
+                excludeTagIds = excludeTagIds
             )
         }
     }
@@ -97,7 +95,11 @@ class PolymarketRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getEventDetails(eventId: String): Result<EventDto> {
-        return safeApiCall { gammaApiClient.getEventDetails(eventIdOrSlug = eventId) }
+        return safeApiCall { gammaApiClient.getEventDetails(eventId = eventId) }
+    }
+
+    override suspend fun getEventDetailsBySlug(eventSlug: String): Result<EventDto> {
+        return safeApiCall { gammaApiClient.getEventDetailsBySlug(eventSlug = eventSlug) }
     }
 
     override suspend fun getMarketTimeseries(

@@ -13,6 +13,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.appendPathSegments
+import io.ktor.http.parametersOf
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -33,8 +34,9 @@ class PolymarketGammaApiClient @Inject constructor(
         tagSlug: String? = null,
         order: String? = "volume",
         ascending: Boolean? = false,
-        excludeTagId: Long? = null,
-        eventId: String? = null // Note: API might ignore this non-standard parameter
+        excludeTagIds: List<Long>? = null,
+        slugList: List<String>? = null,
+        idList: List<String>? = null
     ): PaginationDataDto<EventDto> {
         return client.get("events/pagination") {
             parameter("limit", limit)
@@ -48,8 +50,9 @@ class PolymarketGammaApiClient @Inject constructor(
             parameter("tag_slug", tagSlug)
             parameter("order", order)
             parameter("ascending", ascending)
-            parameter("exclude_tag_id", excludeTagId)
-            parameter("event_id", eventId) // Include potentially ignored param
+            excludeTagIds?.also { list -> parametersOf("exclude_tag_id", list.map { it.toString() }) }
+            slugList?.also { parametersOf("slug", it) }
+            idList?.also { parametersOf("id", it) }
         }.body()
     }
 
@@ -69,13 +72,19 @@ class PolymarketGammaApiClient @Inject constructor(
         }.body()
     }
 
-    suspend fun getEventDetails(eventIdOrSlug: String): EventDto {
-        // Use string interpolation directly in the path
+    suspend fun getEventDetails(eventId: String): EventDto {
         return client.get("events") {
             url {
-                appendPathSegments(eventIdOrSlug)
+                appendPathSegments(eventId)
             }
-            // No need for url block here if baseUrl is set in defaultRequest
+        }.body()
+    }
+
+    suspend fun getEventDetailsBySlug(eventSlug: String): EventDto {
+        return client.get("events/slug") {
+            url {
+                appendPathSegments(eventSlug)
+            }
         }.body()
     }
 

@@ -31,7 +31,7 @@ data class UserClosedPositionDto(
     @SerialName("oppositeAsset") val oppositeAsset: String? = null,
 
     // Event information
-    @SerialName("eventSlug") val eventSlug: String? = null,
+    @SerialName("eventSlug") val eventSlug: String,
     @SerialName("endDate") val endDate: String? = null, // End date as string
 
     // Position size and value (mainly for ACTIVE positions)

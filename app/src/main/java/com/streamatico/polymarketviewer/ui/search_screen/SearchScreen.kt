@@ -44,12 +44,11 @@ import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
-    onNavigateToEventDetail: (eventId: String) -> Unit,
+    onNavigateToEventDetail: (eventSlug: String) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -73,7 +72,7 @@ private fun SearchScreenContent(
     onSearchQueryChange: (String) -> Unit,
     onClearSearch: () -> Unit,
     onNavigateBack: () -> Unit,
-    onNavigateToEventDetail: (String) -> Unit,
+    onNavigateToEventDetail: (eventSlug: String) -> Unit,
     onRetry: () -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -225,18 +224,17 @@ private fun NoResultsState() {
 @Composable
 private fun SearchResultsList(
     events: List<OptimizedEventDto>,
-    onEventClick: (String) -> Unit
+    onEventClick: (eventSlug: String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 8.dp),
-        //contentPadding = PaddingValues(vertical = 8.dp)
     ) {
         items(events, key = { it.id }) { event ->
             EventListItem(
                 event = event,
-                onEventClick = onEventClick
+                onClick = { onEventClick(event.slug) }
             )
         }
     }

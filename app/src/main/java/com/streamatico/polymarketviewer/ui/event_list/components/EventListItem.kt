@@ -57,7 +57,7 @@ private const val MAX_VISIBLE_MARKETS = 3
 @Composable
 fun EventListItem(
     event: BaseEventDto,
-    onEventClick: (String) -> Unit // New parameter for clicking on the entire card
+    onClick: () -> Unit // New parameter for clicking on the entire card
 ) {
     // State to track whether the market/outcome list is expanded
     var isMarketListExpanded by rememberSaveable { mutableStateOf(false) }
@@ -67,7 +67,7 @@ fun EventListItem(
             .alpha(if (event.closed) 0.7f else 1f)
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 8.dp)
-            .clickable { onEventClick(event.id) }, // Click on the entire card
+            .clickable { onClick() }, // Click on the entire card
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
             Column {
@@ -413,7 +413,7 @@ private fun OutcomeTextRow(
 @Composable
 private fun BinaryEventListItemPreview() {
     PolymarketAppTheme {
-        EventListItem(event = PreviewMocks.sampleBinaryEvent, onEventClick = {})
+        EventListItem(event = PreviewMocks.sampleBinaryEvent, onClick = {})
     }
 }
 
@@ -421,7 +421,7 @@ private fun BinaryEventListItemPreview() {
 @Composable
 private fun MultiMarketEventListItemPreview() {
     PolymarketAppTheme {
-        EventListItem(event = PreviewMocks.sampleMultiMarketOptimizedEvent, onEventClick = {})
+        EventListItem(event = PreviewMocks.sampleMultiMarketOptimizedEvent, onClick = {})
     }
 }
 
@@ -430,6 +430,6 @@ private fun MultiMarketEventListItemPreview() {
 @Composable
 private fun CategoricalEventListItemPreview() {
     PolymarketAppTheme {
-        EventListItem(event = PreviewMocks.sampleCategoricalEvent, onEventClick = {})
+        EventListItem(event = PreviewMocks.sampleCategoricalEvent, onClick = {})
     }
 }

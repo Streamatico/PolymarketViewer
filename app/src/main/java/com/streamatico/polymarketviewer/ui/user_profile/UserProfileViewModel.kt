@@ -54,7 +54,7 @@ class UserProfileViewModel @Inject constructor(
         )
     )
 
-    val activity = PaginatedList(
+    val activities = PaginatedList(
         PaginatedDataLoader(
             scope = viewModelScope,
             fetchData = { offset -> repository.getActivity(userAddress, limit = 20, offset = offset) }

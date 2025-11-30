@@ -114,11 +114,11 @@ private fun EventDetailsContent(
     isChartAvailable: Boolean,
     selectedRange: TimeRange,
     onRangeSelected: (TimeRange) -> Unit,
-    // Receive hierarchical comments
+
     displayableComments: List<HierarchicalComment>,
-    // Receive other states/callbacks
     commentsLoading: Boolean,
     commentsError: String?,
+
     onNavigateToUserProfile: (profileAddress: String) -> Unit,
     holdersOnly: Boolean,
     commentsSortOrder: CommentsSortOrder,
@@ -129,6 +129,7 @@ private fun EventDetailsContent(
     onRefreshComments: () -> Unit,
     onNavigateBack: () -> Unit,
     onRetry: () -> Unit,
+
     // Receive the token map
     eventOutcomeTokensMap: Map<String, String>,
     eventTokenToGroupTitleMap: Map<String, String>
@@ -151,9 +152,6 @@ private fun EventDetailsContent(
                     // Show event title if scrolled past the main title, otherwise show "Event Details"
                     val titleText = if (showTitleInAppBar && eventTitle != null) eventTitle else "Event Details"
                     Text(titleText, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    /* // Static title
-                    Text("Event Details")
-                    */
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {

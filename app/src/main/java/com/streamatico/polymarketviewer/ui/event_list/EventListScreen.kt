@@ -364,7 +364,7 @@ fun EventListContent(
                                         items(uiState.events, key = { it.id }) { event ->
                                             EventListItem(
                                                 event = event,
-                                                onEventClick = onNavigateToEventDetail
+                                                onClick = { onNavigateToEventDetail(event.slug) }
                                             )
                                         }
                                         if (isLoadingMore) {
@@ -388,7 +388,7 @@ fun EventListContent(
                                         items(uiState.events, key = { it.id }) { event ->
                                             EventListItem(
                                                 event = event,
-                                                onEventClick = onNavigateToEventDetail
+                                                onClick = { onNavigateToEventDetail(event.slug) }
                                             )
                                         }
                                         if (isLoadingMore) {

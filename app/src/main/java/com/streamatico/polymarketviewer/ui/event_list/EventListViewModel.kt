@@ -110,8 +110,11 @@ class EventListViewModel  @Inject constructor(
             _eventList.value = emptyList()
         }
 
-        val spamGamesTagId: Long = 100639
-        val excludeTagId = if(currentOrder == PolymarketEventsSortOrder.NEWEST) spamGamesTagId else null
+        val excludeTagIds = if(currentOrder == PolymarketEventsSortOrder.NEWEST) {
+            listOf(POLYMARKET_GAMES_TAG_ID)
+        } else {
+            null
+        }
 
         viewModelScope.launch {
             try {
@@ -124,7 +127,7 @@ class EventListViewModel  @Inject constructor(
                     archived = false,
                     closed = false,
                     order = currentOrder,
-                    excludeTagId = excludeTagId
+                    excludeTagIds = excludeTagIds
                 )
 
                 result.onSuccess { newEvents ->
@@ -204,3 +207,5 @@ class EventListViewModel  @Inject constructor(
 
 const val POLYMARKET_EVENTS_SLUG_ALL = "all"
 const val POLYMARKET_EVENTS_SLUG_ALL_TITLE = "All"
+
+private const val POLYMARKET_GAMES_TAG_ID: Long = 100639

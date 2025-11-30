@@ -29,8 +29,8 @@ data class UserPositionDto(
     @SerialName("oppositeAsset") val oppositeAsset: String? = null,
 
     // Event information
-    @SerialName("eventId") val eventId: String? = null,
-    @SerialName("eventSlug") val eventSlug: String? = null,
+    @SerialName("eventId") val eventId: String,
+    @SerialName("eventSlug") val eventSlug: String,
     @SerialName("endDate") val endDate: String? = null, // End date as string
 
     // Position size and value (mainly for ACTIVE positions)

@@ -36,8 +36,8 @@ class EventDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    // Get event ID from navigation arguments
-    private val eventId: String = checkNotNull(savedStateHandle[AppDestinations.EVENT_ID_ARG])
+    // Get event Slug from navigation arguments
+    private val eventSlug: String = checkNotNull(savedStateHandle[AppDestinations.EVENT_SLUG_ARG])
 
     // --- Event Details State --- //
     private val _uiState = MutableStateFlow<EventDetailUiState>(EventDetailUiState.Loading)
@@ -62,7 +62,6 @@ class EventDetailViewModel @Inject constructor(
 
     // --- Comments State (Keep flat list for loading/pagination) --- //
     private val _commentsState = MutableStateFlow<List<CommentDto>>(emptyList())
-    // val commentsState: StateFlow<List<CommentDto>> = _commentsState.asStateFlow() // Keep private if only hierarchical is exposed
 
     // --- Derived Hierarchical Comments State --- //
     val hierarchicalCommentsState: StateFlow<List<HierarchicalComment>> = _commentsState
@@ -100,7 +99,7 @@ class EventDetailViewModel @Inject constructor(
             _uiState.value = EventDetailUiState.Loading
             _eventOutcomeTokensMap.value = emptyMap() // Reset maps
             _eventTokenToGroupTitleMap.value = emptyMap()
-            val eventResult = polymarketRepository.getEventDetails(eventId)
+            val eventResult = polymarketRepository.getEventDetailsBySlug(eventSlug)
 
             eventResult.onSuccess {
                 _uiState.value = EventDetailUiState.Success(it)
@@ -123,7 +122,6 @@ class EventDetailViewModel @Inject constructor(
         val titleMap = mutableMapOf<String, String>()
 
         event.markets.forEach { market ->
-            // Use Kotlinx Serialization
             val tokenIds = market.clobTokenIds
             val outcomes = market.outcomes
             val displayTitle = market.getTitleOrDefault(market.question)
@@ -187,7 +185,6 @@ class EventDetailViewModel @Inject constructor(
                             val xValue = roundEpochToTimeRange(point.timestamp, timeRange) // Timestamp in seconds
                             val yValue = price.toFloat() * 100f
                             // Populate the map for the axis formatter, using milliseconds for consistency
-                            //allChartPoints[xValue] = timestampMillis
                             xValue to yValue
                         }
                     }
@@ -277,7 +274,7 @@ class EventDetailViewModel @Inject constructor(
                 commentsOffset = _commentsState.value.count { comment -> comment.parentCommentID == null }
                 if (reset) _commentsError.value = null // Clear error on successful refresh
             }.onFailure {
-                Log.e(TAG, "Failed to load comments for event $eventId", it)
+                Log.e(TAG, "Failed to load comments for event $eventSlug", it)
                 // Show error only if it's an initial load/refresh or list is empty
                 if (reset || _commentsState.value.isEmpty()) {
                     _commentsError.value = it.message ?: "Failed to load comments"
@@ -347,7 +344,7 @@ class EventDetailViewModel @Inject constructor(
                 // Find replies for this top-level comment, default to empty list
                 replies = repliesMap[topLevel.id] ?: emptyList()
             )
-        } // Consider sorting topLevelComments by createdAt if needed
+        }
     }
 
     companion object {
@@ -376,16 +373,12 @@ private fun roundEpochToTimeRange(epochSeconds: Long, timeRange: TimeRange): Lon
 }
 
 private fun roundEpochToMinutes(epochSeconds: Long, minutes: Int): Long {
-    val interval = minutes * 60L       // длина интервала в секундах
-    val half = interval / 2            // половина интервала для мат. округления
+    val interval = minutes * 60L
+    val half = interval / 2
     return ((epochSeconds + half) / interval) * interval
 }
 
 
-// --- Label for timeline data (dates) --- //
-// val xToDateMapKey = ExtraStore.Key<Map<Float, Long>>()
-
-//private const val CHART_UPDATE_INTERVAL_MINUTES = 15
 private const val DEFAULT_COMMENTS_LIMIT = 40
 
 internal val LegendLabelKey = ExtraStore.Key<Set<OrderedChartLabel>>()

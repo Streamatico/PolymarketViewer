@@ -27,7 +27,7 @@ data class UserActivityDto(
     @SerialName("title") val title: String,
     @SerialName("slug") val slug: String? = null,
     @SerialName("icon") val icon: String? = null,
-    @SerialName("eventSlug") val eventSlug: String? = null,
+    @SerialName("eventSlug") val eventSlug: String,
     @SerialName("outcome") val outcome: String,
     @SerialName("outcomeIndex") val outcomeIndex: Int? = null,
 

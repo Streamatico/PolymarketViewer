@@ -33,9 +33,7 @@ interface PolymarketRepository {
         archived: Boolean? = false,
         closed: Boolean? = false,
         order: PolymarketEventsSortOrder,
-        //ascending: Boolean? = false,
-        eventId: String? = null,
-        excludeTagId: Long? = null
+        excludeTagIds: List<Long>? = null
     ): Result<PaginationDataDto<EventDto>>
 
     /**
@@ -47,6 +45,11 @@ interface PolymarketRepository {
      * Gets details of one event by ID.
      */
     suspend fun getEventDetails(eventId: String): Result<EventDto>
+
+    /**
+     * Gets details of one event by slug.
+     */
+    suspend fun getEventDetailsBySlug(eventSlug: String): Result<EventDto>
 
     /**
      * Gets list of available tags (categories).
