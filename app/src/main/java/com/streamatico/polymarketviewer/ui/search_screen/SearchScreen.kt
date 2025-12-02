@@ -34,7 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.OptimizedEventDto
 import com.streamatico.polymarketviewer.ui.event_list.components.EventListItem
@@ -46,7 +45,7 @@ import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 
 @Composable
 fun SearchScreen(
-    viewModel: SearchViewModel = hiltViewModel(),
+    viewModel: SearchViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToEventDetail: (eventSlug: String) -> Unit,
 ) {

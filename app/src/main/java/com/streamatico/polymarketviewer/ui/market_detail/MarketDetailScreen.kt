@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.streamatico.polymarketviewer.data.model.gamma_api.MarketDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.getTitleOrDefault
@@ -55,7 +54,7 @@ import java.time.OffsetDateTime
 // Market details screen
 @Composable
 fun MarketDetailScreen(
-    viewModel: MarketDetailViewModel = hiltViewModel(),
+    viewModel: MarketDetailViewModel,
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()

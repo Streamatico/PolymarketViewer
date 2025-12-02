@@ -1,23 +1,25 @@
 package com.streamatico.polymarketviewer.ui.event_detail
 
 import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.streamatico.polymarketviewer.data.model.clob_api.TimeseriesPointDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.CommentDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.MarketDto
-import com.streamatico.polymarketviewer.data.model.clob_api.TimeseriesPointDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.getTitleOrDefault
 import com.streamatico.polymarketviewer.data.model.gamma_api.yesPrice
 import com.streamatico.polymarketviewer.domain.repository.CommentsParentEntityId
 import com.streamatico.polymarketviewer.domain.repository.CommentsParentEntityType
 import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
-import com.streamatico.polymarketviewer.ui.navigation.AppDestinations
+import com.streamatico.polymarketviewer.ui.navigation.NavKeys
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -28,16 +30,20 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class EventDetailViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = EventDetailViewModel.Factory::class)
+class EventDetailViewModel @AssistedInject constructor(
     private val polymarketRepository: PolymarketRepository,
-    savedStateHandle: SavedStateHandle
+    @Assisted val navKey: NavKeys.EventDetail
 ) : ViewModel() {
 
     // Get event Slug from navigation arguments
-    private val eventSlug: String = checkNotNull(savedStateHandle[AppDestinations.EVENT_SLUG_ARG])
+    private val eventSlug: String = navKey.eventSlug
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: NavKeys.EventDetail): EventDetailViewModel
+    }
 
     // --- Event Details State --- //
     private val _uiState = MutableStateFlow<EventDetailUiState>(EventDetailUiState.Loading)

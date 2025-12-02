@@ -30,7 +30,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -39,14 +38,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.streamatico.polymarketviewer.BuildConfig
 import com.streamatico.polymarketviewer.R
-import com.streamatico.polymarketviewer.data.preferences.UserPreferencesRepository
 import com.streamatico.polymarketviewer.ui.shared.components.AppLogoIcon
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
-import kotlinx.coroutines.launch
 
 const val PRIVACY_POLICY_URL = "https://streamatico.net/polymarketapp/privacy_policy"
 const val GITHUB_URL = "https://github.com/streamatico/PolymarketViewer"
@@ -56,22 +52,15 @@ const val COMPANY_URL = "https://streamatico.net/"
 @Composable
 fun AboutScreen(
     onNavigateBack: () -> Unit,
-    userPreferencesRepository: UserPreferencesRepository = hiltViewModel<AboutViewModel>().userPreferencesRepository
+    viewModel: AboutViewModel,
 ) {
-    val userPreferences by userPreferencesRepository
-        .userPreferencesFlow
+    val userPreferences by viewModel.userPreferencesFlow
         .collectAsState(initial = null)
-
-    val scope = rememberCoroutineScope()
 
     AboutScreenContent(
         onNavigateBack = onNavigateBack,
         analyticsEnabled = userPreferences?.analyticsEnabled,
-        onAnalyticsEnabledChange = { enabled ->
-            scope.launch {
-                userPreferencesRepository.setAnalyticsEnabled(enabled)
-            }
-        }
+        onAnalyticsEnabledChange = viewModel::setAnalyticsEnabled
     )
 }
 

@@ -34,7 +34,6 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.EventType
@@ -56,7 +55,7 @@ import kotlinx.coroutines.flow.map
 
 @Composable
 fun EventDetailScreen(
-    viewModel: EventDetailViewModel = hiltViewModel(),
+    viewModel: EventDetailViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToMarketDetail: (String) -> Unit,
     onNavigateToUserProfile: (profileAddress: String) -> Unit

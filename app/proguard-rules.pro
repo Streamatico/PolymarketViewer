@@ -60,3 +60,6 @@
 
 # Disable obfuscation to simplify debugging of reproducible build issues.
 -dontobfuscate
+
+# Navigation 3 NavKey classes
+-keep class com.streamatico.polymarketviewer.ui.navigation.** { *; }

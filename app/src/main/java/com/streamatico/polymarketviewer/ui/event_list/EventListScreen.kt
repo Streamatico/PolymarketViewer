@@ -70,7 +70,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 import com.streamatico.polymarketviewer.R
@@ -89,7 +88,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun EventListScreen(
-    viewModel: EventListViewModel = hiltViewModel(),
+    viewModel: EventListViewModel,
     onNavigateToEventDetail: (String) -> Unit,
     onNavigateToAbout: () -> Unit,
     onNavigateToSearch: () -> Unit,

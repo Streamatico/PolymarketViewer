@@ -7,10 +7,13 @@ import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.TagDto
 import com.streamatico.polymarketviewer.domain.repository.PolymarketEventsSortOrder
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 private const val PAGE_SIZE = 20
 
@@ -20,10 +23,15 @@ sealed interface EventListUiState {
     data class Error(val message: String) : EventListUiState
 }
 
-@HiltViewModel
-class EventListViewModel  @Inject constructor(
+@HiltViewModel(assistedFactory = EventListViewModel.Factory::class)
+class EventListViewModel  @AssistedInject constructor(
     private val polymarketRepository: PolymarketRepository
 ) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): EventListViewModel
+    }
 
     // --- UI State --- //
     private val _uiState = MutableStateFlow<EventListUiState>(EventListUiState.Loading)

@@ -1,24 +1,30 @@
 package com.streamatico.polymarketviewer.ui.market_detail
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
-import com.streamatico.polymarketviewer.ui.navigation.AppDestinations
+import com.streamatico.polymarketviewer.ui.navigation.NavKeys
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class MarketDetailViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = MarketDetailViewModel.Factory::class)
+class MarketDetailViewModel @AssistedInject constructor(
     private val polymarketRepository: PolymarketRepository,
-    savedStateHandle: SavedStateHandle // To get marketId from navigation arguments
+    @Assisted val navKey: NavKeys.MarketDetail
 ) : ViewModel() {
 
-    private val marketId: String = checkNotNull(savedStateHandle[AppDestinations.MARKET_ID_ARG])
+    private val marketId: String = navKey.marketId
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: NavKeys.MarketDetail): MarketDetailViewModel
+    }
 
     private val _uiState = MutableStateFlow<MarketDetailUiState>(MarketDetailUiState.Loading)
     val uiState: StateFlow<MarketDetailUiState> = _uiState.asStateFlow()
@@ -44,4 +50,4 @@ class MarketDetailViewModel @Inject constructor(
     fun retryLoad() {
         loadMarketDetails()
     }
-} 
+}

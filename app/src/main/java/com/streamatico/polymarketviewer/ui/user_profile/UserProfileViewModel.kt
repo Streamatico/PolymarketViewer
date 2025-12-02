@@ -1,19 +1,21 @@
 package com.streamatico.polymarketviewer.ui.user_profile
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.streamatico.polymarketviewer.data.model.gamma_api.UserProfileDto
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
-import com.streamatico.polymarketviewer.ui.navigation.AppDestinations
+import com.streamatico.polymarketviewer.ui.navigation.NavKeys
+
 import com.streamatico.polymarketviewer.ui.shared.PaginatedDataLoader
 import com.streamatico.polymarketviewer.ui.shared.PaginatedList
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 sealed interface UserProfileState {
     data object Loading : UserProfileState
@@ -21,13 +23,18 @@ sealed interface UserProfileState {
     data class Error(val message: String) : UserProfileState
 }
 
-@HiltViewModel
-class UserProfileViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = UserProfileViewModel.Factory::class)
+class UserProfileViewModel @AssistedInject constructor(
     private val repository: PolymarketRepository,
-    savedStateHandle: SavedStateHandle
+    @Assisted val navKey: NavKeys.UserProfile
 ) : ViewModel() {
 
-    private val userAddress: String = checkNotNull(savedStateHandle[AppDestinations.USER_ADDRESS_ARG])
+    private val userAddress: String = navKey.userAddress
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: NavKeys.UserProfile): UserProfileViewModel
+    }
 
     // Separate state for profile header
     private val _profileState = MutableStateFlow<UserProfileState>(UserProfileState.Loading)

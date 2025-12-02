@@ -44,7 +44,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.data_api.UserActivityDto
@@ -64,7 +63,7 @@ import com.streamatico.polymarketviewer.ui.user_profile.components.PositionItem
 
 @Composable
 fun UserProfileScreen(
-    viewModel: UserProfileViewModel = hiltViewModel(),
+    viewModel: UserProfileViewModel,
     onEventClick: (eventSlug: String) -> Unit,
     onNavigateBack: () -> Unit
 ) {

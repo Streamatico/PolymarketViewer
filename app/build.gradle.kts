@@ -116,7 +116,9 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
     // Ktor client
     implementation(libs.bundles.ktor.client)
@@ -125,7 +127,6 @@ dependencies {
     // DI: Hilt dependencies
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-
     implementation(libs.androidx.hilt.navigation.compose)
 
     // Coil for Image Loading

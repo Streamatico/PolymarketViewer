@@ -49,6 +49,7 @@ This project follows **Clean Architecture** principles with clear separation of 
 *   **Language**: [Kotlin](https://kotlinlang.org/)
 *   **UI**: [Jetpack Compose](https://developer.android.com/jetpack/compose) with [Material 3](https://m3.material.io/)
 *   **Architecture**: Clean Architecture with MVVM
+*   **Navigation**: [Navigation 3](https://developer.android.com/develop/ui/compose/navigation/navigation3)
 *   **Networking**: [Ktor Client](https://ktor.io/) 
 *   **Charts**: [Vico Charts](https://github.com/patrykandpatrick/vico)
 *   **DI**: [Hilt](https://dagger.dev/hilt/)
