@@ -8,10 +8,7 @@ import com.streamatico.polymarketviewer.ui.navigation.NavKeys
 
 import com.streamatico.polymarketviewer.ui.shared.PaginatedDataLoader
 import com.streamatico.polymarketviewer.ui.shared.PaginatedList
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
-import dagger.hilt.android.lifecycle.HiltViewModel
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,18 +20,13 @@ sealed interface UserProfileState {
     data class Error(val message: String) : UserProfileState
 }
 
-@HiltViewModel(assistedFactory = UserProfileViewModel.Factory::class)
-class UserProfileViewModel @AssistedInject constructor(
+
+class UserProfileViewModel(
     private val repository: PolymarketRepository,
-    @Assisted val navKey: NavKeys.UserProfile
+    navKey: NavKeys.UserProfile
 ) : ViewModel() {
 
     private val userAddress: String = navKey.userAddress
-
-    @AssistedFactory
-    interface Factory {
-        fun create(navKey: NavKeys.UserProfile): UserProfileViewModel
-    }
 
     // Separate state for profile header
     private val _profileState = MutableStateFlow<UserProfileState>(UserProfileState.Loading)

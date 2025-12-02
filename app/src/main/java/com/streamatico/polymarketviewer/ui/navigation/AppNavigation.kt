@@ -4,7 +4,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -42,9 +43,7 @@ fun AppNavigation() {
         },
         entryProvider = entryProvider {
             entry<NavKeys.EventList> {
-                val vm = hiltViewModel<EventListViewModel, EventListViewModel.Factory>(
-                    creationCallback = { factory -> factory.create() }
-                )
+                val vm = koinViewModel<EventListViewModel>()
                 EventListScreen(
                     viewModel = vm,
                     onNavigateToEventDetail = { eventSlug ->
@@ -55,9 +54,7 @@ fun AppNavigation() {
                 )
             }
             entry<NavKeys.Search> {
-                val vm = hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
-                    creationCallback = { factory -> factory.create() }
-                )
+                val vm = koinViewModel<SearchViewModel>()
                 SearchScreen(
                     viewModel = vm,
                     onNavigateBack = { backStack.removeLastOrNull() },
@@ -67,9 +64,7 @@ fun AppNavigation() {
                 )
             }
             entry<NavKeys.EventDetail> { key ->
-                val vm = hiltViewModel<EventDetailViewModel, EventDetailViewModel.Factory>(
-                    creationCallback = { factory -> factory.create(key) }
-                )
+                val vm = koinViewModel<EventDetailViewModel> { parametersOf(key) }
                 EventDetailScreen(
                     viewModel = vm,
                     onNavigateBack = { backStack.removeLastOrNull() },
@@ -82,18 +77,14 @@ fun AppNavigation() {
                 )
             }
             entry<NavKeys.MarketDetail> { key ->
-                val vm = hiltViewModel<MarketDetailViewModel, MarketDetailViewModel.Factory>(
-                    creationCallback = { factory -> factory.create(key) }
-                )
+                val vm = koinViewModel<MarketDetailViewModel> { parametersOf(key) }
                 MarketDetailScreen(
                     viewModel = vm,
                     onNavigateBack = { backStack.removeLastOrNull() }
                 )
             }
             entry<NavKeys.UserProfile> { key ->
-                val vm = hiltViewModel<UserProfileViewModel, UserProfileViewModel.Factory>(
-                    creationCallback = { factory -> factory.create(key) }
-                )
+                val vm = koinViewModel<UserProfileViewModel> { parametersOf(key) }
                 UserProfileScreen(
                     viewModel = vm,
                     onNavigateBack = { backStack.removeLastOrNull() },
@@ -103,9 +94,7 @@ fun AppNavigation() {
                 )
             }
             entry<NavKeys.About> {
-                val vm = hiltViewModel<AboutViewModel, AboutViewModel.Factory>(
-                    creationCallback = { factory -> factory.create() }
-                )
+                val vm = koinViewModel<AboutViewModel>()
                 AboutScreen(
                     viewModel = vm,
                     onNavigateBack = { backStack.removeLastOrNull() }

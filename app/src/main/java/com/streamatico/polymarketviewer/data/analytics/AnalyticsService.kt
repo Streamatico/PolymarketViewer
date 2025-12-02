@@ -3,21 +3,18 @@ package com.streamatico.polymarketviewer.data.analytics
 import android.os.Build
 import android.util.Log
 import com.streamatico.polymarketviewer.BuildConfig
-import com.streamatico.polymarketviewer.data.network.PolymarketHttpClientNames
 import com.streamatico.polymarketviewer.data.preferences.UserPreferencesRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import kotlinx.coroutines.flow.first
 import java.util.Locale
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Singleton
+
 
 private const val ANALYTICS_ENDPOINT = "https://polymarket-ping.streamatico.workers.dev/ping"
 
-@Singleton
-class AnalyticsService @Inject constructor(
-    @Named(PolymarketHttpClientNames.ANALYTICS_CLIENT) private val httpClient: HttpClient,
+
+class AnalyticsService(
+    private val httpClient: HttpClient,
     private val userPreferencesRepository: UserPreferencesRepository
 ) {
     /**

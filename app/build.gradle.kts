@@ -8,9 +8,6 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 
     alias(libs.plugins.google.ksp)
-
-    // DI support
-    alias(libs.plugins.hilt.android)
 }
 
 kotlin {
@@ -124,10 +121,10 @@ dependencies {
     implementation(libs.bundles.ktor.client)
     implementation(libs.kotlinx.serialization.json)
 
-    // DI: Hilt dependencies
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-    implementation(libs.androidx.hilt.navigation.compose)
+    // DI: Koin
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
 
     // Coil for Image Loading
     implementation(libs.bundles.coil)
@@ -136,7 +133,6 @@ dependencies {
     implementation(libs.bundles.vico)
 
     implementation(libs.kotlinx.coroutines.android)
-    //implementation(libs.androidx.savedstate.ktx)
 
     // User Preferences storage
     implementation(libs.androidx.data.store)

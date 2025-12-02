@@ -6,18 +6,18 @@ import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+
+
+
 data class UserPreferences( // Data class to hold related preferences
     val preferencesVersion: Int,
     val analyticsEnabled: Boolean = true, // Opt-out: enabled by default
     val isFirstLaunch: Boolean = true // True until first analytics ping is sent
 )
 
-@Singleton
-class UserPreferencesRepository @Inject constructor(
+
+class UserPreferencesRepository(
     private val dataStore: DataStore<Preferences>
 ) {
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data

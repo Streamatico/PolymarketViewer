@@ -25,9 +25,9 @@ import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.RedirectResponseException
 import io.ktor.client.plugins.ServerResponseException
-import javax.inject.Inject
 
-class PolymarketRepositoryImpl @Inject constructor(
+
+class PolymarketRepositoryImpl(
     private val gammaApiClient: PolymarketGammaApiClient,
     private val clobApiClient: PolymarketClobApiClient,
     private val dataApiClient: PolymarketDataApiClient,

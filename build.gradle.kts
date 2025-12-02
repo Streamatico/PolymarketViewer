@@ -6,7 +6,4 @@ plugins {
 
     // KSP
     alias(libs.plugins.google.ksp) apply false
-
-    // DI support
-    alias(libs.plugins.hilt.android) apply false
 }

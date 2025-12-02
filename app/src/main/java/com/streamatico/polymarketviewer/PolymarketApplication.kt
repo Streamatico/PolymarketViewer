@@ -4,30 +4,35 @@ import android.app.Application
 import android.util.Log
 import com.streamatico.polymarketviewer.data.analytics.AnalyticsService
 import com.streamatico.polymarketviewer.data.preferences.UserPreferencesRepository
-import dagger.hilt.android.HiltAndroidApp
+import com.streamatico.polymarketviewer.di.appModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
 
-@HiltAndroidApp
 class PolymarketApplication : Application() {
 
     companion object {
         private const val TAG = "PolymarketApp"
     }
 
-    @Inject
-    lateinit var userPreferencesRepository: UserPreferencesRepository
-
-    @Inject
-    lateinit var analyticsService: AnalyticsService
+    private val userPreferencesRepository: UserPreferencesRepository by inject()
+    private val analyticsService: AnalyticsService by inject()
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     override fun onCreate() {
         super.onCreate()
+
+        startKoin {
+            androidLogger()
+            androidContext(this@PolymarketApplication)
+            modules(appModule)
+        }
 
         initializeUserPreferences()
         sendAnalyticsPing()

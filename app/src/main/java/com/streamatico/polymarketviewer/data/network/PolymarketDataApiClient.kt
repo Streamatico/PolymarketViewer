@@ -11,12 +11,12 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.parametersOf
-import javax.inject.Inject
-import javax.inject.Named
+
+
 
 // Class to handle API calls to Polymarket Gamma API using Ktor
-class PolymarketDataApiClient @Inject constructor(
-    @Named(PolymarketHttpClientNames.DATA_CLIENT) private val client: HttpClient
+class PolymarketDataApiClient(
+    private val client: HttpClient
 ) {
     suspend fun getPositions(
         address: String,

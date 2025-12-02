@@ -4,12 +4,12 @@ import com.streamatico.polymarketviewer.data.model.clob_api.PriceHistoryResponse
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import javax.inject.Inject
-import javax.inject.Named
+
+
 
 // Class to handle API calls to Polymarket Clob API using Ktor
-class PolymarketClobApiClient @Inject constructor(
-    @Named(PolymarketHttpClientNames.CLOB_CLIENT) private val client: HttpClient
+class PolymarketClobApiClient(
+    private val client: HttpClient
 ) {
 
     /**

@@ -11,9 +11,9 @@ import androidx.compose.ui.Modifier
 
 import com.streamatico.polymarketviewer.ui.navigation.AppNavigation
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
+
+
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -17,10 +17,7 @@ import com.streamatico.polymarketviewer.domain.repository.CommentsParentEntityTy
 import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import com.streamatico.polymarketviewer.ui.navigation.NavKeys
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
-import dagger.hilt.android.lifecycle.HiltViewModel
+
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,19 +28,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-@HiltViewModel(assistedFactory = EventDetailViewModel.Factory::class)
-class EventDetailViewModel @AssistedInject constructor(
+
+class EventDetailViewModel(
     private val polymarketRepository: PolymarketRepository,
-    @Assisted val navKey: NavKeys.EventDetail
+    navKey: NavKeys.EventDetail
 ) : ViewModel() {
 
     // Get event Slug from navigation arguments
     private val eventSlug: String = navKey.eventSlug
-
-    @AssistedFactory
-    interface Factory {
-        fun create(navKey: NavKeys.EventDetail): EventDetailViewModel
-    }
 
     // --- Event Details State --- //
     private val _uiState = MutableStateFlow<EventDetailUiState>(EventDetailUiState.Loading)

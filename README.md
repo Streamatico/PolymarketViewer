@@ -42,7 +42,7 @@ This project follows **Clean Architecture** principles with clear separation of 
 *   **Presentation Layer** (`ui/`) - Jetpack Compose UI with ViewModels and UI states
 *   **Domain Layer** (`domain/`) - Use cases and business logic interfaces
 *   **Data Layer** (`data/`) - Repositories, data sources, and DTOs
-*   **Dependency Injection** (`di/`) - Hilt modules for dependency management
+*   **Dependency Injection** (`di/`) - Koin modules for dependency management
 
 ## Technologies
 
@@ -52,7 +52,7 @@ This project follows **Clean Architecture** principles with clear separation of 
 *   **Navigation**: [Navigation 3](https://developer.android.com/develop/ui/compose/navigation/navigation3)
 *   **Networking**: [Ktor Client](https://ktor.io/) 
 *   **Charts**: [Vico Charts](https://github.com/patrykandpatrick/vico)
-*   **DI**: [Hilt](https://dagger.dev/hilt/)
+*   **DI**: [Koin](https://insert-koin.io/)
 *   **Images**: [Coil](https://coil-kt.github.io/coil/)
 
 ## Acknowledgments
@@ -62,6 +62,7 @@ Special thanks to the maintainers and contributors of the open source libraries 
 *   [Vico Charts](https://github.com/patrykandpatrick/vico) by @patrykandpatrick - Beautiful charts for Compose
 *   [Coil](https://github.com/coil-kt/coil) - Efficient image loading for Android
 *   [Ktor](https://github.com/ktorio/ktor) - Kotlin multiplatform HTTP client
+*   [Koin](https://github.com/InsertKoinIO/koin) - Pragmatic lightweight dependency injection for Kotlin
 *   [Kotlin](https://github.com/JetBrains/kotlin) - The amazing language powering this app
 
 ## Requirements
