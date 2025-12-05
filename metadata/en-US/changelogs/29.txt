@@ -1,0 +1,2 @@
+- Fixed search error in SearchScreen
+- Improved design of positions in UserProfileScreen
