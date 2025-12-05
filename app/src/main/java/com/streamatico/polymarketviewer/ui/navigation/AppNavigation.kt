@@ -35,12 +35,9 @@ fun AppNavigation() {
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator()
         ),
-        transitionSpec = {
-            slideInHorizontally { it } togetherWith slideOutHorizontally { -it }
-        },
-        popTransitionSpec = {
-            slideInHorizontally { -it } togetherWith slideOutHorizontally { it }
-        },
+        transitionSpec = { horizontalSlideTransition(forward = true) },
+        popTransitionSpec = { horizontalSlideTransition(forward = false) },
+        predictivePopTransitionSpec = { horizontalSlideTransition(forward = false) },
         entryProvider = entryProvider {
             entry<NavKeys.EventList> {
                 val vm = koinViewModel<EventListViewModel>()
@@ -103,3 +100,7 @@ fun AppNavigation() {
         }
     )
 }
+
+private fun horizontalSlideTransition(forward: Boolean) =
+    slideInHorizontally { if (forward) it else -it } togetherWith
+        slideOutHorizontally { if (forward) -it else it }
