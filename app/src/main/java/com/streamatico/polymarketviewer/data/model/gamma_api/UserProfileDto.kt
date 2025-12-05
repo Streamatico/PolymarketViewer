@@ -10,7 +10,7 @@ import java.time.OffsetDateTime
 // Represents the user data fetched from the profile API
 @Serializable
 data class UserProfileDto(
-    @SerialName("id") val id: String,
+    @SerialName("id") val id: String? = null,
     @Serializable(with = OffsetDateTimeSerializer::class)
     @SerialName("createdAt") val createdAt: OffsetDateTime? = null, // Consider parsing to OffsetDateTime if needed
     @SerialName("proxyWallet") override val proxyWallet: String, // User's wallet address
@@ -20,7 +20,7 @@ data class UserProfileDto(
     @SerialName("name") override val name: String? = null,
     @SerialName("users") val users: List<UserAssociationDto>? = null, // Additional user info if available
     @SerialName("verifiedBadge") val verifiedBadge: Boolean = false,
-    @SerialName("bio")val bio: String? = null,
+    @SerialName("bio") val bio: String? = null,
 ) : PolymarketUserProfile
 
 // Represents the nested 'users' object in the profile API response
