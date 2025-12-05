@@ -34,8 +34,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -170,7 +170,7 @@ private fun UserProfileContent(
     activities: PaginatedList<UserActivityDto>,
     onEventClick: (eventSlug: String) -> Unit,
 ) {
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
     val tabs = listOf("Positions", "Activity")
 
     // Lazy loading effect based on selected tab
@@ -320,7 +320,7 @@ private fun PositionsTab(
     closedPositions: PaginatedList<UserClosedPositionDto>,
     onEventClick: (eventSlug: String) -> Unit,
 ) {
-    var showActive by remember { mutableStateOf(true) }
+    var showActive by rememberSaveable { mutableStateOf(true) }
 
     // Load closed positions when switched to closed tab
     LaunchedEffect(showActive) {
