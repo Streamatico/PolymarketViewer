@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -187,30 +189,37 @@ private fun UserProfileContent(
             userTraded = userTraded,
         )
 
-        // Tabs
-        SecondaryTabRow(selectedTabIndex = selectedTabIndex) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index },
-                    text = { Text(title) }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+        ) {
+            // Tabs
+            SecondaryTabRow(selectedTabIndex = selectedTabIndex) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTabIndex == index,
+                        onClick = { selectedTabIndex = index },
+                        text = { Text(title) }
+                    )
+                }
+            }
+
+            // Content
+            when (selectedTabIndex) {
+                0 -> PositionsTab(
+                    activePositions = activePositions,
+                    closedPositions = closedPositions,
+                    onEventClick = onEventClick
+                )
+
+                1 -> ActivityTab(
+                    activityList = activities,
+                    onClick = { activityItem ->
+                        onEventClick(activityItem.eventSlug)
+                    }
                 )
             }
-        }
-
-        // Content
-        when (selectedTabIndex) {
-            0 -> PositionsTab(
-                activePositions = activePositions,
-                closedPositions = closedPositions,
-                onEventClick = onEventClick
-            )
-            1 -> ActivityTab(
-                activityList = activities,
-                onClick = { activityItem ->
-                    onEventClick(activityItem.eventSlug)
-                }
-            )
         }
     }
 }
@@ -365,7 +374,19 @@ private fun FilterChip(selected: Boolean, onClick: () -> Unit, label: String) {
     androidx.compose.material3.FilterChip(
         selected = selected,
         onClick = onClick,
-        label = { Text(label) }
+        label = { Text(label) },
+        leadingIcon =
+            if (selected) {
+                {
+                    Icon(
+                        imageVector = Icons.Filled.Done,
+                        contentDescription = null,
+                        modifier = Modifier.size(FilterChipDefaults.IconSize),
+                    )
+                }
+            } else {
+                null
+            }
     )
 }
 
