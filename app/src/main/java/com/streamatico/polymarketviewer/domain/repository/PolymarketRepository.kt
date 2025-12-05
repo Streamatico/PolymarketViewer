@@ -42,11 +42,6 @@ interface PolymarketRepository {
     suspend fun getMarketDetails(marketId: String): Result<MarketDto>
 
     /**
-     * Gets details of one event by ID.
-     */
-    suspend fun getEventDetails(eventId: String): Result<EventDto>
-
-    /**
      * Gets details of one event by slug.
      */
     suspend fun getEventDetailsBySlug(eventSlug: String): Result<EventDto>
@@ -81,7 +76,7 @@ interface PolymarketRepository {
         // Add other parameters if needed
     ): Result<List<CommentDto>>
 
-    suspend fun getUserProfile(address: String): Result<UserProfileDto>
+    suspend fun getUserProfile(userAddress: String): Result<UserProfileDto>
 
     /**
      * Search for events, profiles, and tags (optimized format).
@@ -102,13 +97,13 @@ interface PolymarketRepository {
     ): Result<SearchResultDto>
 
     suspend fun getPositions(
-        address: String,
+        userAddress: String,
         limit: Int = 10,
         offset: Int = 0
     ): Result<List<UserPositionDto>>
 
     suspend fun getClosedPositions(
-        address: String,
+        userAddress: String,
         limit: Int = 10,
         offset: Int = 0
     ): Result<List<UserClosedPositionDto>>
@@ -127,7 +122,7 @@ interface PolymarketRepository {
     ): Result<UserTradedDto>
 
     suspend fun getActivity(
-        address: String,
+        userAddress: String,
         limit: Int = 20,
         offset: Int = 0
     ): Result<List<UserActivityDto>>

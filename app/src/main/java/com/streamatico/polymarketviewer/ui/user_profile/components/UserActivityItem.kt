@@ -11,14 +11,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CardGiftcard
+import androidx.compose.material.icons.outlined.Savings
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
@@ -26,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.data_api.UserActivityDto
 import com.streamatico.polymarketviewer.ui.shared.ComposableUiFormatter
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
@@ -35,19 +40,25 @@ import com.streamatico.polymarketviewer.ui.tooling.ProfilePreviewMocks
 @Composable
 internal fun UserActivityItem(
     userActivity: UserActivityDto,
-    onClick: () -> Unit
+    onClick: (() -> Unit)?
 ) {
-    OutlinedCard(
+    PositionCard(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .let{
+                if(onClick != null) {
+                    it.clickable(onClick = onClick)
+                } else {
+                    it
+                }
+            }
     ) {
         Row(
             Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
         ) {
-            if (userActivity.icon != null) {
+            if (!userActivity.icon.isNullOrBlank()) {
                 AsyncImage(
                     model = userActivity.icon,
                     contentDescription = null,
@@ -58,53 +69,28 @@ internal fun UserActivityItem(
                     contentScale = ContentScale.Crop
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-            }
-            // Middle: Market Info
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = userActivity.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Spacer(Modifier.height(8.dp))
-
-                FlowRow(
-                    itemVerticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val textStyle = MaterialTheme.typography.bodyMedium
-
-                    if(userActivity.type == "TRADE") {
-                        Text(
-                            text = (userActivity.side?.lowercase()?.capitalize(Locale.current)?: "") + " ",
-                            style = textStyle,
-                        )
-
-                        val positionText =
-                            "${userActivity.outcome} ${UiFormatter.formatPriceCents(userActivity.price)}"
-
-                        TrendText(
-                            isPositive = userActivity.outcomeIndex == 0,
-                            text = positionText,
-                            style = textStyle,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    } else {
-                        Text(
-                            text = userActivity.type.lowercase().capitalize(Locale.current),
-                            style = textStyle,
-                        )
-                    }
-
-                    Text(
-                        text = " ${UiFormatter.formatPositionSize(userActivity.size)} shares",
-                        style = textStyle,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+            } else {
+                val imageVector = when(userActivity.type) {
+                    "REWARD" -> Icons.Outlined.CardGiftcard
+                    "YIELD" -> Icons.Outlined.Savings
+                    else -> null
                 }
 
+                if(imageVector != null) {
+                    Icon(
+                        imageVector = imageVector,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .align(Alignment.CenterVertically),
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+            }
+
+            // Middle: Market Info
+            Column(Modifier.weight(1f)) {
+                MarketInfoSection(userActivity)
             }
 
             // Right: Amount + Time
@@ -130,6 +116,63 @@ internal fun UserActivityItem(
     }
 }
 
+@Composable
+private fun MarketInfoSection(userActivity: UserActivityDto) {
+    val title = when(userActivity.type) {
+        "REWARD" -> stringResource(R.string.activity_title_reward)
+        "YIELD" -> stringResource(R.string.activity_title_yield)
+        else -> userActivity.title.ifBlank { "???" }
+    }
+
+    Text(
+        text = title,
+        style = MaterialTheme.typography.bodyLarge,
+        fontWeight = FontWeight.Medium,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+    )
+    Spacer(Modifier.height(4.dp))
+
+    FlowRow(
+        itemVerticalAlignment = Alignment.CenterVertically,
+    ) {
+        val textStyle = MaterialTheme.typography.bodyMedium
+
+        when(userActivity.type) {
+            "TRADE" -> {
+                Text(
+                    text = (userActivity.side?.lowercase()?.capitalize(Locale.current)?: "") + " ",
+                    style = textStyle,
+                )
+
+                val positionText =
+                    "${userActivity.outcome} ${UiFormatter.formatPriceCents(userActivity.price)}"
+
+                TrendText(
+                    isPositive = userActivity.outcomeIndex == 0,
+                    text = positionText,
+                    style = textStyle,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            else -> {
+                Text(
+                    text = userActivity.type.lowercase().capitalize(Locale.current),
+                    style = textStyle,
+                )
+            }
+        }
+
+        Text(
+            text = " ${UiFormatter.formatPositionSize(userActivity.size)} shares",
+            style = textStyle,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+
 // ==== Previews ====
 
 @Preview
@@ -147,5 +190,23 @@ private fun RedeemActivityItemPreview() {
     UserActivityItem(
         userActivity = ProfilePreviewMocks.sampleUserActivityRedeem,
         onClick = {}
+    )
+}
+
+@Preview
+@Composable
+private fun YieldActivityItemPreview() {
+    UserActivityItem(
+        userActivity = ProfilePreviewMocks.sampleUserActivityYield,
+        onClick = null
+    )
+}
+
+@Preview
+@Composable
+private fun RewardActivityItemPreview() {
+    UserActivityItem(
+        userActivity = ProfilePreviewMocks.sampleUserActivityReward,
+        onClick = null
     )
 }

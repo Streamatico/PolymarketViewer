@@ -216,6 +216,51 @@ internal object ProfilePreviewMocks {
         profileImage = "https://polymarket-upload.s3.us-east-2.amazonaws.com/profile-image-2222222222.jpeg",
         profileImageOptimized = ""
     )
+    val sampleUserActivityYield = UserActivityDto(
+        proxyWallet = "0x5dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx73",
+        timestamp = OffsetDateTime.parse("2025-11-27T09:12:22Z"),
+        conditionId = "",
+        type = "YIELD",
+        size = 0.0942,
+        usdcSize = 0.0942,
+        transactionHash = "0xf20xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxe58f75",
+        price = 0.0,
+        asset = "",
+        side = "",
+        outcomeIndex = 999,
+        title = "",
+        slug = "",
+        icon = "",
+        eventSlug = "",
+        outcome = "",
+        name = "user1",
+        pseudonym = "pseudo-user1",
+        bio = "",
+        profileImage = "",
+        profileImageOptimized = ""
+    )
 
-    //val sampleUserActivities = listOf(sampleUserActivityTrade, sampleUserActivityRedeem)
+    val sampleUserActivityReward = UserActivityDto(
+        proxyWallet = "0x5dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx73",
+        timestamp = OffsetDateTime.parse("2025-11-27T09:12:22Z"),
+        conditionId = "",
+        type = "REWARD",
+        size = 1.0397,
+        usdcSize = 1.0397,
+        transactionHash = "0xf20xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxe58f75",
+        price = 0.0,
+        asset = "",
+        side = "",
+        outcomeIndex = 999,
+        title = "",
+        slug = "",
+        icon = "",
+        eventSlug = "",
+        outcome = "",
+        name = "user1",
+        pseudonym = "pseudo-user1",
+        bio = "",
+        profileImage = "",
+        profileImageOptimized = ""
+    )
 }

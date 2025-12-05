@@ -19,6 +19,9 @@
     <string name="search_no_results">No events found</string>
     <string name="search_clear">Clear search</string>
 
+    <string name="activity_title_yield">Rewards</string>
+    <string name="activity_title_reward">Rewards distributed for epoch</string>
+
     <!-- Analytics settings -->
     <string name="analytics_title">Help Improve the App</string>
     <string name="analytics_description">Send anonymous usage statistics (app version, Android SDK, language). No personal data is collected.</string>

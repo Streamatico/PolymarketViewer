@@ -87,6 +87,9 @@ class PolymarketRepositoryImpl(
     }
 
     override suspend fun getMarketDetails(marketId: String): Result<MarketDto> {
+        if(marketId.isBlank()) {
+            return Result.failure(IllegalArgumentException("marketId is blank"))
+        }
         return safeApiCall { gammaApiClient.getMarketDetails(marketId = marketId) }
     }
 
@@ -94,11 +97,10 @@ class PolymarketRepositoryImpl(
         return safeApiCall { gammaApiClient.getTags() }
     }
 
-    override suspend fun getEventDetails(eventId: String): Result<EventDto> {
-        return safeApiCall { gammaApiClient.getEventDetails(eventId = eventId) }
-    }
-
     override suspend fun getEventDetailsBySlug(eventSlug: String): Result<EventDto> {
+        if(eventSlug.isBlank()) {
+            return Result.failure(IllegalArgumentException("Event slug is blank"))
+        }
         return safeApiCall { gammaApiClient.getEventDetailsBySlug(eventSlug = eventSlug) }
     }
 
@@ -109,6 +111,10 @@ class PolymarketRepositoryImpl(
         startTimestamp: Long?,
         endTimestamp: Long?
     ): Result<List<TimeseriesPointDto>> {
+        if(marketTokenId.isBlank()) {
+            return Result.failure(IllegalArgumentException("MarketTokenId is blank"))
+        }
+
         return safeApiCall {
             clobApiClient.getPricesHistory(
                 marketTokenId = marketTokenId,
@@ -127,6 +133,10 @@ class PolymarketRepositoryImpl(
         holdersOnly: Boolean,
         order: CommentsSortOrder,
     ): Result<List<CommentDto>> {
+        if(parentEntity.entityId.isBlank()) {
+            return Result.failure(IllegalArgumentException("ParentEntity.entityId is blank"))
+        }
+
         val resultOrder: String
         val resultAscending: Boolean
 
@@ -156,8 +166,12 @@ class PolymarketRepositoryImpl(
         }
     }
 
-    override suspend fun getUserProfile(address: String): Result<UserProfileDto> {
-        return safeApiCall { gammaApiClient.getUserProfile(address) }
+    override suspend fun getUserProfile(userAddress: String): Result<UserProfileDto> {
+        if(userAddress.isBlank()) {
+            return Result.failure(IllegalArgumentException("User address is blank"))
+        }
+
+        return safeApiCall { gammaApiClient.getUserProfile(userAddress) }
     }
 
     override suspend fun searchPublicOptimized(
@@ -189,13 +203,17 @@ class PolymarketRepositoryImpl(
     }
 
     override suspend fun getPositions(
-        address: String,
+        userAddress: String,
         limit: Int,
         offset: Int
     ): Result<List<UserPositionDto>> {
+        if(userAddress.isBlank()) {
+            return Result.failure(IllegalArgumentException("User address is blank"))
+        }
+
         return safeApiCall {
             dataApiClient.getPositions(
-                address = address,
+                address = userAddress,
                 limit = limit,
                 offset = offset,
                 sortBy = "CURRENT",
@@ -206,13 +224,13 @@ class PolymarketRepositoryImpl(
     }
 
     override suspend fun getClosedPositions(
-        address: String,
+        userAddress: String,
         limit: Int,
         offset: Int
     ): Result<List<UserClosedPositionDto>> {
         return safeApiCall {
             dataApiClient.getClosedPositions(
-                address = address,
+                address = userAddress,
                 limit = limit,
                 offset = offset,
                 sortBy = "realizedpnl",
@@ -225,6 +243,10 @@ class PolymarketRepositoryImpl(
         userAddress: String,
         markets: List<String>?
     ): Result<List<UserTotalPositionValueDto>> {
+        if(userAddress.isBlank()) {
+            return Result.failure(IllegalArgumentException("User address is blank"))
+        }
+
         return safeApiCall {
             dataApiClient.getTotalPositionsValue(
                 user = userAddress,
@@ -236,6 +258,10 @@ class PolymarketRepositoryImpl(
     override suspend fun getUserLeaderBoard(
         userAddress: String,
     ) : Result<LeaderBoardDto?> {
+        if(userAddress.isBlank()) {
+            return Result.failure(IllegalArgumentException("User address is blank"))
+        }
+
         val result = safeApiCall {
             dataApiClient.getLeaderBoard(
                 user = userAddress
@@ -255,6 +281,10 @@ class PolymarketRepositoryImpl(
     override suspend fun getUserTraded(
         userAddress: String,
     ): Result<UserTradedDto> {
+        if(userAddress.isBlank()) {
+            return Result.failure(IllegalArgumentException("User address is blank"))
+        }
+
         return safeApiCall {
             dataApiClient.getUserTraded(
                 user = userAddress
@@ -263,13 +293,17 @@ class PolymarketRepositoryImpl(
     }
 
     override suspend fun getActivity(
-        address: String,
+        userAddress: String,
         limit: Int,
         offset: Int
     ): Result<List<UserActivityDto>> {
+        if(userAddress.isBlank()) {
+            return Result.failure(IllegalArgumentException("User address is blank"))
+        }
+
         return safeApiCall {
             dataApiClient.getActivity(
-                address = address,
+                address = userAddress,
                 limit = limit,
                 offset = offset
             )

@@ -215,9 +215,7 @@ private fun UserProfileContent(
 
                 1 -> ActivityTab(
                     activityList = activities,
-                    onClick = { activityItem ->
-                        onEventClick(activityItem.eventSlug)
-                    }
+                    onEventClick = { eventSlug -> onEventClick(eventSlug) }
                 )
             }
         }
@@ -359,13 +357,10 @@ private fun PositionsTab(
             ) { position ->
                 ClosedPositionItem(
                     position = position,
-                    onClick = {
-                        onEventClick(position.eventSlug)
-                    }
+                    onClick = { onEventClick(position.eventSlug) }
                 )
             }
         }
-
     }
 }
 
@@ -393,7 +388,7 @@ private fun FilterChip(selected: Boolean, onClick: () -> Unit, label: String) {
 @Composable
 private fun ActivityTab(
     activityList: PaginatedList<UserActivityDto>,
-    onClick: (userActivity: UserActivityDto) -> Unit
+    onEventClick: (eventSlug: String) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -405,7 +400,11 @@ private fun ActivityTab(
         ) { item ->
             UserActivityItem(
                 userActivity = item,
-                onClick = { onClick(item) },
+                onClick = if(item.eventSlug.isNotBlank()) {
+                    { onEventClick(item.eventSlug) }
+                } else {
+                    null
+                }
             )
         }
     }
