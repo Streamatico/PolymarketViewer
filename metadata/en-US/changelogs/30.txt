@@ -1,0 +1,2 @@
+- Add unique avatar tints to distinguish users without profile pictures
+- Display activities with "REWARD" and "YIELD" types
