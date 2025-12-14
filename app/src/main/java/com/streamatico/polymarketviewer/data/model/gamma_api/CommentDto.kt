@@ -15,7 +15,7 @@ data class CommentDto(
     @SerialName("body") val body: String? = null, // Changed from text
 
     // Author/User Info
-    @SerialName("profile") val profile: CommentCreatorProfileDto? = null, // Changed from author: AuthorDto?
+    @SerialName("profile") val profile: CommentCreatorProfileDto, // Changed from author: AuthorDto?
     @SerialName("userAddress") val userAddress: String? = null, // Added
 
     // Timestamps

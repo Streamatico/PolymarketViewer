@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
@@ -39,29 +38,27 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.data_api.UserActivityDto
 import com.streamatico.polymarketviewer.data.model.data_api.UserClosedPositionDto
 import com.streamatico.polymarketviewer.data.model.data_api.UserPositionDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.UserProfileDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.getDisplayName
+import com.streamatico.polymarketviewer.ui.shared.components.ProfileIcon
 import com.streamatico.polymarketviewer.ui.shared.PaginatedDataLoader
 import com.streamatico.polymarketviewer.ui.shared.PaginatedList
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.OpenInBrowserIconButton
 import com.streamatico.polymarketviewer.ui.tooling.ProfilePreviewMocks
-import com.streamatico.polymarketviewer.ui.user_profile.components.UserActivityItem
 import com.streamatico.polymarketviewer.ui.user_profile.components.ClosedPositionItem
 import com.streamatico.polymarketviewer.ui.user_profile.components.PaginatedListContent
 import com.streamatico.polymarketviewer.ui.user_profile.components.PositionItem
+import com.streamatico.polymarketviewer.ui.user_profile.components.UserActivityItem
 
 @Composable
 fun UserProfileScreen(
@@ -239,14 +236,11 @@ private fun UserProfileHeader(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            AsyncImage(
-                model = userProfile.profileImage,
+            ProfileIcon(
+                userAddress = userProfile.proxyWallet,
+                iconUrl = userProfile.profileImage,
                 contentDescription = "${userProfile.getDisplayName()}'s avatar",
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentScale = ContentScale.Crop
+                avatarSize = 80.dp,
             )
 
             Column(

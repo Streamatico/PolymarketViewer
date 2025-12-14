@@ -1,7 +1,5 @@
 package com.streamatico.polymarketviewer.ui.event_detail.components
 
-// --- Imports needed for Comment Composables --- //
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
@@ -28,9 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -39,7 +34,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.streamatico.polymarketviewer.data.model.gamma_api.CommentDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.PolymarketUserProfile
 import com.streamatico.polymarketviewer.data.model.gamma_api.ProfilePositionDto
@@ -47,6 +41,7 @@ import com.streamatico.polymarketviewer.data.model.gamma_api.getDisplayName
 import com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment
 import com.streamatico.polymarketviewer.ui.shared.ComposableUiFormatter
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
+import com.streamatico.polymarketviewer.ui.shared.components.ProfileIcon
 import com.streamatico.polymarketviewer.ui.theme.ExtendedTheme
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 import java.math.BigDecimal
@@ -115,6 +110,7 @@ internal fun CommentItem(
         }
     }
 }
+
 // --- Composable helper to calculate badge data --- //
 @Composable
 private fun rememberPositionBadgeData(
@@ -123,8 +119,8 @@ private fun rememberPositionBadgeData(
     eventTokenToGroupTitleMap: Map<String, String>,
     isBinaryEvent: Boolean
 ): PositionBadgeData {
-    val relevantPosition = remember(comment.profile?.positions, eventOutcomeTokensMap, eventTokenToGroupTitleMap) {
-        comment.profile?.positions
+    val relevantPosition = remember(comment.profile.positions, eventOutcomeTokensMap, eventTokenToGroupTitleMap) {
+        comment.profile.positions
             ?.filter { eventOutcomeTokensMap.containsKey(it.tokenId) }
             ?.maxByOrNull {
                 try { BigDecimal(it.positionSize) } catch (_: Exception) { BigDecimal.ZERO }
@@ -185,26 +181,23 @@ private fun CommentContent(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            AsyncImage(
-                model = userProfile?.profileImage,
-                contentDescription = "${userProfile?.getDisplayName() ?: "Anon"}'s avatar",
-                modifier = Modifier
-                    .size(avatarSize)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clickable { userProfile?.also(onUserProfileClick) },
-                contentScale = ContentScale.Crop
+            ProfileIcon(
+                userAddress = userProfile.proxyWallet,
+                iconUrl = userProfile.profileImage,
+                contentDescription = userProfile.getDisplayName(),
+                avatarSize = avatarSize,
+                onClick = { onUserProfileClick(userProfile) },
             )
             Spacer(modifier = Modifier.width(if (avatarSize > 24.dp) 12.dp else 8.dp)) // Adjust spacing based on avatar
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) { // Row for name and position badge
                     Text(
-                        userProfile?.getDisplayName() ?: "Anonymous",
+                        userProfile.getDisplayName(),
                         fontWeight = if (avatarSize > 24.dp) FontWeight.Bold else FontWeight.Medium, // Adjust weight
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.clickable { userProfile?.also(onUserProfileClick) }
+                        modifier = Modifier.clickable { userProfile.also(onUserProfileClick) }
                     )
                     // Display position badge if found
                     if (badgeData.formattedSize != null && badgeData.displayTitle != null) {
@@ -318,7 +311,8 @@ private fun ReplyItem(
     )
 }
 
-// --- Previews for Comment Composables --- //
+
+// ===== Previews =========
 
 @Composable
 private fun CommentItemPreviewTemplate(
@@ -377,3 +371,4 @@ private fun ReplyItemStandalonePreview() {
         )
     }
 }
+

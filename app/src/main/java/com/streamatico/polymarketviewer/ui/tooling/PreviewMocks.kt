@@ -52,7 +52,7 @@ internal object PreviewMocks {
         id = "reply-1",
         body = "Disagree, I think it's going down.",
         createdAt = OffsetDateTime.now().minusMinutes(30),
-        profile = sampleUserProfile.copy(name = "BearishBob", proxyWallet = "0xabc123def456fed789"),
+        profile = sampleUserProfile.copy(name = "BearishBob", proxyWallet = "0xabc123def456fed789", profileImage = "https://polymarket-upload.s3.us-east-2.amazonaws.com/fallback-image.png"),
         parentEntityType = null,
         parentEntityID = null,
         parentCommentID = null,
