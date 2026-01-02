@@ -1,5 +1,6 @@
 package com.streamatico.polymarketviewer.ui.navigation
 
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -103,4 +104,4 @@ fun AppNavigation() {
 
 private fun horizontalSlideTransition(forward: Boolean) =
     slideInHorizontally { if (forward) it else -it } togetherWith
-        slideOutHorizontally { if (forward) -it else it }
+        slideOutHorizontally { if (forward) -it else it } + fadeOut()
