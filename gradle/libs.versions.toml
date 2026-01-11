@@ -18,7 +18,7 @@ nav3Core = "1.0.0"
 
 coil = "3.3.0"
 coroutines = "1.10.2"
-vico = "2.3.6"
+vico = "2.4.1"
 
 ktor = "3.3.3"  # Ktor version
 kotlinx-serialization = "1.9.0" # Kotlinx Serialization version
