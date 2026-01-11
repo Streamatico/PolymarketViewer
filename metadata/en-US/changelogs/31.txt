@@ -1,0 +1,2 @@
+- Added Watchlist functionality to bookmark favorite events
+- Improved event list navigation and scroll behavior
