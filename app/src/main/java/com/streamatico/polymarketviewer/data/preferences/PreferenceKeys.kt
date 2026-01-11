@@ -12,4 +12,7 @@ object PreferenceKeys {
 
     // First launch flag
     val IS_FIRST_LAUNCH = booleanPreferencesKey("is_first_launch")
+
+    // Watchlist event IDs
+    val WATCHLIST_EVENT_IDS = androidx.datastore.preferences.core.stringSetPreferencesKey("watchlist_event_ids")
 }

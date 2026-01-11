@@ -7,22 +7,22 @@ import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.TagDto
 import com.streamatico.polymarketviewer.domain.repository.PolymarketEventsSortOrder
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
+import com.streamatico.polymarketviewer.data.preferences.UserPreferencesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-
-private const val PAGE_SIZE = 20
-
-sealed interface EventListUiState {
-    object Loading : EventListUiState
-    data class Success(val events: List<EventDto>) : EventListUiState
-    data class Error(val message: String) : EventListUiState
-}
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
 class EventListViewModel(
-    private val polymarketRepository: PolymarketRepository
+    private val polymarketRepository: PolymarketRepository,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
+
+    // --- Watchlist --- //
+    val watchlistIds: StateFlow<Set<String>> = userPreferencesRepository.watchlistIds
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
     // --- UI State --- //
     private val _uiState = MutableStateFlow<EventListUiState>(EventListUiState.Loading)
@@ -109,6 +109,36 @@ class EventListViewModel(
             _eventList.value = emptyList()
         }
 
+        // Determine parameters for repository call
+        val idList: List<String>?
+        val reqTagSlug: String?
+        val reqActive: Boolean?
+        val reqClosed: Boolean?
+        val reqArchived: Boolean?
+
+        if (currentTag == POLYMARKET_EVENTS_SLUG_WATCHLIST) {
+            val ids = watchlistIds.value.toList()
+            if (ids.isEmpty()) {
+                // If watchlist is empty, skip network call and show empty success state
+                _uiState.value = EventListUiState.Success(emptyList(), currentTag, currentOrder)
+                _isRefreshing.value = false
+                _isLoadingMore.value = false
+                _canLoadMore.value = false
+                return
+            }
+            idList = ids
+            reqTagSlug = null
+            reqActive = null // Fetch all statuses for watchlist
+            reqClosed = null
+            reqArchived = null
+        } else {
+            idList = null
+            reqTagSlug = if (currentTag == POLYMARKET_EVENTS_SLUG_ALL) null else currentTag
+            reqActive = true
+            reqClosed = false
+            reqArchived = false
+        }
+
         val excludeTagIds = if(currentOrder == PolymarketEventsSortOrder.NEWEST) {
             listOf(POLYMARKET_GAMES_TAG_ID)
         } else {
@@ -119,14 +149,15 @@ class EventListViewModel(
             try {
                 Log.d("EventListViewModel", "Loading events with order: $currentOrder, tag: $currentTag, offset: $offsetToLoad")
                 val result = polymarketRepository.getEvents(
-                    active = true,
+                    active = reqActive,
                     limit = PAGE_SIZE,
                     offset = offsetToLoad,
-                    tagSlug = if(currentTag == POLYMARKET_EVENTS_SLUG_ALL) null else currentTag,
-                    archived = false,
-                    closed = false,
+                    tagSlug = reqTagSlug,
+                    archived = reqArchived,
+                    closed = reqClosed,
                     order = currentOrder,
-                    excludeTagIds = excludeTagIds
+                    excludeTagIds = excludeTagIds,
+                    ids = idList
                 )
 
                 result.onSuccess { newEvents ->
@@ -150,7 +181,7 @@ class EventListViewModel(
                             }
                         }
 
-                    _uiState.value = EventListUiState.Success(sortedList)
+                    _uiState.value = EventListUiState.Success(sortedList, currentTag, currentOrder)
                 }
                 result.onFailure { exception ->
                     Log.e("EventListViewModel", "Failed to load events", exception)
@@ -160,7 +191,7 @@ class EventListViewModel(
                     if ((isInitialLoad || isManualRefresh || currentUniqueList.isEmpty())) {
                         _uiState.value = EventListUiState.Error(exception.message ?: "Error loading events")
                     } else {
-                        _uiState.value = EventListUiState.Success(currentUniqueList) // Show existing data on pagination error
+                        _uiState.value = EventListUiState.Success(currentUniqueList, currentTag, currentOrder) // Show existing data on pagination error
                     }
                 }
             } finally {
@@ -169,7 +200,7 @@ class EventListViewModel(
                 // Ensure loading state is cleared if it was set initially
                 if (isInitialLoad && _uiState.value is EventListUiState.Loading) {
                    if (_eventList.value.isNotEmpty()) {
-                       _uiState.value = EventListUiState.Success(_eventList.value)
+                       _uiState.value = EventListUiState.Success(_eventList.value, currentTag, currentOrder)
                    } // Error state is handled in onFailure
                 }
             }
@@ -202,9 +233,40 @@ class EventListViewModel(
             loadEventsInternal(isInitialLoad = true) // Trigger initial load with new sort
         }
     }
+
+    fun toggleWatchlist(eventId: String) {
+        viewModelScope.launch {
+            val success = userPreferencesRepository.toggleWatchlist(eventId)
+            if (!success) {
+                // TODO: Emit side effect to show error message (e.g., Snackbar)
+                // For now, we just silently ignore or could log it
+                Log.w("EventListViewModel", "Watchlist limit reached")
+            }
+            // If we are currently on the Watchlist tab, we might want to refresh the list
+            // However, removing an item while viewing it might be jarring.
+            // For now, let's keep it simple. If we are on watchlist and remove it, it won't disappear until refresh.
+            // But if we want it to be reactive, we should observe watchlistIds in loadEventsInternal or trigger reload.
+            if (_selectedTagSlug.value == POLYMARKET_EVENTS_SLUG_WATCHLIST) {
+                // Optional: trigger refresh to remove it from view
+                // loadEventsInternal(isManualRefresh = true)
+            }
+        }
+    }
 }
 
+sealed interface EventListUiState {
+    object Loading : EventListUiState
+    data class Success(
+        val events: List<EventDto>,
+        val tagSlug: String = POLYMARKET_EVENTS_SLUG_ALL,
+        val sortOrder: PolymarketEventsSortOrder = PolymarketEventsSortOrder.DEFAULT_SORT_ORDER
+    ) : EventListUiState
+    data class Error(val message: String) : EventListUiState
+}
+
+private const val PAGE_SIZE = 20
+
 const val POLYMARKET_EVENTS_SLUG_ALL = "all"
-const val POLYMARKET_EVENTS_SLUG_ALL_TITLE = "All"
+const val POLYMARKET_EVENTS_SLUG_WATCHLIST = "watchlist"
 
 private const val POLYMARKET_GAMES_TAG_ID: Long = 100639

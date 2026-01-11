@@ -1,6 +1,7 @@
 package com.streamatico.polymarketviewer.ui.event_list.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -26,12 +28,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.BaseEventDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.BaseMarketDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.EventType
@@ -47,6 +52,10 @@ import com.streamatico.polymarketviewer.ui.shared.sortedByViewPriority
 import com.streamatico.polymarketviewer.ui.shared.sortedForShortView
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 
 // Constant for maximum number of visible markets
 private const val MAX_VISIBLE_MARKETS = 3
@@ -57,6 +66,8 @@ private const val MAX_VISIBLE_MARKETS = 3
 @Composable
 fun EventListItem(
     event: BaseEventDto,
+    isInWatchlist: Boolean = false,
+    onToggleWatchlist: () -> Unit = {},
     onClick: () -> Unit // New parameter for clicking on the entire card
 ) {
     // State to track whether the market/outcome list is expanded
@@ -70,13 +81,14 @@ fun EventListItem(
             .clickable { onClick() }, // Click on the entire card
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
+        Box {
             Column {
                 // --- Header (Image + Title) --- //
                 Row(
                     modifier = Modifier.padding(
                         start = 16.dp,
                         top = 12.dp,
-                        end = 16.dp,
+                        end = 48.dp, // Add padding for bookmark icon
                         bottom = 8.dp
                     ),
                     verticalAlignment = Alignment.CenterVertically
@@ -109,7 +121,7 @@ fun EventListItem(
 
                     EventType.CategoricalMarket -> {
                         val mainMarketByThreshold = event.baseMarkets
-                            .firstOrNull{ it.groupItemThreshold == 0 }
+                            .firstOrNull { it.groupItemThreshold == 0 }
 
                         CategoricalMarketContent(
                             market = mainMarketByThreshold ?: event.baseMarkets.first(),
@@ -122,7 +134,7 @@ fun EventListItem(
 
                     EventType.MultiMarket -> {
                         val sortedMarkets = remember(event, isMarketListExpanded) {
-                            if(isMarketListExpanded || event.baseMarkets.size <= (MAX_VISIBLE_MARKETS+1)) {
+                            if (isMarketListExpanded || event.baseMarkets.size <= (MAX_VISIBLE_MARKETS + 1)) {
                                 event.baseMarkets.sortedByViewPriority(event.sortByEnum)
                             } else {
                                 event.baseMarkets
@@ -156,7 +168,7 @@ fun EventListItem(
                     // Volume on the left
                     event.volume?.let {
                         Text(
-                            text = UiFormatter.formatLargeValueUsd(it, suffix = " Vol."),
+                            text = UiFormatter.formatLargeValueUsd(it, suffix = stringResource(R.string.volume_suffix)),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.outline,
                         )
@@ -176,7 +188,22 @@ fun EventListItem(
                     )
                 }
             }
+
+            // Watchlist Button
+            IconButton(
+                onClick = onToggleWatchlist,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+            ) {
+                Icon(
+                    imageVector = if (isInWatchlist) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                    contentDescription = stringResource(if (isInWatchlist) R.string.cd_remove_from_watchlist else R.string.cd_add_to_watchlist),
+                    tint = if (isInWatchlist) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
+    }
 }
 
 // --- Composable for "Binary market" style --- //
@@ -252,7 +279,10 @@ private fun CategoricalMarketContent(
             // Display "+ X more outcomes"
              Spacer(modifier = Modifier.height(4.dp))
              Text(
-                text = if (isExpanded) "Show less" else "+ ${outcomePricePairs.size - MAX_VISIBLE_MARKETS} more ${getOutcomeDeclension(outcomePricePairs.size - MAX_VISIBLE_MARKETS)}",
+                text = if (isExpanded) stringResource(R.string.action_show_less) else {
+                    val count = outcomePricePairs.size - MAX_VISIBLE_MARKETS
+                    pluralStringResource(R.plurals.more_outcomes_count, count, count)
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary, // Make color clickable
@@ -275,7 +305,7 @@ private fun MultiMarketContent(
     onToggleExpand: () -> Unit
 ) {
     if(markets.isEmpty()){
-        Text("No market data available", Modifier.padding(16.dp))
+        Text(stringResource(R.string.error_no_market_data), Modifier.padding(16.dp))
         return
     }
 
@@ -299,10 +329,10 @@ private fun MultiMarketContent(
         if (isExpanded || markets.size < totalMarketsSize) {
             val moreText: String
             if(isExpanded) {
-                moreText = "Show less"
+                moreText = stringResource(R.string.action_show_less)
             } else {
                 val remainingCount = totalMarketsSize - markets.size
-                moreText = "+ $remainingCount more ${getOutcomeDeclension(remainingCount)}"
+                moreText = pluralStringResource(R.plurals.more_outcomes_count, remainingCount, remainingCount)
             }
 
             // Display "+ X more markets"
@@ -319,14 +349,6 @@ private fun MultiMarketContent(
                     .clickable { onToggleExpand() } // Make clickable
              )
         }
-    }
-}
-
-// NEW Helper function for outcome word declension
-private fun getOutcomeDeclension(count: Int): String {
-    return when {
-        count == 1 -> "outcome"
-        else -> "outcomes"
     }
 }
 
@@ -395,8 +417,8 @@ private fun OutcomeTextRow(
             Spacer(modifier = Modifier.width(8.dp))
 
             val resolutionText = when (marketResolutionStatus) {
-                MarketResolutionStatus.DISPUTED -> "(Disputed)"
-                MarketResolutionStatus.RESOLVED -> "(Resolved)"
+                MarketResolutionStatus.DISPUTED -> stringResource(R.string.status_disputed)
+                MarketResolutionStatus.RESOLVED -> stringResource(R.string.status_resolved)
             }
 
             Text(

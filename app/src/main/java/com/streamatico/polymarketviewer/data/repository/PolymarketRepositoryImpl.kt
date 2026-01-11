@@ -55,7 +55,8 @@ class PolymarketRepositoryImpl(
         archived: Boolean?,
         closed: Boolean?,
         order: PolymarketEventsSortOrder,
-        excludeTagIds: List<Long>?
+        excludeTagIds: List<Long>?,
+        ids: List<String>?
     ): Result<PaginationDataDto<EventDto>> {
         val orderString = when (order) {
             PolymarketEventsSortOrder.VOLUME_24H -> "volume24hr"
@@ -81,7 +82,8 @@ class PolymarketRepositoryImpl(
                 closed = closed,
                 order = orderString,
                 ascending = isAscending,
-                excludeTagIds = excludeTagIds
+                excludeTagIds = excludeTagIds,
+                idList = ids
             )
         }
     }

@@ -34,4 +34,36 @@
     <string name="send_email">Send email</string>
 
     <string name="user_profile_title">User profile</string>
+
+    <!-- Watchlist -->
+    <string name="watchlist_empty_title">Your watchlist is empty.</string>
+    <string name="watchlist_empty_message">Bookmark events to track them here.</string>
+    <string name="cd_remove_from_watchlist">Remove from watchlist</string>
+    <string name="cd_add_to_watchlist">Add to watchlist</string>
+    <string name="tag_watchlist">Watchlist</string>
+
+    <!-- Event List -->
+    <string name="tag_all">All</string>
+    <string name="no_events_found">No events found for selected tag.</string>
+    <string name="sort_by_title">Sort by</string>
+    <string name="sort_option_default">Default</string>
+    <string name="sort_option_24h_volume">24hr Volume</string>
+    <string name="sort_option_total_volume">Total Volume</string>
+    <string name="sort_option_liquidity">Liquidity</string>
+    <string name="sort_option_newest">Newest</string>
+    <string name="sort_option_ending_soon">Ending Soon</string>
+    <string name="sort_option_competitive">Competitive</string>
+    <string name="cd_selected">Selected</string>
+
+    <!-- Event Item -->
+    <string name="volume_suffix">" Vol."</string>
+    <string name="action_show_less">Show less</string>
+    <string name="error_no_market_data">No market data available</string>
+    <string name="status_disputed">(Disputed)</string>
+    <string name="status_resolved">(Resolved)</string>
+
+    <plurals name="more_outcomes_count">
+        <item quantity="one">+ %d more outcome</item>
+        <item quantity="other">+ %d more outcomes</item>
+    </plurals>
 </resources>

@@ -13,20 +13,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListItemInfo
-import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
-import androidx.compose.foundation.lazy.grid.LazyGridLayoutInfo
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.HourglassBottom
@@ -36,6 +32,7 @@ import androidx.compose.material.icons.filled.NewReleases
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -57,6 +54,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -64,13 +62,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.TagDto
@@ -101,6 +99,7 @@ fun EventListScreen(
     val selectedTagSlug by viewModel.selectedTagSlug.collectAsState()
     val selectedSortOrder by viewModel.selectedSortOrder.collectAsState()
     val areTagsLoading by viewModel.areTagsLoading.collectAsState()
+    val watchlistIds by viewModel.watchlistIds.collectAsState()
 
     var showBottomSheet by remember { mutableStateOf(false) }
 
@@ -113,11 +112,13 @@ fun EventListScreen(
         canLoadMore = canLoadMore,
         selectedTagSlug = selectedTagSlug,
         selectedSortOrder = selectedSortOrder,
+        watchlistIds = watchlistIds,
         onRefresh = viewModel::refreshEvents,
         onLoadMore = viewModel::loadMoreEvents,
         onTagSelected = viewModel::selectTag,
         onSortOrderSelected = viewModel::selectSortOrder,
         onRetry = viewModel::retryLoad,
+        onToggleWatchlist = viewModel::toggleWatchlist,
         onNavigateToEventDetail = onNavigateToEventDetail,
         showBottomSheet = showBottomSheet,
         onShowSortOptionsClick = { showBottomSheet = true },
@@ -138,11 +139,13 @@ private fun EventListScreenContent(
     canLoadMore: Boolean,
     selectedTagSlug: String,
     selectedSortOrder: PolymarketEventsSortOrder,
+    watchlistIds: Set<String>,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
     onTagSelected: (String) -> Unit,
     onSortOrderSelected: (PolymarketEventsSortOrder) -> Unit,
     onRetry: () -> Unit,
+    onToggleWatchlist: (String) -> Unit,
     onNavigateToEventDetail: (String) -> Unit,
     showBottomSheet: Boolean,
     onShowSortOptionsClick: () -> Unit,
@@ -161,10 +164,12 @@ private fun EventListScreenContent(
         canLoadMore = canLoadMore,
         selectedTagSlug = selectedTagSlug,
         selectedSortOrder = selectedSortOrder,
+        watchlistIds = watchlistIds,
         onRefresh = onRefresh,
         onLoadMore = onLoadMore,
         onTagSelected = onTagSelected,
         onRetry = onRetry,
+        onToggleWatchlist = onToggleWatchlist,
         onNavigateToEventDetail = onNavigateToEventDetail,
         onShowSortOptionsClick = onShowSortOptionsClick,
         onNavigateToAbout = onNavigateToAbout,
@@ -180,14 +185,23 @@ private fun EventListScreenContent(
         ) {
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
                 Text(
-                    "Sort by",
+                    stringResource(R.string.sort_by_title),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 8.dp)
                 )
 
-                eventsSortOptions.forEach { (key, label) ->
+                val sortOptions = mapOf(
+                    PolymarketEventsSortOrder.VOLUME_24H to stringResource(R.string.sort_option_24h_volume),
+                    PolymarketEventsSortOrder.VOLUME_TOTAL to stringResource(R.string.sort_option_total_volume),
+                    PolymarketEventsSortOrder.LIQUIDITY to stringResource(R.string.sort_option_liquidity),
+                    PolymarketEventsSortOrder.NEWEST to stringResource(R.string.sort_option_newest),
+                    PolymarketEventsSortOrder.ENDING_SOON to stringResource(R.string.sort_option_ending_soon),
+                    PolymarketEventsSortOrder.COMPETITIVE to stringResource(R.string.sort_option_competitive)
+                )
+
+                sortOptions.forEach { (key, label) ->
                     val isSelected = key == selectedSortOrder
                     val isDefault = key == PolymarketEventsSortOrder.DEFAULT_SORT_ORDER
 
@@ -221,7 +235,7 @@ private fun EventListScreenContent(
                         if(isDefault) {
                             Spacer(Modifier.size(8.dp))
                             Text(
-                                text = "Default",
+                                text = stringResource(R.string.sort_option_default),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.outline
                             )
@@ -232,7 +246,7 @@ private fun EventListScreenContent(
                         if (isSelected) {
                             Icon(
                                 imageVector = Icons.Filled.Check,
-                                contentDescription = "Selected",
+                                contentDescription = stringResource(R.string.cd_selected),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(24.dp)
                             )
@@ -256,35 +270,22 @@ fun EventListContent(
     canLoadMore: Boolean,
     selectedTagSlug: String,
     selectedSortOrder: PolymarketEventsSortOrder,
+    watchlistIds: Set<String>,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
     onTagSelected: (String) -> Unit,
     onRetry: () -> Unit,
+    onToggleWatchlist: (String) -> Unit,
     onNavigateToEventDetail: (String) -> Unit,
     onShowSortOptionsClick: () -> Unit,
     onSearchClick: () -> Unit,
     onNavigateToAbout: () -> Unit
 ) {
-    // More info: https://developer.android.com/develop/ui/compose/layouts/adaptive/build-adaptive-navigation
-    val adaptiveInfo = currentWindowAdaptiveInfo()
-
-    val useGrid = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_MEDIUM_LOWER_BOUND)
-    val listState = rememberLazyListState()
-    val gridState = rememberLazyGridState()
-
-    var lastTagSlug by remember { mutableStateOf<String?>(selectedTagSlug) }
-    var lastSortOrder by remember { mutableStateOf(selectedSortOrder) }
+    // Use key to recreate state when tag or sort order changes, ensuring scroll position resets
+    val gridState = key(selectedTagSlug, selectedSortOrder) { rememberLazyGridState() }
 
     LaunchedEffect(selectedTagSlug, selectedSortOrder) {
-        if (lastTagSlug != selectedTagSlug || lastSortOrder != selectedSortOrder) {
-            lastTagSlug = selectedTagSlug
-            lastSortOrder = selectedSortOrder
-            if (useGrid) {
-                gridState.scrollToItem(0)
-            } else {
-                listState.scrollToItem(0)
-            }
-        }
+        gridState.scrollToItem(0)
     }
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -337,7 +338,35 @@ fun EventListContent(
                     }
                     is EventListUiState.Success -> {
                         if (uiState.events.isEmpty() && !isLoadingMore) {
-                            Text("No events found for selected tag.")
+                            if (selectedTagSlug == POLYMARKET_EVENTS_SLUG_WATCHLIST) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center,
+                                    modifier = Modifier.padding(16.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.BookmarkBorder,
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .alpha(0.7f)
+                                            .size(64.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = stringResource(R.string.watchlist_empty_title),
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.watchlist_empty_message),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            } else {
+                                Text(stringResource(R.string.no_events_found))
+                            }
                         } else {
                             PullToRefreshBox(
                                 isRefreshing = isRefreshing,
@@ -347,83 +376,56 @@ fun EventListContent(
                                 val adaptiveInfo = currentWindowAdaptiveInfo()
 
                                 // Determine number of columns for the grid
-                                val gridCells = if(adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+                                val gridCells = if(adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_MEDIUM_LOWER_BOUND)) {
                                     GridCells.Adaptive(minSize = 300.dp) // Adaptive columns for Expanded width
                                 } else {
-                                    GridCells.Fixed(2) // 2 columns for Medium and Compact width
+                                    GridCells.Fixed(1)
                                 }
 
-                                // Use LazyColumn for Compact, LazyVerticalGrid otherwise
-                                if (!useGrid) {
-                                    LazyColumn(
-                                        state = listState,
-                                        modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
-                                        //contentPadding = PaddingValues(vertical = 8.dp)
-                                    ) {
-                                        items(uiState.events, key = { it.id }) { event ->
-                                            EventListItem(
-                                                event = event,
-                                                onClick = { onNavigateToEventDetail(event.slug) }
-                                            )
-                                        }
-                                        if (isLoadingMore) {
-                                            item {
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                                                    horizontalArrangement = Arrangement.Center
-                                                ) { CircularProgressIndicator() }
-                                            }
-                                        }
+                                LazyVerticalGrid(
+                                    columns = gridCells,
+                                    state = gridState,
+                                    modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+                                    //contentPadding = PaddingValues(vertical = 8.dp),
+                                    //horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    //verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    items(
+                                        items = uiState.events,
+                                        key = { "${uiState.tagSlug}_${uiState.sortOrder}_${it.id}" }
+                                    ) { event ->
+                                        EventListItem(
+                                            event = event,
+                                            isInWatchlist = watchlistIds.contains(event.id),
+                                            onToggleWatchlist = { onToggleWatchlist(event.id) },
+                                            onClick = { onNavigateToEventDetail(event.slug) }
+                                        )
                                     }
-                                } else {
-                                    LazyVerticalGrid(
-                                        columns = gridCells,
-                                        state = gridState,
-                                        modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
-                                        contentPadding = PaddingValues(vertical = 8.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        items(uiState.events, key = { it.id }) { event ->
-                                            EventListItem(
-                                                event = event,
-                                                onClick = { onNavigateToEventDetail(event.slug) }
-                                            )
-                                        }
-                                        if (isLoadingMore) {
-                                            item {
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                                                    horizontalArrangement = Arrangement.Center
-                                                ) { CircularProgressIndicator() }
-                                            }
+                                    if (isLoadingMore) {
+                                        item(span = { GridItemSpan(maxLineSpan) }) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                                horizontalArrangement = Arrangement.Center
+                                            ) { CircularProgressIndicator() }
                                         }
                                     }
                                 }
 
                                 // Logic for loading more items
-                                LaunchedEffect(listState, gridState, canLoadMore, isLoadingMore, isRefreshing,
-                                    uiState.events, useGrid) {
-                                    snapshotFlow { if (useGrid) gridState.layoutInfo else listState.layoutInfo }
+                                LaunchedEffect(gridState, canLoadMore, isLoadingMore, isRefreshing,
+                                    uiState.events) {
+                                    snapshotFlow { gridState.layoutInfo }
                                         .map { layoutInfo ->
                                             // Explicitly get visibleItemsInfo based on type
-                                            val visibleItemsInfo: List<*> = when(layoutInfo) {
-                                                is LazyListLayoutInfo -> layoutInfo.visibleItemsInfo
-                                                is LazyGridLayoutInfo -> layoutInfo.visibleItemsInfo
-                                                else -> emptyList<Unit>()
-                                            }
+                                            val visibleItemsInfo = layoutInfo.visibleItemsInfo
                                             if (visibleItemsInfo.isEmpty()) {
                                                 false
                                             } else {
                                                 // Get index from the specific item info type
-                                                val lastVisibleItemIndex = when(val lastItem = visibleItemsInfo.lastOrNull()) {
-                                                    is LazyListItemInfo -> lastItem.index
-                                                    is LazyGridItemInfo -> lastItem.index
-                                                    else -> -1
-                                                }
+                                                val lastVisibleItemIndex = visibleItemsInfo.lastOrNull()?.index ?: -1
                                                 val totalDataItems = uiState.events.size
                                                 // Adjust threshold based on grid layout if needed, currently uses 5
-                                                totalDataItems > 0 && lastVisibleItemIndex != -1 && lastVisibleItemIndex >= totalDataItems - (if (useGrid) 10 else 5)
+                                                totalDataItems > 0 && lastVisibleItemIndex != -1 && lastVisibleItemIndex >= totalDataItems - 5
                                             }
                                         }
                                         .distinctUntilChanged()
@@ -480,15 +482,6 @@ private fun AboutAction(
     }
 }
 
-private val eventsSortOptions: Map<PolymarketEventsSortOrder, String> = mapOf(
-    PolymarketEventsSortOrder.VOLUME_24H to "24hr Volume",
-    PolymarketEventsSortOrder.VOLUME_TOTAL to "Total Volume",
-    PolymarketEventsSortOrder.LIQUIDITY to "Liquidity",
-    PolymarketEventsSortOrder.NEWEST to "Newest", // Descending
-    PolymarketEventsSortOrder.ENDING_SOON to "Ending Soon", // Ascending
-    PolymarketEventsSortOrder.COMPETITIVE to "Competitive"
-)
-
 private fun getIconForSortOrder(orderKey: PolymarketEventsSortOrder): ImageVector {
     return when (orderKey) {
         PolymarketEventsSortOrder.VOLUME_24H -> Icons.AutoMirrored.Filled.TrendingUp
@@ -507,9 +500,10 @@ private fun TagsRow(
     selectedTagSlug: String,
     onTagSelected: (String) -> Unit
 ) {
-    val allTag = TagDto(id = POLYMARKET_EVENTS_SLUG_ALL, label = POLYMARKET_EVENTS_SLUG_ALL_TITLE, slug = POLYMARKET_EVENTS_SLUG_ALL, forceShow = true)
+    val watchlistTag = TagDto(id = POLYMARKET_EVENTS_SLUG_WATCHLIST, label = stringResource(R.string.tag_watchlist), slug = POLYMARKET_EVENTS_SLUG_WATCHLIST, forceShow = true)
+    val allTag = TagDto(id = POLYMARKET_EVENTS_SLUG_ALL, label = stringResource(R.string.tag_all), slug = POLYMARKET_EVENTS_SLUG_ALL, forceShow = true)
     val uniqueTags = tags.filter { !it.slug.equals(POLYMARKET_EVENTS_SLUG_ALL, ignoreCase = true) }
-    val displayTags = listOf(allTag) + uniqueTags
+    val displayTags = listOf(watchlistTag, allTag) + uniqueTags
 
     LazyRow(
         modifier = Modifier
@@ -531,21 +525,46 @@ private fun TagsRow(
             }
         } else {
             // Existing items call when not loading
-            items(displayTags, key = { it.slug }) { tag ->
-                val isSelected = if (tag.slug == POLYMARKET_EVENTS_SLUG_ALL) selectedTagSlug == POLYMARKET_EVENTS_SLUG_ALL else selectedTagSlug == tag.slug
-                FilterChip(
-                    selected = isSelected,
-                    onClick = { onTagSelected(if (tag.slug == "all") POLYMARKET_EVENTS_SLUG_ALL else tag.slug) },
-                    label = { Text(tag.label) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+            items(items = displayTags, key = { it.slug }) { tag ->
+                TagChip(
+                    tag = tag,
+                    isSelected = selectedTagSlug == tag.slug,
+                    onClick = { onTagSelected(tag.slug) },
                 )
             }
         }
     }
 }
+
+@Composable
+private fun TagChip(
+    tag: TagDto,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    FilterChip(
+        selected = isSelected,
+        onClick = onClick,
+        label = {
+            if (tag.slug == POLYMARKET_EVENTS_SLUG_WATCHLIST) {
+                Icon(
+                    imageVector = if (isSelected) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                    contentDescription = tag.label,
+                    modifier = Modifier.size(18.dp)
+                )
+            } else {
+                Text(tag.label)
+            }
+        },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    )
+}
+
+
+// ====== Preview ========
 
 @Preview(showBackground = true)
 @Composable
@@ -571,11 +590,13 @@ private fun EventListScreenPreview_Success() {
             canLoadMore = true,
             selectedTagSlug = "crypto",
             selectedSortOrder = PolymarketEventsSortOrder.NEWEST,
+            watchlistIds = emptySet(),
             onRefresh = {},
             onLoadMore = {},
             onTagSelected = {},
             onSortOrderSelected = {},
             onRetry = {},
+            onToggleWatchlist = {},
             onNavigateToEventDetail = {},
             showBottomSheet = false,
             onShowSortOptionsClick = {},
@@ -599,11 +620,45 @@ private fun EventListScreenPreview_Loading() {
             canLoadMore = false,
             selectedTagSlug = POLYMARKET_EVENTS_SLUG_ALL,
             selectedSortOrder = PolymarketEventsSortOrder.DEFAULT_SORT_ORDER,
+            watchlistIds = emptySet(),
             onRefresh = {},
             onLoadMore = {},
             onTagSelected = {},
             onSortOrderSelected = {},
             onRetry = {},
+            onToggleWatchlist = {},
+            onNavigateToEventDetail = {},
+            showBottomSheet = false,
+            onShowSortOptionsClick = {},
+            onDismissRequest = {},
+            onNavigateToAbout = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Empty Watchlist")
+@Composable
+private fun EventListScreenPreview_EmptyWatchlist() {
+    MaterialTheme {
+        EventListScreenContent(
+            uiState = EventListUiState.Success(
+                emptyList()
+            ),
+            tags = emptyList(),
+            isRefreshing = false,
+            isLoadingMore = false,
+            areTagsLoading = false,
+            canLoadMore = false,
+            selectedTagSlug = POLYMARKET_EVENTS_SLUG_WATCHLIST,
+            selectedSortOrder = PolymarketEventsSortOrder.DEFAULT_SORT_ORDER,
+            watchlistIds = emptySet(),
+            onRefresh = {},
+            onLoadMore = {},
+            onTagSelected = {},
+            onSortOrderSelected = {},
+            onRetry = {},
+            onToggleWatchlist = {},
             onNavigateToEventDetail = {},
             showBottomSheet = false,
             onShowSortOptionsClick = {},
@@ -627,11 +682,13 @@ private fun EventListScreenPreview_Error() {
             canLoadMore = false,
             selectedTagSlug = POLYMARKET_EVENTS_SLUG_ALL,
             selectedSortOrder = PolymarketEventsSortOrder.DEFAULT_SORT_ORDER,
+            watchlistIds = emptySet(),
             onRefresh = {},
             onLoadMore = {},
             onTagSelected = {},
             onSortOrderSelected = {},
             onRetry = {},
+            onToggleWatchlist = {},
             onNavigateToEventDetail = {},
             showBottomSheet = false,
             onShowSortOptionsClick = {},

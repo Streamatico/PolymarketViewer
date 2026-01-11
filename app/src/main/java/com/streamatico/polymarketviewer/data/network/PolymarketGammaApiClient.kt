@@ -13,7 +13,6 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.appendPathSegments
-import io.ktor.http.parametersOf
 
 
 
@@ -50,9 +49,9 @@ class PolymarketGammaApiClient(
             parameter("tag_slug", tagSlug)
             parameter("order", order)
             parameter("ascending", ascending)
-            excludeTagIds?.also { list -> parametersOf("exclude_tag_id", list.map { it.toString() }) }
-            slugList?.also { parametersOf("slug", it) }
-            idList?.also { parametersOf("id", it) }
+            excludeTagIds?.forEach { parameter("exclude_tag_id", it) }
+            slugList?.forEach { parameter("slug", it) }
+            idList?.forEach { parameter("id", it) }
         }.body()
     }
 
@@ -69,14 +68,6 @@ class PolymarketGammaApiClient(
         return client.get("https://polymarket.com/api/tags/filteredBySlug") {
             parameter("tag", "all")
             parameter("status", "active")
-        }.body()
-    }
-
-    suspend fun getEventDetails(eventId: String): EventDto {
-        return client.get("events") {
-            url {
-                appendPathSegments(eventId)
-            }
         }.body()
     }
 

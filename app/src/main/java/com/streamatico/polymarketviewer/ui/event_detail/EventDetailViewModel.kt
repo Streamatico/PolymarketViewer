@@ -18,12 +18,14 @@ import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import com.streamatico.polymarketviewer.ui.navigation.NavKeys
 
+import com.streamatico.polymarketviewer.data.preferences.UserPreferencesRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -31,6 +33,7 @@ import kotlinx.coroutines.launch
 
 class EventDetailViewModel(
     private val polymarketRepository: PolymarketRepository,
+    private val userPreferencesRepository: UserPreferencesRepository,
     navKey: NavKeys.EventDetail
 ) : ViewModel() {
 
@@ -40,6 +43,15 @@ class EventDetailViewModel(
     // --- Event Details State --- //
     private val _uiState = MutableStateFlow<EventDetailUiState>(EventDetailUiState.Loading)
     val uiState: StateFlow<EventDetailUiState> = _uiState.asStateFlow()
+
+    // --- Watchlist State --- //
+    val isInWatchlist: StateFlow<Boolean> = combine(
+        userPreferencesRepository.watchlistIds,
+        _uiState
+    ) { ids, state ->
+        val eventId = (state as? EventDetailUiState.Success)?.event?.id
+        eventId != null && ids.contains(eventId)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     // Map for determining badge color (Token ID -> Outcome Label like "Yes"/"No")
     private val _eventOutcomeTokensMap = MutableStateFlow<Map<String, String>>(emptyMap())
@@ -306,6 +318,13 @@ class EventDetailViewModel(
         if (range == _selectedTimeRange.value) return
         _selectedTimeRange.value = range
         loadChartData(range)
+    }
+
+    fun toggleWatchlist() {
+        val eventId = (_uiState.value as? EventDetailUiState.Success)?.event?.id ?: return
+        viewModelScope.launch {
+            userPreferencesRepository.toggleWatchlist(eventId)
+        }
     }
 
     fun retryLoad() {

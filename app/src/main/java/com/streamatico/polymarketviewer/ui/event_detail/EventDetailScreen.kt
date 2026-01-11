@@ -30,11 +30,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.EventType
 import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
@@ -52,6 +54,8 @@ import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 
 @Composable
 fun EventDetailScreen(
@@ -61,6 +65,7 @@ fun EventDetailScreen(
     onNavigateToUserProfile: (profileAddress: String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isInWatchlist by viewModel.isInWatchlist.collectAsState()
     val selectedTimeRange by viewModel.selectedTimeRange.collectAsState()
     // Collect hierarchical comments state
     val hierarchicalComments by viewModel.hierarchicalCommentsState.collectAsState()
@@ -78,11 +83,13 @@ fun EventDetailScreen(
 
     EventDetailsContent(
         uiState = uiState,
+        isInWatchlist = isInWatchlist,
         onMarketClick = onNavigateToMarketDetail,
         chartModelProducer = viewModel.chartModelProducer,
         isChartAvailable = isChartAvailable,
         selectedRange = selectedTimeRange,
         onRangeSelected = viewModel::selectTimeRange,
+        onToggleWatchlist = viewModel::toggleWatchlist,
         // Pass hierarchical comments
         displayableComments = hierarchicalComments,
         // Pass other states/callbacks as before
@@ -108,11 +115,13 @@ fun EventDetailScreen(
 @Composable
 private fun EventDetailsContent(
     uiState: EventDetailUiState,
+    isInWatchlist: Boolean,
     onMarketClick: (String) -> Unit,
     chartModelProducer: CartesianChartModelProducer,
     isChartAvailable: Boolean,
     selectedRange: TimeRange,
     onRangeSelected: (TimeRange) -> Unit,
+    onToggleWatchlist: () -> Unit,
 
     displayableComments: List<HierarchicalComment>,
     commentsLoading: Boolean,
@@ -158,6 +167,17 @@ private fun EventDetailsContent(
                     }
                 },
                 actions = {
+                    // Watchlist Toggle
+                    if (uiState is EventDetailUiState.Success) {
+                        IconButton(onClick = onToggleWatchlist) {
+                            Icon(
+                                imageVector = if (isInWatchlist) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                                contentDescription = stringResource(if (isInWatchlist) R.string.cd_remove_from_watchlist else R.string.cd_add_to_watchlist),
+                                tint = if (isInWatchlist) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
                     // Translate Action - Use composable from TranslateAction.kt
                     TranslateAction(
                         isVisible = !isEnglishLocale && uiState is EventDetailUiState.Success,
@@ -345,11 +365,13 @@ private fun EventDetailsContentPreviewTemplate(uiState: EventDetailUiState) {
     MaterialTheme {
         EventDetailsContent(
             uiState = uiState,
+            isInWatchlist = false,
             onMarketClick = { },
             chartModelProducer = PreviewMocks.previewChartModelProducer, // Use the mock producer
             isChartAvailable = true,
             selectedRange = TimeRange.D1,
             onRangeSelected = { },
+            onToggleWatchlist = { },
             displayableComments = PreviewMocks.sampleHierarchicalComments,
             commentsLoading = false,
             commentsError = null,

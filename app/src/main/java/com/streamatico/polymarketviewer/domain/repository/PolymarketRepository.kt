@@ -33,7 +33,8 @@ interface PolymarketRepository {
         archived: Boolean? = false,
         closed: Boolean? = false,
         order: PolymarketEventsSortOrder,
-        excludeTagIds: List<Long>? = null
+        excludeTagIds: List<Long>? = null,
+        ids: List<String>? = null
     ): Result<PaginationDataDto<EventDto>>
 
     /**
