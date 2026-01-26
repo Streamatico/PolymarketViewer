@@ -14,7 +14,8 @@ data class UserPreferences( // Data class to hold related preferences
     val preferencesVersion: Int,
     val analyticsEnabled: Boolean = true, // Opt-out: enabled by default
     val isFirstLaunch: Boolean = true, // True until first analytics ping is sent
-    val watchlistIds: Set<String> = emptySet()
+    val watchlistIds: Set<String> = emptySet(),
+    val isWatchlistSelected: Boolean = false
 )
 
 
@@ -27,7 +28,8 @@ class UserPreferencesRepository(
                 preferencesVersion = preferences[PreferenceKeys.PREFERENCES_VERSION] ?: 0,
                 analyticsEnabled = preferences[PreferenceKeys.ANALYTICS_ENABLED] ?: true,
                 isFirstLaunch = preferences[PreferenceKeys.IS_FIRST_LAUNCH] ?: true,
-                watchlistIds = preferences[PreferenceKeys.WATCHLIST_EVENT_IDS] ?: emptySet()
+                watchlistIds = preferences[PreferenceKeys.WATCHLIST_EVENT_IDS] ?: emptySet(),
+                isWatchlistSelected = preferences[PreferenceKeys.IS_WATCHLIST_SELECTED] ?: false
             )
         }
 
@@ -85,6 +87,14 @@ class UserPreferencesRepository(
     }
 
     val watchlistIds: Flow<Set<String>> = userPreferencesFlow.map { it.watchlistIds }
+
+    val isWatchlistSelected: Flow<Boolean> = userPreferencesFlow.map { it.isWatchlistSelected }
+
+    suspend fun setWatchlistSelected(isSelected: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferenceKeys.IS_WATCHLIST_SELECTED] = isSelected
+        }
+    }
 }
 
 // Add migration logic if needed in the future

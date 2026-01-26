@@ -15,4 +15,7 @@ object PreferenceKeys {
 
     // Watchlist event IDs
     val WATCHLIST_EVENT_IDS = androidx.datastore.preferences.core.stringSetPreferencesKey("watchlist_event_ids")
+
+    // Watchlist tab selection flag
+    val IS_WATCHLIST_SELECTED = booleanPreferencesKey("is_watchlist_selected")
 }

@@ -11,6 +11,7 @@ import com.streamatico.polymarketviewer.data.preferences.UserPreferencesReposito
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -51,8 +52,19 @@ class EventListViewModel(
     private var currentOffset = 0
 
     init {
-        loadInitialTags()
-        loadEventsInternal(isInitialLoad = true)
+        viewModelScope.launch {
+            val isWatchlistSelected = userPreferencesRepository.isWatchlistSelected.first()
+            _selectedTagSlug.value = if (isWatchlistSelected) {
+                POLYMARKET_EVENTS_SLUG_WATCHLIST
+            } else {
+                POLYMARKET_EVENTS_SLUG_ALL
+            }
+            if (isWatchlistSelected) {
+                userPreferencesRepository.watchlistIds.first()
+            }
+            loadInitialTags()
+            loadEventsInternal(isInitialLoad = true)
+        }
     }
 
     private fun loadInitialTags() {
@@ -223,6 +235,9 @@ class EventListViewModel(
     fun selectTag(tagSlug: String) {
         if (_selectedTagSlug.value != tagSlug) {
             _selectedTagSlug.value = tagSlug
+            viewModelScope.launch {
+                userPreferencesRepository.setWatchlistSelected(tagSlug == POLYMARKET_EVENTS_SLUG_WATCHLIST)
+            }
             loadEventsInternal(isInitialLoad = true) // Trigger initial load for the new tag
         }
     }
