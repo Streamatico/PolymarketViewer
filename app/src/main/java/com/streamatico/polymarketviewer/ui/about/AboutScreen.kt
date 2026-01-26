@@ -44,10 +44,10 @@ import com.streamatico.polymarketviewer.ui.shared.components.AppLogoIcon
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
 
-const val PRIVACY_POLICY_URL = "https://streamatico.net/polymarketapp/privacy_policy"
+const val PRIVACY_POLICY_URL = "https://streamatico.com/polymarketapp/privacy_policy"
 const val GITHUB_URL = "https://github.com/streamatico/PolymarketViewer"
 const val EMAIL_ADDRESS = "streamatico+polymarket@gmail.com"
-const val COMPANY_URL = "https://streamatico.net/"
+const val COMPANY_URL = "https://streamatico.com/"
 
 @Composable
 fun AboutScreen(
