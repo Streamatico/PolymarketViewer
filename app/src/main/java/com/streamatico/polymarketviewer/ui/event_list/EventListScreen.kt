@@ -54,7 +54,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -281,11 +280,15 @@ fun EventListContent(
     onSearchClick: () -> Unit,
     onNavigateToAbout: () -> Unit
 ) {
-    // Use key to recreate state when tag or sort order changes, ensuring scroll position resets
-    val gridState = key(selectedTagSlug, selectedSortOrder) { rememberLazyGridState() }
+    val gridState = rememberLazyGridState()
 
+    var isGridDisplayed by remember { mutableStateOf(false) }
     LaunchedEffect(selectedTagSlug, selectedSortOrder) {
-        gridState.scrollToItem(0)
+        if (isGridDisplayed) {
+            gridState.animateScrollToItem(0)
+        } else {
+            isGridDisplayed = true
+        }
     }
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
