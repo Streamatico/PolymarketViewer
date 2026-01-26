@@ -1,0 +1,2 @@
+- Fix: Preserve scroll position when navigating back to EventListScreen
+- Updated dependencies
