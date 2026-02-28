@@ -47,9 +47,11 @@ import com.streamatico.polymarketviewer.data.model.gamma_api.getTitleOrDefault
 import com.streamatico.polymarketviewer.data.model.gamma_api.getYesTitle
 import com.streamatico.polymarketviewer.data.model.gamma_api.yesPrice
 import com.streamatico.polymarketviewer.ui.shared.ComposableUiFormatter
+import com.streamatico.polymarketviewer.ui.shared.MarketDisplayRow
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.sortedByViewPriority
 import com.streamatico.polymarketviewer.ui.shared.sortedForShortView
+import com.streamatico.polymarketviewer.ui.shared.toDisplayRows
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 import androidx.compose.material.icons.filled.Bookmark
@@ -120,15 +122,11 @@ fun EventListItem(
                     }
 
                     EventType.CategoricalMarket -> {
-                        val mainMarketByThreshold = event.baseMarkets
-                            .firstOrNull { it.groupItemThreshold == 0 }
-
+                        val rows = remember(event) { event.toDisplayRows() }
                         CategoricalMarketContent(
-                            market = mainMarketByThreshold ?: event.baseMarkets.first(),
-                            isExpanded = isMarketListExpanded, // Pass state
-                            onToggleExpand = {
-                                isMarketListExpanded = !isMarketListExpanded
-                            } // Pass lambda
+                            rows = rows,
+                            isExpanded = isMarketListExpanded,
+                            onToggleExpand = { isMarketListExpanded = !isMarketListExpanded }
                         )
                     }
 
@@ -248,50 +246,42 @@ private fun BinaryMarketContent(
 // --- Composable for SINGLE CATEGORICAL market --- //
 @Composable
 private fun CategoricalMarketContent(
-    market: BaseMarketDto,
+    rows: List<MarketDisplayRow>,
     isExpanded: Boolean,
     onToggleExpand: () -> Unit
 ) {
-    val outcomes = market.outcomes
-    val prices = market.outcomePrices
-
-    // Create (Outcome, Price) pairs for sorting and display
-    val outcomePricePairs = remember(outcomes, prices) {
-        outcomes.zip(prices) { outcome, price -> outcome to price }
-            //.sortedByDescending { it.second } // Sort by descending price
-    }
-
     Column(modifier = Modifier.padding(bottom = 8.dp)) {
-        // Show all if expanded or if there are exactly 4 outcomes
-        val visibleOutcomes = if (isExpanded || outcomePricePairs.size == MAX_VISIBLE_MARKETS + 1) {
-            outcomePricePairs
+        val visibleRows = if (isExpanded || rows.size == MAX_VISIBLE_MARKETS + 1) {
+            rows
         } else {
-            outcomePricePairs.take(MAX_VISIBLE_MARKETS)
+            rows.take(MAX_VISIBLE_MARKETS)
         }
 
-        visibleOutcomes.forEach { (outcome, price) ->
-            // Use universal MarketRow
-            MarketRow(title = outcome, price = price, marketResolutionStatus = market.getResolutionStatus())
+        visibleRows.forEach { row ->
+            MarketRow(
+                title = row.title,
+                price = row.price,
+                marketResolutionStatus = if (row.isResolved) MarketResolutionStatus.RESOLVED else null,
+                resolvedOutcome = row.resolvedOutcome
+            )
         }
 
-        // Show button only if there are more than 4 outcomes (more than 1 hidden)
-        if (outcomePricePairs.size > MAX_VISIBLE_MARKETS + 1) {
-            // Display "+ X more outcomes"
-             Spacer(modifier = Modifier.height(4.dp))
-             Text(
+        if (rows.size > MAX_VISIBLE_MARKETS + 1) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
                 text = if (isExpanded) stringResource(R.string.action_show_less) else {
-                    val count = outcomePricePairs.size - MAX_VISIBLE_MARKETS
+                    val count = rows.size - MAX_VISIBLE_MARKETS
                     pluralStringResource(R.plurals.more_outcomes_count, count, count)
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary, // Make color clickable
+                color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
-                    .clickable { onToggleExpand() } // Make clickable
-             )
+                    .clickable { onToggleExpand() }
+            )
         }
     }
 }

@@ -140,6 +140,9 @@ dependencies {
 
     // User Preferences storage
     implementation(libs.androidx.data.store)
+    implementation(libs.androidx.glance)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.work.runtime)
 
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)

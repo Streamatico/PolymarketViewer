@@ -5,6 +5,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -26,8 +27,14 @@ import com.streamatico.polymarketviewer.ui.user_profile.UserProfileScreen
 import com.streamatico.polymarketviewer.ui.user_profile.UserProfileViewModel
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(initialEventSlug: String? = null) {
     val backStack = rememberNavBackStack(NavKeys.EventList)
+
+    LaunchedEffect(initialEventSlug) {
+        if (!initialEventSlug.isNullOrBlank()) {
+            backStack.add(NavKeys.EventDetail(initialEventSlug))
+        }
+    }
 
     NavDisplay(
         backStack = backStack,

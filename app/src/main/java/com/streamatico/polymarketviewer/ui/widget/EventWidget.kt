@@ -1,0 +1,380 @@
+package com.streamatico.polymarketviewer.ui.widget
+
+import android.content.Context
+import android.content.Intent
+import android.appwidget.AppWidgetManager
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastForEachIndexed
+import androidx.datastore.preferences.core.Preferences
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
+import androidx.glance.GlanceTheme
+import androidx.glance.ImageProvider
+import androidx.glance.LocalContext
+import androidx.glance.LocalSize
+import androidx.glance.action.ActionParameters
+import androidx.glance.action.clickable
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.LinearProgressIndicator
+import androidx.glance.appwidget.SizeMode
+import androidx.glance.appwidget.updateAll
+import androidx.glance.appwidget.action.ActionCallback
+import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.action.actionStartActivity
+import androidx.glance.appwidget.components.Scaffold
+import androidx.glance.appwidget.components.TitleBar
+import androidx.glance.appwidget.cornerRadius
+import androidx.glance.appwidget.provideContent
+import androidx.glance.currentState
+import androidx.glance.layout.Column
+import androidx.glance.layout.Row
+import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.height
+import androidx.glance.layout.padding
+import androidx.glance.layout.width
+import androidx.glance.text.FontStyle
+import androidx.glance.text.FontWeight
+import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
+import com.streamatico.polymarketviewer.MainActivity
+import com.streamatico.polymarketviewer.R
+import java.time.Duration
+import java.time.Instant
+import kotlin.math.max
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+internal class EventWidget : GlanceAppWidget() {
+    override val sizeMode: SizeMode = SizeMode.Exact
+
+    override suspend fun provideGlance(context: Context, id: androidx.glance.GlanceId) {
+        provideContent {
+            GlanceTheme {
+                EventWidgetContent()
+            }
+        }
+    }
+}
+
+internal class EventWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = EventWidget()
+
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        if (intent.action == AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED) {
+            CoroutineScope(Dispatchers.IO).launch {
+                runCatching {
+                    EventWidget().updateAll(context.applicationContext)
+                    EventWidgetUpdater.enqueueImmediate(context.applicationContext)
+                }
+            }
+        }
+    }
+}
+
+internal class EventWidgetRefreshAction : ActionCallback {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters
+    ) {
+        EventWidgetRefresher.refresh(context.applicationContext, glanceId)
+    }
+}
+
+@Composable
+private fun EventWidgetContent() {
+    val context = LocalContext.current
+    val size = LocalSize.current
+    val sizeClass = resolveSizeClass(size.height)
+
+    val preferences = currentState<Preferences>()
+    val selection = preferences.readSelection()
+    val snapshot = preferences.readSnapshot()
+
+    val rows = snapshot?.rows.orEmpty()
+    val totalRowsCount = (snapshot?.totalRowsCount ?: 0).takeIf { it > 0 } ?: rows.size
+    val progress = snapshot?.binaryYesPrice?.toFloat()
+    val hasProgress = snapshot?.eventType == "BinaryEvent" && progress != null
+    val showFooter = shouldShowFooter(size.height)
+    val maxRows = calculateRowLimit(size.height, hasProgress, showFooter, sizeClass)
+    val hasOverflow = rows.size > maxRows
+    val reservedRows = if (hasOverflow) 1 else 0
+    val visibleRows = rows.take((maxRows - reservedRows).coerceAtLeast(1))
+    val remaining = max(totalRowsCount - visibleRows.size, 0)
+    val trendState = resolveTrendState(rows, progress)
+
+    val title = snapshot?.eventTitle
+        ?: selection?.eventTitle
+        ?: context.getString(R.string.widget_select_event)
+    val compactTitle = title.take(maxTitleChars(sizeClass))
+    val statusText = snapshot?.let {
+        if (it.closed) {
+            context.getString(R.string.widget_status_closed)
+        } else {
+            context.getString(R.string.widget_status_open)
+        }
+    }
+    val updatedText = formatUpdatedLabel(context, snapshot?.updatedAtEpochMs)
+
+    val clickAction = selection?.eventSlug?.let {
+        actionStartActivity(createOpenEventIntent(context, it))
+    }
+    val refreshAction = actionRunCallback<EventWidgetRefreshAction>()
+    val themeColors = GlanceTheme.colors
+
+    val trendIcon = when (trendState) {
+        TrendState.Up -> R.drawable.ic_trend_up
+        TrendState.Down -> R.drawable.ic_trend_down
+        TrendState.Flat -> R.drawable.ic_trend_flat
+    }
+    val trendColor = when (trendState) {
+        TrendState.Up -> themeColors.primary
+        TrendState.Down -> themeColors.onSurface
+        TrendState.Flat -> themeColors.onSurfaceVariant
+    }
+    val trendLabel = when (trendState) {
+        TrendState.Up -> context.getString(R.string.widget_trend_up)
+        TrendState.Down -> context.getString(R.string.widget_trend_down)
+        TrendState.Flat -> context.getString(R.string.widget_trend_flat)
+    }
+
+    val rowTitleStyle = TextStyle(
+        color = themeColors.onSurface,
+        fontWeight = FontWeight.Medium
+    )
+    val primaryValueStyle = TextStyle(
+        color = themeColors.primary,
+        fontWeight = FontWeight.Medium
+    )
+    val secondaryValueStyle = TextStyle(
+        color = themeColors.onSurfaceVariant,
+        fontWeight = FontWeight.Medium
+    )
+    val secondaryStyle = TextStyle(color = themeColors.onSurfaceVariant)
+    val refreshLabel = if (sizeClass == WidgetSizeClass.Small) {
+        context.getString(R.string.widget_refresh_short)
+    } else {
+        context.getString(R.string.widget_refresh)
+    }
+
+    Scaffold(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .cornerRadius(16.dp)
+            .let { modifier ->
+                if (clickAction != null) modifier.clickable(clickAction) else modifier
+            },
+        backgroundColor = themeColors.surface,
+        titleBar = {
+            TitleBar(
+                startIcon = ImageProvider(trendIcon),
+                title = compactTitle,
+                iconColor = trendColor,
+                textColor = themeColors.onSurface,
+                actions = {
+                    Text(
+                        text = refreshLabel,
+                        maxLines = 1,
+                        style = TextStyle(
+                            color = themeColors.onSurfaceVariant,
+                            fontStyle = FontStyle.Italic
+                        ),
+                        modifier = GlanceModifier.clickable(refreshAction)
+                    )
+                }
+            )
+        }
+    ) {
+        Column(modifier = GlanceModifier.fillMaxSize()) {
+            Column(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
+                if (sizeClass != WidgetSizeClass.Small) {
+                    Text(
+                        text = trendLabel,
+                        style = TextStyle(
+                            color = trendColor,
+                            fontWeight = FontWeight.Medium
+                        )
+                    )
+                    Spacer(modifier = GlanceModifier.height(2.dp))
+                }
+
+                if (visibleRows.isEmpty()) {
+                    val placeholderText = if (selection == null) {
+                        context.getString(R.string.widget_select_event)
+                    } else {
+                        context.getString(R.string.widget_loading)
+                    }
+                    Text(text = placeholderText, style = secondaryStyle)
+                } else {
+                    visibleRows
+                        .chunked(MAX_ROWS_PER_GROUP)
+                        .fastForEach { rowsGroup ->
+                            Column {
+                                rowsGroup.fastForEachIndexed { rowIndex, row ->
+                                    Row(
+                                        modifier = GlanceModifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = ROW_BOTTOM_PADDING)
+                                    ) {
+                                        Text(
+                                            text = row.title,
+                                            modifier = GlanceModifier.defaultWeight(),
+                                            maxLines = 1,
+                                            style = rowTitleStyle
+                                        )
+                                        Spacer(modifier = GlanceModifier.width(8.dp))
+                                        Text(
+                                            text = row.value,
+                                            maxLines = 1,
+                                            style = if (rowIndex == 0) primaryValueStyle else secondaryValueStyle
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                    if (hasProgress) {
+                        LinearProgressIndicator(
+                            progress = progress.coerceIn(0f, 1f),
+                            modifier = GlanceModifier
+                                .fillMaxWidth()
+                                .height(4.dp),
+                            color = themeColors.primary,
+                            backgroundColor = themeColors.surfaceVariant
+                        )
+                        Spacer(modifier = GlanceModifier.height(4.dp))
+                    }
+                }
+            }
+
+            if (remaining > 0) {
+                Text(
+                    text = context.getString(R.string.widget_more_format, remaining),
+                    style = TextStyle(
+                        color = themeColors.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium
+                    )
+                )
+            }
+
+            if (showFooter && (statusText != null || updatedText != null)) {
+                Row(modifier = GlanceModifier.fillMaxWidth()) {
+                    statusText?.let { Text(text = it, maxLines = 1, style = secondaryStyle) }
+                    Spacer(modifier = GlanceModifier.defaultWeight())
+                    updatedText?.let { Text(text = it, maxLines = 1, style = secondaryStyle) }
+                }
+            }
+            Spacer(modifier = GlanceModifier.height(FOOTER_BOTTOM_PADDING))
+        }
+    }
+}
+
+private fun createOpenEventIntent(context: Context, eventSlug: String): Intent =
+    Intent(context, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        putExtra(MainActivity.EXTRA_EVENT_SLUG, eventSlug)
+    }
+
+private fun calculateRowLimit(
+    height: Dp,
+    hasProgress: Boolean,
+    showFooter: Boolean,
+    sizeClass: WidgetSizeClass
+): Int {
+    val available = height -
+        CONTENT_VERTICAL_PADDING -
+        HEADER_HEIGHT -
+        if (showFooter) FOOTER_HEIGHT else 0.dp -
+        if (hasProgress) PROGRESS_HEIGHT else 0.dp
+    val rows = (max(0f, available.value) / ROW_SLOT_HEIGHT.value).toInt() - ROW_FIT_SAFETY_ROWS
+    return rows.coerceIn(sizeClass.minRows, sizeClass.maxRows)
+}
+
+private fun shouldShowFooter(height: Dp): Boolean {
+    return height >= FOOTER_MIN_HEIGHT
+}
+
+private fun resolveTrendState(rows: List<EventWidgetRow>, progress: Float?): TrendState {
+    val probability = progress ?: rows.firstNotNullOfOrNull { parseProbability(it.value) } ?: return TrendState.Flat
+    return when {
+        probability >= 0.55f -> TrendState.Up
+        probability <= 0.45f -> TrendState.Down
+        else -> TrendState.Flat
+    }
+}
+
+private fun parseProbability(value: String): Float? {
+    val trimmed = value.trim()
+    if (trimmed == "--") return null
+    if (trimmed.startsWith("<")) {
+        return 0.005f
+    }
+    val percent = trimmed.removeSuffix("%").toFloatOrNull() ?: return null
+    return (percent / 100f).coerceIn(0f, 1f)
+}
+
+private fun resolveSizeClass(height: Dp): WidgetSizeClass {
+    val value = height.value
+    return when {
+        value < SMALL_HEIGHT_THRESHOLD -> WidgetSizeClass.Small
+        value < MEDIUM_HEIGHT_THRESHOLD -> WidgetSizeClass.Medium
+        else -> WidgetSizeClass.Large
+    }
+}
+
+private fun maxTitleChars(sizeClass: WidgetSizeClass): Int = when (sizeClass) {
+    WidgetSizeClass.Small -> SMALL_TITLE_MAX_CHARS
+    WidgetSizeClass.Medium -> MEDIUM_TITLE_MAX_CHARS
+    WidgetSizeClass.Large -> LARGE_TITLE_MAX_CHARS
+}
+
+private fun formatUpdatedLabel(context: Context, updatedAtEpochMs: Long?): String? {
+    if (updatedAtEpochMs == null) return null
+    val duration = Duration.between(Instant.ofEpochMilli(updatedAtEpochMs), Instant.now())
+    val minutes = max(1, duration.toMinutes())
+
+    val value = when {
+        minutes < 60 -> "${minutes}m"
+        minutes < 60 * 24 -> "${minutes / 60}h"
+        else -> "${minutes / (60 * 24)}d"
+    }
+
+    return context.getString(R.string.widget_updated_format, value)
+}
+
+private val CONTENT_VERTICAL_PADDING = 24.dp
+private val HEADER_HEIGHT = 34.dp
+private val FOOTER_BOTTOM_PADDING = 8.dp
+private val FOOTER_HEIGHT = 18.dp + FOOTER_BOTTOM_PADDING
+private val ROW_CONTENT_HEIGHT = 18.dp
+private val PROGRESS_HEIGHT = 8.dp
+private val FOOTER_MIN_HEIGHT = 112.dp
+private val ROW_BOTTOM_PADDING = 1.dp
+private val ROW_SLOT_HEIGHT = ROW_CONTENT_HEIGHT + ROW_BOTTOM_PADDING
+private const val MAX_ROWS_PER_GROUP = 8
+private const val ROW_FIT_SAFETY_ROWS = 1
+private const val SMALL_HEIGHT_THRESHOLD = 230f
+private const val MEDIUM_HEIGHT_THRESHOLD = 360f
+private const val SMALL_TITLE_MAX_CHARS = 24
+private const val MEDIUM_TITLE_MAX_CHARS = 32
+private const val LARGE_TITLE_MAX_CHARS = 44
+
+private enum class TrendState {
+    Up,
+    Down,
+    Flat
+}
+
+private enum class WidgetSizeClass(val minRows: Int, val maxRows: Int) {
+    Small(minRows = 3, maxRows = 8),
+    Medium(minRows = 6, maxRows = 14),
+    Large(minRows = 10, maxRows = 26)
+}

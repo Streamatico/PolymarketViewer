@@ -5,6 +5,7 @@ import android.util.Log
 import com.streamatico.polymarketviewer.data.analytics.AnalyticsService
 import com.streamatico.polymarketviewer.data.preferences.UserPreferencesRepository
 import com.streamatico.polymarketviewer.di.appModule
+import com.streamatico.polymarketviewer.ui.widget.EventWidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -36,6 +37,7 @@ class PolymarketApplication : Application() {
 
         initializeUserPreferences()
         sendAnalyticsPing()
+        EventWidgetUpdater.enqueuePeriodic(this)
     }
 
     private fun initializeUserPreferences() {
