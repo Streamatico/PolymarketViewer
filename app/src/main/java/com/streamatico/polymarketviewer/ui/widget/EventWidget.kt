@@ -3,6 +3,7 @@ package com.streamatico.polymarketviewer.ui.widget
 import android.content.Context
 import android.content.Intent
 import android.appwidget.AppWidgetManager
+import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -28,11 +29,12 @@ import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.components.Scaffold
-import androidx.glance.appwidget.components.TitleBar
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.currentState
+import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
+import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
@@ -56,7 +58,7 @@ import kotlinx.coroutines.launch
 internal class EventWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
 
-    override suspend fun provideGlance(context: Context, id: androidx.glance.GlanceId) {
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             GlanceTheme {
                 EventWidgetContent()
@@ -105,11 +107,19 @@ private fun EventWidgetContent() {
     val totalRowsCount = (snapshot?.totalRowsCount ?: 0).takeIf { it > 0 } ?: rows.size
     val progress = snapshot?.binaryYesPrice?.toFloat()
     val hasProgress = snapshot?.eventType == "BinaryEvent" && progress != null
-    val hasHero = hasProgress && sizeClass != WidgetSizeClass.Small && progress != null
+    val hasHero = hasProgress && sizeClass != WidgetSizeClass.Small
+
+    val bitmap = if (sizeClass != WidgetSizeClass.Small) {
+        snapshot?.imageCachePath?.let { path ->
+            runCatching { BitmapFactory.decodeFile(path) }.getOrNull()
+        }
+    } else null
+    val showImage = bitmap != null
+
     val showFooter = shouldShowFooter(size.height)
-    val maxRows = calculateRowLimit(size.height, hasProgress, hasHero, showFooter, sizeClass)
+    val maxRows = calculateRowLimit(size.height, hasProgress, hasHero, showImage, showFooter, sizeClass)
     val hasOverflow = rows.size > maxRows
-    val reservedRows = if (hasOverflow) 1 else 0
+    val reservedRows = if (hasOverflow) 2 else 0
     val visibleRows = rows.take((maxRows - reservedRows).coerceAtLeast(1))
     val remaining = max(totalRowsCount - visibleRows.size, 0)
     val trendState = resolveTrendState(rows, progress)
@@ -117,7 +127,6 @@ private fun EventWidgetContent() {
     val title = snapshot?.eventTitle
         ?: selection?.eventTitle
         ?: context.getString(R.string.widget_select_event)
-    val compactTitle = title.take(maxTitleChars(sizeClass))
     val statusText = snapshot?.let {
         if (it.closed) {
             context.getString(R.string.widget_status_closed)
@@ -171,23 +180,42 @@ private fun EventWidgetContent() {
             },
         backgroundColor = themeColors.surface,
         titleBar = {
-            TitleBar(
-                startIcon = ImageProvider(trendIcon),
-                title = compactTitle,
-                iconColor = trendColor,
-                textColor = themeColors.onSurface,
-                actions = {
-                    Image(
-                        provider = ImageProvider(R.drawable.ic_refresh),
-                        contentDescription = context.getString(R.string.widget_refresh_cd),
-                        colorFilter = ColorFilter.tint(themeColors.onSurfaceVariant),
-                        modifier = GlanceModifier
-                            .width(24.dp)
-                            .height(24.dp)
-                            .clickable(refreshAction)
+            // Custom title bar replacing Glance's TitleBar component, which hardcodes maxLines=1.
+            // Small widgets: single-line with ellipsis. Medium/Large: up to 2 lines.
+            Row(
+                modifier = GlanceModifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    provider = ImageProvider(trendIcon),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(trendColor),
+                    modifier = GlanceModifier.width(24.dp).height(24.dp)
+                )
+                Spacer(modifier = GlanceModifier.width(10.dp))
+                Text(
+                    text = title,
+                    maxLines = if (sizeClass == WidgetSizeClass.Small) 1 else 2,
+                    modifier = GlanceModifier.defaultWeight(),
+                    style = TextStyle(
+                        color = themeColors.onSurface,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
                     )
-                }
-            )
+                )
+                Spacer(modifier = GlanceModifier.width(4.dp))
+                Image(
+                    provider = ImageProvider(R.drawable.ic_refresh),
+                    contentDescription = context.getString(R.string.widget_refresh_cd),
+                    colorFilter = ColorFilter.tint(themeColors.onSurfaceVariant),
+                    modifier = GlanceModifier
+                        .width(24.dp)
+                        .height(24.dp)
+                        .clickable(refreshAction)
+                )
+            }
         }
     ) {
         Column(modifier = GlanceModifier.fillMaxSize()) {
@@ -200,28 +228,46 @@ private fun EventWidgetContent() {
                     }
                     Text(text = placeholderText, style = secondaryStyle)
                 } else {
-                    if (hasHero) {
-                        Text(
-                            text = formatHeroPercent(progress!!),
-                            style = TextStyle(
-                                color = themeColors.primary,
-                                fontSize = 28.sp,
-                                fontWeight = FontWeight.Bold
+                    // Wrap header elements (image + hero + progress) in a single Column
+                    // so the outer defaultWeight Column's child count stays within the
+                    // RemoteViews 10-child-per-container limit.
+                    Column {
+                        if (showImage) {
+                            Image(
+                                provider = ImageProvider(bitmap),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = GlanceModifier
+                                    .fillMaxWidth()
+                                    .height(IMAGE_HEIGHT)
+                                    .cornerRadius(8.dp)
                             )
-                        )
-                        Spacer(modifier = GlanceModifier.height(4.dp))
-                    }
+                            Spacer(modifier = GlanceModifier.height(6.dp))
+                        }
 
-                    if (hasProgress) {
-                        LinearProgressIndicator(
-                            progress = progress!!.coerceIn(0f, 1f),
-                            modifier = GlanceModifier
-                                .fillMaxWidth()
-                                .height(PROGRESS_BAR_HEIGHT),
-                            color = themeColors.primary,
-                            backgroundColor = themeColors.surfaceVariant
-                        )
-                        Spacer(modifier = GlanceModifier.height(6.dp))
+                        if (hasHero) {
+                            Text(
+                                text = formatHeroPercent(progress),
+                                style = TextStyle(
+                                    color = themeColors.primary,
+                                    fontSize = 28.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                            Spacer(modifier = GlanceModifier.height(4.dp))
+                        }
+
+                        if (hasProgress) {
+                            LinearProgressIndicator(
+                                progress = progress.coerceIn(0f, 1f),
+                                modifier = GlanceModifier
+                                    .fillMaxWidth()
+                                    .height(PROGRESS_BAR_HEIGHT),
+                                color = themeColors.primary,
+                                backgroundColor = themeColors.surfaceVariant
+                            )
+                            Spacer(modifier = GlanceModifier.height(6.dp))
+                        }
                     }
 
                     // Chunk rows into groups to respect RemoteViews' 10-child-per-container limit.
@@ -252,17 +298,17 @@ private fun EventWidgetContent() {
                             }
                         }
                     }
-                }
-            }
 
-            if (remaining > 0) {
-                Text(
-                    text = context.getString(R.string.widget_more_format, remaining),
-                    style = TextStyle(
-                        color = themeColors.onSurfaceVariant,
-                        fontWeight = FontWeight.Medium
-                    )
-                )
+                    if (remaining > 0) {
+                        Text(
+                            text = context.getString(R.string.widget_more_format, remaining),
+                            style = TextStyle(
+                                color = themeColors.onSurfaceVariant,
+                                fontWeight = FontWeight.Medium
+                            )
+                        )
+                    }
+                }
             }
 
             if (showFooter && (statusText != null || updatedText != null)) {
@@ -292,13 +338,16 @@ private fun calculateRowLimit(
     height: Dp,
     hasProgress: Boolean,
     hasHero: Boolean,
+    showImage: Boolean,
     showFooter: Boolean,
     sizeClass: WidgetSizeClass
 ): Int {
+    val headerHeight = if (sizeClass == WidgetSizeClass.Small) HEADER_HEIGHT_SINGLE else HEADER_HEIGHT_DOUBLE
     val available = height -
         CONTENT_VERTICAL_PADDING -
-        HEADER_HEIGHT -
+        headerHeight -
         if (showFooter) FOOTER_HEIGHT else 0.dp -
+        if (showImage) IMAGE_SECTION_HEIGHT else 0.dp -
         if (hasProgress) PROGRESS_SECTION_HEIGHT else 0.dp -
         if (hasHero) HERO_HEIGHT else 0.dp
     val rows = (max(0f, available.value) / ROW_SLOT_HEIGHT.value).toInt() - ROW_FIT_SAFETY_ROWS
@@ -337,12 +386,6 @@ private fun resolveSizeClass(height: Dp): WidgetSizeClass {
     }
 }
 
-private fun maxTitleChars(sizeClass: WidgetSizeClass): Int = when (sizeClass) {
-    WidgetSizeClass.Small -> SMALL_TITLE_MAX_CHARS
-    WidgetSizeClass.Medium -> MEDIUM_TITLE_MAX_CHARS
-    WidgetSizeClass.Large -> LARGE_TITLE_MAX_CHARS
-}
-
 private fun formatUpdatedLabel(context: Context, updatedAtEpochMs: Long?): String? {
     if (updatedAtEpochMs == null) return null
     val duration = Duration.between(Instant.ofEpochMilli(updatedAtEpochMs), Instant.now())
@@ -357,14 +400,17 @@ private fun formatUpdatedLabel(context: Context, updatedAtEpochMs: Long?): Strin
     return context.getString(R.string.widget_updated_format, value)
 }
 
-private val CONTENT_VERTICAL_PADDING = 24.dp
-private val HEADER_HEIGHT = 34.dp
+private val CONTENT_VERTICAL_PADDING = 16.dp
+private val HEADER_HEIGHT_SINGLE = 40.dp  // Small: single-line title
+private val HEADER_HEIGHT_DOUBLE = 58.dp  // Medium/Large: up to 2-line title
 private val FOOTER_BOTTOM_PADDING = 8.dp
 private val FOOTER_HEIGHT = 18.dp + FOOTER_BOTTOM_PADDING
 private val ROW_CONTENT_HEIGHT = 18.dp
 private val PROGRESS_BAR_HEIGHT = 8.dp
 private val PROGRESS_SECTION_HEIGHT = PROGRESS_BAR_HEIGHT + 6.dp
 private val HERO_HEIGHT = 36.dp + 4.dp
+private val IMAGE_HEIGHT = 56.dp
+private val IMAGE_SECTION_HEIGHT = IMAGE_HEIGHT + 6.dp
 private val FOOTER_MIN_HEIGHT = 112.dp
 private val ROW_BOTTOM_PADDING = 2.dp
 private val ROW_SLOT_HEIGHT = ROW_CONTENT_HEIGHT + ROW_BOTTOM_PADDING
@@ -375,9 +421,6 @@ private const val ROW_FIT_SAFETY_ROWS = 1
 private const val MAX_ROWS_PER_GROUP = 8
 private const val SMALL_HEIGHT_THRESHOLD = 230f
 private const val MEDIUM_HEIGHT_THRESHOLD = 360f
-private const val SMALL_TITLE_MAX_CHARS = 24
-private const val MEDIUM_TITLE_MAX_CHARS = 32
-private const val LARGE_TITLE_MAX_CHARS = 44
 
 private enum class TrendState {
     Up,
@@ -388,5 +431,5 @@ private enum class TrendState {
 private enum class WidgetSizeClass(val minRows: Int, val maxRows: Int) {
     Small(minRows = 3, maxRows = 8),
     Medium(minRows = 6, maxRows = 14),
-    Large(minRows = 10, maxRows = 26)
+    Large(minRows = 10, maxRows = 23)
 }

@@ -27,7 +27,8 @@ internal data class EventWidgetSnapshot(
     val updatedAtEpochMs: Long,
     val rows: List<EventWidgetRow>,
     val totalRowsCount: Int = 0,
-    val binaryYesPrice: Double? = null
+    val binaryYesPrice: Double? = null,
+    val imageCachePath: String? = null
 )
 
 internal data class EventWidgetSelection(
