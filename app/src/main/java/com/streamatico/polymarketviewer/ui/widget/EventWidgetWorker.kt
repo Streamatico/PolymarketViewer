@@ -2,13 +2,6 @@ package com.streamatico.polymarketviewer.ui.widget
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapShader
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.RectF
-import android.graphics.Shader
-import androidx.core.graphics.createBitmap
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.getAppWidgetState
@@ -26,6 +19,7 @@ import coil3.size.Scale
 import coil3.transform.RoundedCornersTransformation
 import com.streamatico.polymarketviewer.data.model.gamma_api.BaseEventDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.EventType
+import com.streamatico.polymarketviewer.data.model.gamma_api.MarketResolutionStatus
 import com.streamatico.polymarketviewer.data.model.gamma_api.yesPrice
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import com.streamatico.polymarketviewer.ui.shared.MarketDisplayRow
@@ -133,27 +127,6 @@ internal object EventWidgetRefresher : KoinComponent {
         file.absolutePath
     }.getOrNull()
 
-    private fun Bitmap.roundedWithBackground(radius: Float): Bitmap {
-        val output = createBitmap(width, height)
-
-        val canvas = Canvas(output)
-
-        canvas.drawColor(Color.YELLOW)
-
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            shader = BitmapShader(
-                this@roundedWithBackground,
-                Shader.TileMode.CLAMP,
-                Shader.TileMode.CLAMP
-            )
-        }
-
-        val rect = RectF(0f, 0f, width.toFloat(), height.toFloat())
-        canvas.drawRoundRect(rect, radius, radius, paint)
-
-        return output
-    }
-
     private fun buildRows(event: BaseEventDto, limit: Int): List<EventWidgetRow> =
         event.toDisplayRows(limit).map { it.toWidgetRow() }
 
@@ -163,7 +136,6 @@ internal object EventWidgetRefresher : KoinComponent {
 
 private fun MarketDisplayRow.toWidgetRow() = EventWidgetRow(
     title = title,
-    value = if (isResolved && resolvedOutcome != null) resolvedOutcome
-            else UiFormatter.formatPriceAsPercentage(price),
-    isResolved = isResolved
+    value = resolvedOutcome ?: UiFormatter.formatPriceAsPercentage(price),
+    isResolved = resolutionStatus == MarketResolutionStatus.RESOLVED
 )

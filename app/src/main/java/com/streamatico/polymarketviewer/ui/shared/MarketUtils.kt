@@ -40,17 +40,25 @@ fun List<BaseMarketDto>.sortedForShortView(limit: Int): List<BaseMarketDto> {
 
         .take(limit)
 
-        .sortedBy { it.groupItemThreshold }
+        .sortedWith (
+            compareBy<BaseMarketDto> { it.isResolved() }
+                .thenBy { it.groupItemThreshold  }
+        )
 }
+
+private fun BaseMarketDto.isResolved(): Boolean {
+    return getResolutionStatus() == MarketResolutionStatus.RESOLVED
+}
+
 
 data class MarketDisplayRow(
     val title: String,
     val price: Double?,
-    val isResolved: Boolean = false,
+    val resolutionStatus: MarketResolutionStatus?,
     val resolvedOutcome: String? = null
 )
 
-fun BaseEventDto.toDisplayRows(limit: Int = Int.MAX_VALUE): List<MarketDisplayRow> {
+fun BaseEventDto.toDisplayRows(limit: Int? = null): List<MarketDisplayRow> {
     val markets = baseMarkets
     if (markets.isEmpty()) return emptyList()
 
@@ -63,16 +71,14 @@ fun BaseEventDto.toDisplayRows(limit: Int = Int.MAX_VALUE): List<MarketDisplayRo
         }
 
         EventType.MultiMarket -> {
-            val categoricalMarket = markets.firstOrNull { it.outcomes.size > 2 }
-            if (categoricalMarket != null) {
-                categoricalMarket.toCategoricalDisplayRows(limit)
+            val sortedMarkets = if(limit == null) {
+                markets.sortedByViewPriority(sortByEnum)
             } else {
-                val sorted = markets
-                    .sortedByViewPriority(EventMarketsSortBy.Price)
-                    .take(limit)
-                val isSingle = sorted.size == 1
-                sorted.map { it.toMultiMarketDisplayRow(isSingle) }
+                // Short view
+                markets.sortedForShortView(limit)
             }
+            val isSingleMarket = sortedMarkets.size == 1
+            sortedMarkets.map { it.toMultiMarketDisplayRow(isSingleMarket) }
         }
     }
 }
@@ -95,29 +101,29 @@ fun BaseEventDto.totalDisplayRowsCount(): Int {
 }
 
 private fun BaseMarketDto.toBinaryDisplayRow(): MarketDisplayRow {
-    val isResolved = getResolutionStatus() == MarketResolutionStatus.RESOLVED
     return MarketDisplayRow(
         title = getYesTitle(),
         price = yesPrice(),
-        isResolved = isResolved,
-        resolvedOutcome = if (isResolved) getResolvedOutcome() else null
+        resolutionStatus = getResolutionStatus(),
+        resolvedOutcome = getResolvedOutcome()
     )
 }
 
-private fun BaseMarketDto.toCategoricalDisplayRows(limit: Int): List<MarketDisplayRow> {
+private fun BaseMarketDto.toCategoricalDisplayRows(limit: Int? = null): List<MarketDisplayRow> {
+    val resolutionStatus = getResolutionStatus()
+
     return outcomes
         .mapIndexed { index, outcome -> outcome to outcomePrices.getOrNull(index) }
         .sortedWith(compareByDescending { it.second ?: -1.0 })
-        .take(limit)
-        .map { (outcome, price) -> MarketDisplayRow(title = outcome, price = price) }
+        .take(limit ?: Int.MAX_VALUE)
+        .map { (outcome, price) -> MarketDisplayRow(title = outcome, price = price, resolutionStatus = resolutionStatus) }
 }
 
 private fun BaseMarketDto.toMultiMarketDisplayRow(isSingle: Boolean): MarketDisplayRow {
-    val isResolved = getResolutionStatus() == MarketResolutionStatus.RESOLVED
     return MarketDisplayRow(
         title = if (isSingle) getYesTitle() else getTitleOrDefault(question),
         price = yesPrice(),
-        isResolved = isResolved,
-        resolvedOutcome = if (isResolved) getResolvedOutcome() else null
+        resolutionStatus = getResolutionStatus(),
+        resolvedOutcome = getResolvedOutcome()
     )
 }
