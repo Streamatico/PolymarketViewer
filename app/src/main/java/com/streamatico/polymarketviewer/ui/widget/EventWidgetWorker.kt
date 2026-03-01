@@ -94,6 +94,7 @@ internal object EventWidgetRefresher : KoinComponent {
             eventTitle = event.title,
             eventType = event.eventType.name,
             closed = event.closed,
+            volume = event.volume,
             updatedAtEpochMs = Instant.now().toEpochMilli(),
             rows = rows,
             totalRowsCount = totalRowsCount,

@@ -44,6 +44,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.streamatico.polymarketviewer.MainActivity
 import com.streamatico.polymarketviewer.R
+import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.widget.components.WidgetTitleBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -131,6 +132,7 @@ private fun EventWidgetContent() {
             context.getString(R.string.widget_status_open)
         }
     }
+    val volumeText = UiFormatter.formatLargeValueUsd(snapshot?.volume ?: 0.0, suffix = " Vol.")
     val updatedText = formatUpdatedLabel(context, snapshot?.updatedAtEpochMs)
 
     val clickAction = selection?.eventSlug?.let {
@@ -266,6 +268,7 @@ private fun EventWidgetContent() {
 
             if (showFooter && (statusText != null || updatedText != null)) {
                 Row(modifier = GlanceModifier.fillMaxWidth()) {
+                    Text(text = volumeText, maxLines = 1, style = secondaryStyle)
                     statusText?.let { Text(text = it, maxLines = 1, style = secondaryStyle) }
                     Spacer(modifier = GlanceModifier.defaultWeight())
                     updatedText?.let { Text(text = it, maxLines = 1, style = secondaryStyle) }

@@ -24,6 +24,7 @@ internal data class EventWidgetSnapshot(
     val eventTitle: String,
     val eventType: String,
     val closed: Boolean,
+    val volume: Double?,
     val updatedAtEpochMs: Long,
     val rows: List<EventWidgetRow>,
     val totalRowsCount: Int = 0,
