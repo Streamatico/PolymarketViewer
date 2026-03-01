@@ -49,8 +49,13 @@ import com.streamatico.polymarketviewer.ui.widget.components.WidgetTitleBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.core.os.ConfigurationCompat
 import java.time.Duration
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -325,13 +330,16 @@ private fun resolveSizeClass(height: Dp): WidgetSizeClass {
 
 private fun formatUpdatedLabel(context: Context, updatedAtEpochMs: Long?): String? {
     if (updatedAtEpochMs == null) return null
-    val duration = Duration.between(Instant.ofEpochMilli(updatedAtEpochMs), Instant.now())
+    val instant = Instant.ofEpochMilli(updatedAtEpochMs)
+    val duration = Duration.between(instant, Instant.now())
     val minutes = max(1, duration.toMinutes())
 
-    val value = when {
-        minutes < 60 -> "${minutes}m"
-        minutes < 60 * 24 -> "${minutes / 60}h"
-        else -> "${minutes / (60 * 24)}d"
+    val value = if (minutes < 60 * 24) {
+        val locale = ConfigurationCompat.getLocales(context.resources.configuration)[0] ?: Locale.getDefault()
+        val formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)
+        instant.atZone(ZoneId.systemDefault()).format(formatter)
+    } else {
+        "${minutes / (60 * 24)}d"
     }
 
     return context.getString(R.string.widget_updated_format, value)
