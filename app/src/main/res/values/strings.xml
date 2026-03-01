@@ -75,7 +75,6 @@
     <string name="widget_updated_format">Updated %s</string>
     <string name="widget_refresh">Refresh</string>
     <string name="widget_refresh_short">Upd</string>
-    <string name="widget_refresh_cd">Refresh widget</string>
     <string name="widget_description">Track a selected Polymarket event on your home screen.</string>
     <string name="widget_more_format">+%d more</string>
     <string name="widget_trend_up">Trend: bullish</string>

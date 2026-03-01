@@ -2,6 +2,13 @@ package com.streamatico.polymarketviewer.ui.widget
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapShader
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
+import android.graphics.Shader
+import androidx.core.graphics.createBitmap
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.getAppWidgetState
@@ -14,7 +21,9 @@ import coil3.SingletonImageLoader
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.request.allowHardware
+import coil3.request.transformations
 import coil3.size.Scale
+import coil3.transform.RoundedCornersTransformation
 import com.streamatico.polymarketviewer.data.model.gamma_api.BaseEventDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.EventType
 import com.streamatico.polymarketviewer.data.model.gamma_api.yesPrice
@@ -41,6 +50,7 @@ internal class EventWidgetWorker(
 
 private const val MAX_CACHED_ROWS = 50
 private const val IMAGE_SIZE_PX = 200
+private const val IMAGE_CORNER_RADIUS = 24f
 
 internal object EventWidgetRefresher : KoinComponent {
     private val repository: PolymarketRepository by inject()
@@ -108,15 +118,41 @@ internal object EventWidgetRefresher : KoinComponent {
             .data(imageUrl)
             .size(IMAGE_SIZE_PX, IMAGE_SIZE_PX)
             .scale(Scale.FILL)
+            .transformations(RoundedCornersTransformation(IMAGE_CORNER_RADIUS))
             .allowHardware(false) // required to read pixels and save to file
             .build()
-        val bitmap = ((imageLoader.execute(request) as? SuccessResult)?.image as? BitmapImage)?.bitmap
+
+        val bitmap = ((imageLoader.execute(request) as? SuccessResult)?.image as? BitmapImage)?.bitmap//?.roundedWithBackground(IMAGE_CORNER_RADIUS)
             ?: return@runCatching null
+
         val file = File(context.cacheDir, "widget_images/$eventId.png")
         file.parentFile?.mkdirs()
-        file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 90, it) }
+        file.outputStream().use {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, it)
+        }
         file.absolutePath
     }.getOrNull()
+
+    private fun Bitmap.roundedWithBackground(radius: Float): Bitmap {
+        val output = createBitmap(width, height)
+
+        val canvas = Canvas(output)
+
+        canvas.drawColor(Color.YELLOW)
+
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            shader = BitmapShader(
+                this@roundedWithBackground,
+                Shader.TileMode.CLAMP,
+                Shader.TileMode.CLAMP
+            )
+        }
+
+        val rect = RectF(0f, 0f, width.toFloat(), height.toFloat())
+        canvas.drawRoundRect(rect, radius, radius, paint)
+
+        return output
+    }
 
     private fun buildRows(event: BaseEventDto, limit: Int): List<EventWidgetRow> =
         event.toDisplayRows(limit).map { it.toWidgetRow() }

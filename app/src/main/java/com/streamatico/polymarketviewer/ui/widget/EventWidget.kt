@@ -1,8 +1,8 @@
 package com.streamatico.polymarketviewer.ui.widget
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
-import android.appwidget.AppWidgetManager
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
@@ -10,11 +10,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import androidx.datastore.preferences.core.Preferences
-import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
-import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
@@ -24,17 +22,16 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.SizeMode
-import androidx.glance.appwidget.updateAll
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
+import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
+import androidx.glance.appwidget.updateAll
 import androidx.glance.currentState
-import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
-import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
@@ -47,13 +44,14 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.streamatico.polymarketviewer.MainActivity
 import com.streamatico.polymarketviewer.R
+import com.streamatico.polymarketviewer.ui.widget.components.WidgetTitleBar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.Instant
 import kotlin.math.max
 import kotlin.math.roundToInt
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 internal class EventWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
@@ -122,7 +120,6 @@ private fun EventWidgetContent() {
     val reservedRows = if (hasOverflow) 2 else 0
     val visibleRows = rows.take((maxRows - reservedRows).coerceAtLeast(1))
     val remaining = max(totalRowsCount - visibleRows.size, 0)
-    val trendState = resolveTrendState(rows, progress)
 
     val title = snapshot?.eventTitle
         ?: selection?.eventTitle
@@ -139,19 +136,7 @@ private fun EventWidgetContent() {
     val clickAction = selection?.eventSlug?.let {
         actionStartActivity(createOpenEventIntent(context, it))
     }
-    val refreshAction = actionRunCallback<EventWidgetRefreshAction>()
     val themeColors = GlanceTheme.colors
-
-    val trendIcon = when (trendState) {
-        TrendState.Up -> R.drawable.ic_trend_up
-        TrendState.Down -> R.drawable.ic_trend_down
-        TrendState.Flat -> R.drawable.ic_trend_flat
-    }
-    val trendColor = when (trendState) {
-        TrendState.Up -> themeColors.primary
-        TrendState.Down -> themeColors.onSurface
-        TrendState.Flat -> themeColors.onSurfaceVariant
-    }
 
     val rowTitleStyle = TextStyle(
         color = themeColors.onSurface,
@@ -180,42 +165,23 @@ private fun EventWidgetContent() {
             },
         backgroundColor = themeColors.surface,
         titleBar = {
-            // Custom title bar replacing Glance's TitleBar component, which hardcodes maxLines=1.
-            // Small widgets: single-line with ellipsis. Medium/Large: up to 2 lines.
-            Row(
-                modifier = GlanceModifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    provider = ImageProvider(trendIcon),
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(trendColor),
-                    modifier = GlanceModifier.width(24.dp).height(24.dp)
-                )
-                Spacer(modifier = GlanceModifier.width(10.dp))
-                Text(
-                    text = title,
-                    maxLines = if (sizeClass == WidgetSizeClass.Small) 1 else 2,
-                    modifier = GlanceModifier.defaultWeight(),
-                    style = TextStyle(
-                        color = themeColors.onSurface,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp
+            val startIcon = if(bitmap != null) ImageProvider(bitmap)
+            else ImageProvider(R.drawable.ic_trend_flat)
+
+            val refreshAction = actionRunCallback<EventWidgetRefreshAction>()
+
+            WidgetTitleBar(
+                startIcon = startIcon,
+                startIconSize = IMAGE_WIDTH,
+                title = title,
+                actions = {
+                    CircleIconButton(
+                        onClick = refreshAction,
+                        imageProvider = ImageProvider(R.drawable.ic_refresh),
+                        contentDescription = null,
                     )
-                )
-                Spacer(modifier = GlanceModifier.width(4.dp))
-                Image(
-                    provider = ImageProvider(R.drawable.ic_refresh),
-                    contentDescription = context.getString(R.string.widget_refresh_cd),
-                    colorFilter = ColorFilter.tint(themeColors.onSurfaceVariant),
-                    modifier = GlanceModifier
-                        .width(24.dp)
-                        .height(24.dp)
-                        .clickable(refreshAction)
-                )
-            }
+                }
+            )
         }
     ) {
         Column(modifier = GlanceModifier.fillMaxSize()) {
@@ -232,19 +198,6 @@ private fun EventWidgetContent() {
                     // so the outer defaultWeight Column's child count stays within the
                     // RemoteViews 10-child-per-container limit.
                     Column {
-                        if (showImage) {
-                            Image(
-                                provider = ImageProvider(bitmap),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = GlanceModifier
-                                    .fillMaxWidth()
-                                    .height(IMAGE_HEIGHT)
-                                    .cornerRadius(8.dp)
-                            )
-                            Spacer(modifier = GlanceModifier.height(6.dp))
-                        }
-
                         if (hasHero) {
                             Text(
                                 text = formatHeroPercent(progress),
@@ -358,25 +311,6 @@ private fun shouldShowFooter(height: Dp): Boolean {
     return height >= FOOTER_MIN_HEIGHT
 }
 
-private fun resolveTrendState(rows: List<EventWidgetRow>, progress: Float?): TrendState {
-    val probability = progress ?: rows.firstNotNullOfOrNull { parseProbability(it.value) } ?: return TrendState.Flat
-    return when {
-        probability >= 0.55f -> TrendState.Up
-        probability <= 0.45f -> TrendState.Down
-        else -> TrendState.Flat
-    }
-}
-
-private fun parseProbability(value: String): Float? {
-    val trimmed = value.trim()
-    if (trimmed == "--") return null
-    if (trimmed.startsWith("<")) {
-        return 0.005f
-    }
-    val percent = trimmed.removeSuffix("%").toFloatOrNull() ?: return null
-    return (percent / 100f).coerceIn(0f, 1f)
-}
-
 private fun resolveSizeClass(height: Dp): WidgetSizeClass {
     val value = height.value
     return when {
@@ -410,6 +344,7 @@ private val PROGRESS_BAR_HEIGHT = 8.dp
 private val PROGRESS_SECTION_HEIGHT = PROGRESS_BAR_HEIGHT + 6.dp
 private val HERO_HEIGHT = 36.dp + 4.dp
 private val IMAGE_HEIGHT = 56.dp
+private val IMAGE_WIDTH = 56.dp
 private val IMAGE_SECTION_HEIGHT = IMAGE_HEIGHT + 6.dp
 private val FOOTER_MIN_HEIGHT = 112.dp
 private val ROW_BOTTOM_PADDING = 2.dp
@@ -421,12 +356,6 @@ private const val ROW_FIT_SAFETY_ROWS = 1
 private const val MAX_ROWS_PER_GROUP = 8
 private const val SMALL_HEIGHT_THRESHOLD = 230f
 private const val MEDIUM_HEIGHT_THRESHOLD = 360f
-
-private enum class TrendState {
-    Up,
-    Down,
-    Flat
-}
 
 private enum class WidgetSizeClass(val minRows: Int, val maxRows: Int) {
     Small(minRows = 3, maxRows = 8),
