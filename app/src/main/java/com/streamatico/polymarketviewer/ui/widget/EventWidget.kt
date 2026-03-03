@@ -50,6 +50,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.core.os.ConfigurationCompat
+import androidx.glance.text.TextAlign
+import com.streamatico.polymarketviewer.ui.widget.components.WidgetHorizontalDivider
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
@@ -111,33 +113,31 @@ private fun EventWidgetContent() {
     val totalRowsCount = (snapshot?.totalRowsCount ?: 0).takeIf { it > 0 } ?: rows.size
     val progress = snapshot?.binaryYesPrice?.toFloat()
     val hasProgress = snapshot?.eventType == "BinaryEvent" && progress != null
-    val hasHero = hasProgress && sizeClass != WidgetSizeClass.Small
+    val hasHero = hasProgress
 
-    val bitmap = if (sizeClass != WidgetSizeClass.Small) {
+    val bitmap =
         snapshot?.imageCachePath?.let { path ->
             runCatching { BitmapFactory.decodeFile(path) }.getOrNull()
         }
-    } else null
-    val showImage = bitmap != null
 
     val showFooter = shouldShowFooter(size.height)
-    val maxRows = calculateRowLimit(size.height, hasProgress, hasHero, showImage, showFooter, sizeClass)
+    val maxRows = calculateRowLimit(
+        height = size.height,
+        hasProgress = hasProgress,
+        hasHero = hasHero,
+        showFooter = showFooter,
+        sizeClass = sizeClass
+    )
     val hasOverflow = rows.size > maxRows
-    val reservedRows = if (hasOverflow) 2 else 0
+    val reservedRows = if (hasOverflow) 1 else 0
     val visibleRows = rows.take((maxRows - reservedRows).coerceAtLeast(1))
     val remaining = max(totalRowsCount - visibleRows.size, 0)
 
     val title = snapshot?.eventTitle
         ?: selection?.eventTitle
         ?: context.getString(R.string.widget_select_event)
-    val statusText = snapshot?.let {
-        if (it.closed) {
-            context.getString(R.string.widget_status_closed)
-        } else {
-            context.getString(R.string.widget_status_open)
-        }
-    }
     val volumeText = UiFormatter.formatLargeValueUsd(snapshot?.volume ?: 0.0, suffix = " Vol.")
+    val endDateText = snapshot?.let { formatEndDateLabel(context, it.endDateEpochMs, it.closed) }
     val updatedText = formatUpdatedLabel(context, snapshot?.updatedAtEpochMs)
 
     val clickAction = selection?.eventSlug?.let {
@@ -151,11 +151,13 @@ private fun EventWidgetContent() {
     )
     val primaryRowTitleStyle = TextStyle(
         color = themeColors.onSurface,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.Bold,
+        fontSize = 15.sp  // Explicit size for first outcome title
     )
     val primaryValueStyle = TextStyle(
         color = themeColors.primary,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp  // Explicit size for first outcome value
     )
     val secondaryValueStyle = TextStyle(
         color = themeColors.onSurfaceVariant,
@@ -226,7 +228,7 @@ private fun EventWidgetContent() {
                                 color = themeColors.primary,
                                 backgroundColor = themeColors.surfaceVariant
                             )
-                            Spacer(modifier = GlanceModifier.height(6.dp))
+                            Spacer(modifier = GlanceModifier.height(10.dp))  // Increased from 6dp for better visual separation
                         }
                     }
 
@@ -261,22 +263,47 @@ private fun EventWidgetContent() {
 
                     if (remaining > 0) {
                         Text(
+                            modifier = GlanceModifier
+                                .fillMaxWidth(),
                             text = context.getString(R.string.widget_more_format, remaining),
                             style = TextStyle(
                                 color = themeColors.onSurfaceVariant,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Center
                             )
                         )
                     }
                 }
             }
 
-            if (showFooter && (statusText != null || updatedText != null)) {
-                Row(modifier = GlanceModifier.fillMaxWidth()) {
-                    Text(text = volumeText, maxLines = 1, style = secondaryStyle)
-                    statusText?.let { Text(text = it, maxLines = 1, style = secondaryStyle) }
-                    Spacer(modifier = GlanceModifier.defaultWeight())
-                    updatedText?.let { Text(text = it, maxLines = 1, style = secondaryStyle) }
+            if (showFooter) {
+                WidgetHorizontalDivider()
+
+                // Footer: Two rows for better information grouping
+                Column {
+                    // Row 1: Volume (left), [reserved space for future] (right)
+                    Row(modifier = GlanceModifier.fillMaxWidth()) {
+                        Text(text = volumeText, maxLines = 1, style = secondaryStyle)
+                        Spacer(modifier = GlanceModifier.defaultWeight())
+                        // Reserved space for future info (e.g., status badge, participant count)
+
+                        // DEBUG!!
+                        //Text(text = sizeClass.toString(), maxLines = 1, style = secondaryStyle)
+                    }
+
+                    // Row 2: End Date (left), Updated time (right)
+                    if (endDateText != null || updatedText != null) {
+                        Spacer(modifier = GlanceModifier.height(2.dp))
+                        Row(modifier = GlanceModifier.fillMaxWidth()) {
+                            endDateText?.let {
+                                Text(text = it, maxLines = 1, style = secondaryStyle)
+                            }
+                            Spacer(modifier = GlanceModifier.defaultWeight())
+                            updatedText?.let {
+                                Text(text = it, maxLines = 1, style = secondaryStyle)
+                            }
+                        }
+                    }
                 }
             }
             Spacer(modifier = GlanceModifier.height(FOOTER_BOTTOM_PADDING))
@@ -299,16 +326,14 @@ private fun calculateRowLimit(
     height: Dp,
     hasProgress: Boolean,
     hasHero: Boolean,
-    showImage: Boolean,
     showFooter: Boolean,
     sizeClass: WidgetSizeClass
 ): Int {
-    val headerHeight = if (sizeClass == WidgetSizeClass.Small) HEADER_HEIGHT_SINGLE else HEADER_HEIGHT_DOUBLE
+    val headerHeight = HEADER_HEIGHT
     val available = height -
         CONTENT_VERTICAL_PADDING -
         headerHeight -
         if (showFooter) FOOTER_HEIGHT else 0.dp -
-        if (showImage) IMAGE_SECTION_HEIGHT else 0.dp -
         if (hasProgress) PROGRESS_SECTION_HEIGHT else 0.dp -
         if (hasHero) HERO_HEIGHT else 0.dp
     val rows = (max(0f, available.value) / ROW_SLOT_HEIGHT.value).toInt() - ROW_FIT_SAFETY_ROWS
@@ -322,7 +347,7 @@ private fun shouldShowFooter(height: Dp): Boolean {
 private fun resolveSizeClass(height: Dp): WidgetSizeClass {
     val value = height.value
     return when {
-        value < SMALL_HEIGHT_THRESHOLD -> WidgetSizeClass.Small
+        //value < SMALL_HEIGHT_THRESHOLD -> WidgetSizeClass.Small
         value < MEDIUM_HEIGHT_THRESHOLD -> WidgetSizeClass.Medium
         else -> WidgetSizeClass.Large
     }
@@ -345,31 +370,73 @@ private fun formatUpdatedLabel(context: Context, updatedAtEpochMs: Long?): Strin
     return context.getString(R.string.widget_updated_format, value)
 }
 
+private fun formatEndDateLabel(context: Context, endDateEpochMs: Long?, closed: Boolean): String? {
+    if (endDateEpochMs == null) return null
+
+    val endInstant = Instant.ofEpochMilli(endDateEpochMs)
+    val endDateTime = endInstant.atZone(ZoneId.systemDefault())
+    val now = Instant.now().atZone(ZoneId.systemDefault())
+    val duration = Duration.between(now.toInstant(), endInstant)
+
+    // If event already ended/closed
+    if (closed || duration.isNegative) {
+        val daysSinceEnd = kotlin.math.abs(duration.toDays())
+        return when {
+            daysSinceEnd == 0L -> "Ended today"
+            daysSinceEnd == 1L -> "Ended yesterday"
+            daysSinceEnd < 7 -> "Ended ${daysSinceEnd}d ago"
+            else -> {
+                val locale = ConfigurationCompat.getLocales(context.resources.configuration)[0] ?: Locale.getDefault()
+                val formatter = DateTimeFormatter.ofPattern("MMM d", locale)
+                "Ended ${endDateTime.format(formatter)}"
+            }
+        }
+    }
+
+    // Event is active - show remaining time or date
+    val hours = duration.toHours()
+    val days = duration.toDays()
+
+    return when {
+        hours < 1 -> "Ends in <1h"
+        hours < 24 -> "Ends in ${hours}h"
+        days < 7 -> "Ends in ${days}d"
+        else -> {
+            val locale = ConfigurationCompat.getLocales(context.resources.configuration)[0] ?: Locale.getDefault()
+            val formatter = if (endDateTime.year == now.year) {
+                DateTimeFormatter.ofPattern("MMM d", locale)
+            } else {
+                DateTimeFormatter.ofPattern("MMM d, yyyy", locale)
+            }
+            "Ends ${endDateTime.format(formatter)}"
+        }
+    }
+}
+
 private val CONTENT_VERTICAL_PADDING = 16.dp
-private val HEADER_HEIGHT_SINGLE = 40.dp  // Small: single-line title
-private val HEADER_HEIGHT_DOUBLE = 58.dp  // Medium/Large: up to 2-line title
+private val HEADER_HEIGHT = 40.dp //+ 40.dp + 6.dp
 private val FOOTER_BOTTOM_PADDING = 8.dp
-private val FOOTER_HEIGHT = 18.dp + FOOTER_BOTTOM_PADDING
-private val ROW_CONTENT_HEIGHT = 18.dp
+private val FOOTER_HEIGHT = (18.dp * 2) + 2.dp + FOOTER_BOTTOM_PADDING  // Two rows + spacer between + bottom padding
+private val ROW_CONTENT_HEIGHT = 19.dp
 private val PROGRESS_BAR_HEIGHT = 8.dp
-private val PROGRESS_SECTION_HEIGHT = PROGRESS_BAR_HEIGHT + 6.dp
+private val PROGRESS_SECTION_HEIGHT = PROGRESS_BAR_HEIGHT + 10.dp  // Updated spacer from 6dp to 10dp
 private val HERO_HEIGHT = 36.dp + 4.dp
-private val IMAGE_HEIGHT = 56.dp
-private val IMAGE_WIDTH = 56.dp
-private val IMAGE_SECTION_HEIGHT = IMAGE_HEIGHT + 6.dp
+private val IMAGE_HEIGHT = 40.dp  // Changed from 56.dp to match in-app cards
+private val IMAGE_WIDTH = 40.dp   // Changed from 56.dp to match in-app cards
+//private val IMAGE_SECTION_HEIGHT = IMAGE_HEIGHT + 6.dp
 private val FOOTER_MIN_HEIGHT = 112.dp
-private val ROW_BOTTOM_PADDING = 2.dp
+private val ROW_BOTTOM_PADDING = 5.dp  // Increased from 2.dp for better readability
 private val ROW_SLOT_HEIGHT = ROW_CONTENT_HEIGHT + ROW_BOTTOM_PADDING
 private const val ROW_FIT_SAFETY_ROWS = 1
 // RemoteViews (Glance's rendering backend) limits direct children of any
 // Column/Row to 10. Rows are chunked into groups of MAX_ROWS_PER_GROUP so
 // each nested Column stays within that limit.
 private const val MAX_ROWS_PER_GROUP = 8
-private const val SMALL_HEIGHT_THRESHOLD = 230f
+//private const val SMALL_HEIGHT_THRESHOLD = 230f
 private const val MEDIUM_HEIGHT_THRESHOLD = 360f
 
 private enum class WidgetSizeClass(val minRows: Int, val maxRows: Int) {
-    Small(minRows = 3, maxRows = 8),
-    Medium(minRows = 6, maxRows = 14),
+//    Small(minRows = 3, maxRows = 8),
+    Medium(minRows = 4, maxRows = 15),
     Large(minRows = 10, maxRows = 23)
 }

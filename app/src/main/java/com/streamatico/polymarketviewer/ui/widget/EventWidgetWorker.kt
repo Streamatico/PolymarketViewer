@@ -43,7 +43,7 @@ internal class EventWidgetWorker(
 }
 
 private const val MAX_CACHED_ROWS = 50
-private const val IMAGE_SIZE_PX = 200
+private const val IMAGE_SIZE_PX = 150  // Reduced from 200 to match smaller 40dp icon size
 private const val IMAGE_CORNER_RADIUS = 24f
 
 internal object EventWidgetRefresher : KoinComponent {
@@ -88,6 +88,8 @@ internal object EventWidgetRefresher : KoinComponent {
         val imageCachePath = event.imageUrl?.let {
             downloadAndCacheImage(context, it, event.id)
         }
+        val endDateEpochMs = event.endDate?.toInstant()?.toEpochMilli()
+
         return EventWidgetSnapshot(
             eventId = selection.eventId,
             eventSlug = selection.eventSlug,
@@ -96,6 +98,7 @@ internal object EventWidgetRefresher : KoinComponent {
             closed = event.closed,
             volume = event.volume,
             updatedAtEpochMs = Instant.now().toEpochMilli(),
+            endDateEpochMs = endDateEpochMs,
             rows = rows,
             totalRowsCount = totalRowsCount,
             binaryYesPrice = binaryYesPrice,

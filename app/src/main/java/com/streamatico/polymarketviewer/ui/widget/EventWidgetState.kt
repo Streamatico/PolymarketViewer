@@ -26,6 +26,7 @@ internal data class EventWidgetSnapshot(
     val closed: Boolean,
     val volume: Double?,
     val updatedAtEpochMs: Long,
+    val endDateEpochMs: Long? = null,  // End date of the event (when it closes/ends)
     val rows: List<EventWidgetRow>,
     val totalRowsCount: Int = 0,
     val binaryYesPrice: Double? = null,
