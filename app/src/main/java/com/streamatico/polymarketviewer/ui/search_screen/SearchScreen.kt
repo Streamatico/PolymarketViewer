@@ -34,6 +34,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -79,6 +80,14 @@ private fun SearchScreenContent(
     onRetry: () -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
+    var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(searchQuery, selection = TextRange(searchQuery.length)))
+    }
+
+    val clearSearchAndTextField = {
+        textFieldValue = TextFieldValue("")
+        onClearSearch()
+    }
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -97,7 +106,13 @@ private fun SearchScreenContent(
                 },
                 title = {
                     SearchTextField(
-                        onQueryChange = onSearchQueryChange,
+                        value = textFieldValue,
+                        onValueChange = { newValue ->
+                            textFieldValue = newValue
+                            if (newValue.text != searchQuery) {
+                                onSearchQueryChange(newValue.text)
+                            }
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(focusRequester)
@@ -105,7 +120,7 @@ private fun SearchScreenContent(
                 },
                 actions = {
                     if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = onClearSearch) {
+                        IconButton(onClick = clearSearchAndTextField) {
                             Icon(
                                 imageVector = Icons.Filled.Clear,
                                 contentDescription = stringResource(R.string.search_clear)
@@ -152,19 +167,13 @@ private fun SearchScreenContent(
 
 @Composable
 private fun SearchTextField(
-    onQueryChange: (String) -> Unit,
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var query by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue(""))
-    }
-
     BasicTextField(
-        value = query,
-        onValueChange = { newValue ->
-            query = newValue
-            onQueryChange(newValue.text)
-        },
+        value = value,
+        onValueChange = onValueChange,
         modifier = modifier,
         textStyle = TextStyle(
             color = MaterialTheme.colorScheme.onSurface,
@@ -173,7 +182,7 @@ private fun SearchTextField(
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         singleLine = true,
         decorationBox = { innerTextField ->
-            if (query.text.isEmpty()) {
+            if (value.text.isEmpty()) {
                 Text(
                     text = stringResource(R.string.search_hint),
                     style = MaterialTheme.typography.bodyLarge,
