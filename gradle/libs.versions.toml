@@ -1,8 +1,7 @@
 [versions]
-agp = "8.13.2"
+agp = "9.1.0"
 
 kotlin = "2.3.10"
-ksp = "2.3.2"
 
 coreKtx = "1.17.0"
 junit = "4.13.2"
@@ -24,7 +23,7 @@ vico = "2.4.3"
 glance = "1.1.1"
 work = "2.11.1"
 
-ktor = "3.4.0"  # Ktor version
+ktor = "3.4.1"  # Ktor version
 kotlinx-serialization = "1.10.0" # Kotlinx Serialization version
 
 koin = "4.1.1"
@@ -75,7 +74,6 @@ koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compos
 # Vico Chart Library (Compose)
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
-vico-core = { group = "com.patrykandpatrick.vico", name = "core", version.ref = "vico" }
 
 # Ktor Client
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
@@ -93,21 +91,17 @@ androidx-data-store = { group = "androidx.datastore", name = "datastore-preferen
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" } # Kotlinx Serialization plugin
 
-
-google-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 
 [bundles]
 # Vico
 vico = [
     "vico-compose",
-    "vico-compose-m3",
-    "vico-core"
+    "vico-compose-m3"
 ]
 
 # Ktor client bundle
