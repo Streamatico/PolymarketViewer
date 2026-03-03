@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SearchResultOptimizedDto(
     @SerialName("events") val events: List<OptimizedEventDto>? = null,
-    @SerialName("profiles") val profiles: List<UserProfileDto>? = null,
+    @SerialName("profiles") val profiles: List<UserProfileDto?>? = null,
     @SerialName("tags") val tags: List<TagDto>? = null,
     @SerialName("hasMore") val hasMore: Boolean
 )
