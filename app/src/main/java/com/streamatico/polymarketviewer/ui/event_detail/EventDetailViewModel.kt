@@ -18,7 +18,7 @@ import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import com.streamatico.polymarketviewer.ui.navigation.NavKeys
 
-import com.streamatico.polymarketviewer.data.preferences.UserPreferencesRepository
+import com.streamatico.polymarketviewer.data.preferences.WatchlistInteractor
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 
 class EventDetailViewModel(
     private val polymarketRepository: PolymarketRepository,
-    private val userPreferencesRepository: UserPreferencesRepository,
+    private val watchlistInteractor: WatchlistInteractor,
     navKey: NavKeys.EventDetail
 ) : ViewModel() {
 
@@ -46,7 +46,7 @@ class EventDetailViewModel(
 
     // --- Watchlist State --- //
     val isInWatchlist: StateFlow<Boolean> = combine(
-        userPreferencesRepository.watchlistIds,
+        watchlistInteractor.watchlistIds,
         _uiState
     ) { ids, state ->
         val eventId = (state as? EventDetailUiState.Success)?.event?.id
@@ -323,7 +323,7 @@ class EventDetailViewModel(
     fun toggleWatchlist() {
         val eventId = (_uiState.value as? EventDetailUiState.Success)?.event?.id ?: return
         viewModelScope.launch {
-            userPreferencesRepository.toggleWatchlist(eventId)
+            watchlistInteractor.toggleWatchlist(eventId)
         }
     }
 
