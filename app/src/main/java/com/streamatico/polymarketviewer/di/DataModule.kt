@@ -9,7 +9,9 @@ import com.streamatico.polymarketviewer.data.network.PolymarketClobApiClient
 import com.streamatico.polymarketviewer.data.network.PolymarketDataApiClient
 import com.streamatico.polymarketviewer.data.network.PolymarketGammaApiClient
 import com.streamatico.polymarketviewer.data.network.PolymarketHttpClientNames
+import com.streamatico.polymarketviewer.data.preferences.DefaultWatchlistInteractor
 import com.streamatico.polymarketviewer.data.preferences.UserPreferencesRepository
+import com.streamatico.polymarketviewer.data.preferences.WatchlistInteractor
 import com.streamatico.polymarketviewer.data.repository.PolymarketRepositoryImpl
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import org.koin.android.ext.koin.androidContext
@@ -34,6 +36,7 @@ val dataModule = module {
 
     // Repositories & Services
     singleOf(::UserPreferencesRepository)
+    singleOf(::DefaultWatchlistInteractor) bind WatchlistInteractor::class
     single { AnalyticsService(get(named(PolymarketHttpClientNames.ANALYTICS_CLIENT)), get()) }
 
     // API Clients

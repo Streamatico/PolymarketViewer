@@ -4,23 +4,29 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.streamatico.polymarketviewer.data.model.gamma_api.OptimizedEventDto
+import com.streamatico.polymarketviewer.data.preferences.WatchlistInteractor
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 
 class SearchViewModel(
-    private val polymarketRepository: PolymarketRepository
+    private val polymarketRepository: PolymarketRepository,
+    private val watchlistInteractor: WatchlistInteractor
 ) : ViewModel() {
 
+    val watchlistIds: StateFlow<Set<String>> = watchlistInteractor.watchlistIds
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
     private val _uiState = MutableStateFlow<SearchUiState>(SearchUiState.Empty)
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
@@ -99,6 +105,12 @@ class SearchViewModel(
             _uiState.value = SearchUiState.Error(
                 e.message ?: "An unexpected error occurred"
             )
+        }
+    }
+
+    fun toggleWatchlist(eventId: String) {
+        viewModelScope.launch {
+            watchlistInteractor.toggleWatchlist(eventId)
         }
     }
 

@@ -56,14 +56,17 @@ fun SearchScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val watchlistIds by viewModel.watchlistIds.collectAsState()
 
     SearchScreenContent(
         uiState = uiState,
         searchQuery = searchQuery,
+        watchlistIds = watchlistIds,
         onSearchQueryChange = viewModel::onSearchQueryChange,
         onClearSearch = viewModel::clearSearch,
         onNavigateBack = onNavigateBack,
         onNavigateToEventDetail = onNavigateToEventDetail,
+        onToggleWatchlist = viewModel::toggleWatchlist,
         onRetry = viewModel::retrySearch
     )
 }
@@ -73,10 +76,12 @@ fun SearchScreen(
 private fun SearchScreenContent(
     uiState: SearchUiState,
     searchQuery: String,
+    watchlistIds: Set<String>,
     onSearchQueryChange: (String) -> Unit,
     onClearSearch: () -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToEventDetail: (eventSlug: String) -> Unit,
+    onToggleWatchlist: (String) -> Unit,
     onRetry: () -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -149,7 +154,9 @@ private fun SearchScreenContent(
                     } else {
                         SearchResultsList(
                             events = uiState.events,
-                            onEventClick = onNavigateToEventDetail
+                            watchlistIds = watchlistIds,
+                            onEventClick = onNavigateToEventDetail,
+                            onToggleWatchlist = onToggleWatchlist
                         )
                     }
                 }
@@ -241,7 +248,9 @@ private fun NoResultsState() {
 @Composable
 private fun SearchResultsList(
     events: List<OptimizedEventDto>,
-    onEventClick: (eventSlug: String) -> Unit
+    watchlistIds: Set<String>,
+    onEventClick: (eventSlug: String) -> Unit,
+    onToggleWatchlist: (eventId: String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -251,6 +260,8 @@ private fun SearchResultsList(
         items(events, key = { it.id }) { event ->
             EventListItem(
                 event = event,
+                isInWatchlist = watchlistIds.contains(event.id),
+                onToggleWatchlist = { onToggleWatchlist(event.id) },
                 onClick = { onEventClick(event.slug) }
             )
         }
@@ -269,10 +280,12 @@ private fun SearchScreenPreview_Success() {
                 PreviewMocks.sampleOptimizedEvents
             ),
             searchQuery = "xyz123",
+            watchlistIds = emptySet(),
             onSearchQueryChange = {},
             onClearSearch = {},
             onNavigateBack = {},
             onNavigateToEventDetail = {},
+            onToggleWatchlist = {},
             onRetry = {}
         )
     }
@@ -287,10 +300,12 @@ private fun SearchScreenPreview_Empty() {
         SearchScreenContent(
             uiState = SearchUiState.Empty,
             searchQuery = "",
+            watchlistIds = emptySet(),
             onSearchQueryChange = {},
             onClearSearch = {},
             onNavigateBack = {},
             onNavigateToEventDetail = {},
+            onToggleWatchlist = {},
             onRetry = {}
         )
     }
@@ -304,10 +319,12 @@ private fun SearchScreenPreview_Loading() {
         SearchScreenContent(
             uiState = SearchUiState.Loading,
             searchQuery = "trump",
+            watchlistIds = emptySet(),
             onSearchQueryChange = {},
             onClearSearch = {},
             onNavigateBack = {},
             onNavigateToEventDetail = {},
+            onToggleWatchlist = {},
             onRetry = {}
         )
     }
@@ -321,10 +338,12 @@ private fun SearchScreenPreview_NoResults() {
         SearchScreenContent(
             uiState = SearchUiState.Success(emptyList()),
             searchQuery = "xyz123",
+            watchlistIds = emptySet(),
             onSearchQueryChange = {},
             onClearSearch = {},
             onNavigateBack = {},
             onNavigateToEventDetail = {},
+            onToggleWatchlist = {},
             onRetry = {}
         )
     }
@@ -338,10 +357,12 @@ private fun SearchScreenPreview_Error() {
         SearchScreenContent(
             uiState = SearchUiState.Error("Network error occurred"),
             searchQuery = "trump",
+            watchlistIds = emptySet(),
             onSearchQueryChange = {},
             onClearSearch = {},
             onNavigateBack = {},
             onNavigateToEventDetail = {},
+            onToggleWatchlist = {},
             onRetry = {}
         )
     }

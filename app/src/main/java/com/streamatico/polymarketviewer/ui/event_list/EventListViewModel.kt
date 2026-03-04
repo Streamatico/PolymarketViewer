@@ -8,6 +8,7 @@ import com.streamatico.polymarketviewer.data.model.gamma_api.TagDto
 import com.streamatico.polymarketviewer.domain.repository.PolymarketEventsSortOrder
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import com.streamatico.polymarketviewer.data.preferences.UserPreferencesRepository
+import com.streamatico.polymarketviewer.data.preferences.WatchlistInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,11 +19,12 @@ import kotlinx.coroutines.flow.stateIn
 
 class EventListViewModel(
     private val polymarketRepository: PolymarketRepository,
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val watchlistInteractor: WatchlistInteractor
 ) : ViewModel() {
 
     // --- Watchlist --- //
-    val watchlistIds: StateFlow<Set<String>> = userPreferencesRepository.watchlistIds
+    val watchlistIds: StateFlow<Set<String>> = watchlistInteractor.watchlistIds
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
     // --- UI State --- //
@@ -251,20 +253,8 @@ class EventListViewModel(
 
     fun toggleWatchlist(eventId: String) {
         viewModelScope.launch {
-            val success = userPreferencesRepository.toggleWatchlist(eventId)
-            if (!success) {
-                // TODO: Emit side effect to show error message (e.g., Snackbar)
-                // For now, we just silently ignore or could log it
-                Log.w("EventListViewModel", "Watchlist limit reached")
-            }
-            // If we are currently on the Watchlist tab, we might want to refresh the list
-            // However, removing an item while viewing it might be jarring.
-            // For now, let's keep it simple. If we are on watchlist and remove it, it won't disappear until refresh.
-            // But if we want it to be reactive, we should observe watchlistIds in loadEventsInternal or trigger reload.
-            if (_selectedTagSlug.value == POLYMARKET_EVENTS_SLUG_WATCHLIST) {
-                // Optional: trigger refresh to remove it from view
-                // loadEventsInternal(isManualRefresh = true)
-            }
+            watchlistInteractor.toggleWatchlist(eventId)
+            // Keep existing behavior: on watchlist tab we do not force a refresh after toggle.
         }
     }
 }
