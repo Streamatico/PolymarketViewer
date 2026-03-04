@@ -1,0 +1,5 @@
+- Added state restoration for selected Watchlist tag
+- Fix: Clear button now fully resets Search input text
+- Fix: Improved Search stability when some profiles are missing
+- Fix: Synced Watchlist toggle/status behavior in Search
+- Updated dependencies and build tooling (including AGP 9.1.0)
