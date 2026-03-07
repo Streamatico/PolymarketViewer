@@ -182,7 +182,7 @@ private fun EventWidgetContent() {
         backgroundColor = themeColors.surface,
         titleBar = {
             val startIcon = if(bitmap != null) ImageProvider(bitmap)
-            else ImageProvider(R.drawable.ic_trend_flat)
+            else ImageProvider(R.drawable.ic_event_default)
 
             val refreshAction = actionRunCallback<EventWidgetRefreshAction>()
 
