@@ -1,6 +1,7 @@
 package com.streamatico.polymarketviewer.data.model.gamma_api
 
 import com.streamatico.polymarketviewer.data.serializers.OffsetDateTimeSerializer
+import com.streamatico.polymarketviewer.domain.model.EventType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.OffsetDateTime

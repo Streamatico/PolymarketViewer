@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
+import androidx.glance.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
@@ -50,8 +52,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.core.os.ConfigurationCompat
+import androidx.glance.preview.ExperimentalGlancePreviewApi
 import androidx.glance.text.TextAlign
+import com.streamatico.polymarketviewer.domain.model.EventType
 import com.streamatico.polymarketviewer.ui.widget.components.WidgetHorizontalDivider
+import com.streamatico.polymarketviewer.ui.widget.tooling.WidgetPreviewMocks
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
@@ -108,18 +113,33 @@ internal class EventWidgetRefreshAction : ActionCallback {
 
 @Composable
 private fun EventWidgetContent() {
+    val size = LocalSize.current
+    val preferences = currentState<Preferences>()
+
+    EventWidgetContent(
+        state = EventWidgetRenderState(
+            size = size,
+            selection = preferences.readSelection(),
+            snapshot = preferences.readSnapshot(),
+            disableInteractions = false
+        )
+    )
+}
+
+@Composable
+private fun EventWidgetContent(state: EventWidgetRenderState) {
     val context = LocalContext.current
+    //val size = state.size
     val size = LocalSize.current
     val sizeClass = resolveSizeClass(size.height)
 
-    val preferences = currentState<Preferences>()
-    val selection = preferences.readSelection()
-    val snapshot = preferences.readSnapshot()
+    val selection = state.selection
+    val snapshot = state.snapshot
 
     val rows = snapshot?.rows.orEmpty()
     val totalRowsCount = (snapshot?.totalRowsCount ?: 0).takeIf { it > 0 } ?: rows.size
     val progress = snapshot?.binaryYesPrice?.toFloat()
-    val hasProgress = snapshot?.eventType == "BinaryEvent" && progress != null
+    val hasProgress = snapshot?.eventType == EventType.BinaryEvent && progress != null
     val hasHero = hasProgress
 
     val bitmap = snapshot?.imageCachePath?.let { path ->
@@ -146,8 +166,10 @@ private fun EventWidgetContent() {
     val endDateText = snapshot?.let { formatEndDateLabel(context, it.endDateEpochMs, it.closed) }
     val updatedText = formatUpdatedLabel(context, snapshot?.updatedAtEpochMs)
 
-    val clickAction = selection?.eventSlug?.let {
-        actionStartActivity(createOpenEventIntent(context, it))
+    val clickAction = if (state.disableInteractions) {
+        null
+    } else {
+        selection?.eventSlug?.let { actionStartActivity(createOpenEventIntent(context, it)) }
     }
 
     val themeColors = GlanceTheme.colors
@@ -159,12 +181,12 @@ private fun EventWidgetContent() {
     val primaryRowTitleStyle = TextStyle(
         color = themeColors.onSurface,
         fontWeight = FontWeight.Bold,
-        fontSize = 15.sp  // Explicit size for first outcome title
+        fontSize = 15.sp
     )
     val primaryValueStyle = TextStyle(
         color = themeColors.primary,
         fontWeight = FontWeight.Bold,
-        fontSize = 16.sp  // Explicit size for first outcome value
+        fontSize = 16.sp
     )
     val secondaryValueStyle = TextStyle(
         color = themeColors.onSurfaceVariant,
@@ -181,9 +203,7 @@ private fun EventWidgetContent() {
             },
         backgroundColor = themeColors.surfaceVariant,
         titleBar = {
-            val startIcon = if(bitmap != null) ImageProvider(bitmap)
-            else ImageProvider(R.drawable.ic_event_default)
-
+            val startIcon = if (bitmap != null) ImageProvider(bitmap) else ImageProvider(R.drawable.ic_event_default)
             val refreshAction = actionRunCallback<EventWidgetRefreshAction>()
 
             WidgetTitleBar(
@@ -191,11 +211,13 @@ private fun EventWidgetContent() {
                 startIconSize = IMAGE_WIDTH,
                 title = title,
                 actions = {
-                    CircleIconButton(
-                        onClick = refreshAction,
-                        imageProvider = ImageProvider(R.drawable.ic_refresh),
-                        contentDescription = null,
-                    )
+                    if (!state.disableInteractions) {
+                        CircleIconButton(
+                            onClick = refreshAction,
+                            imageProvider = ImageProvider(R.drawable.ic_refresh),
+                            contentDescription = null,
+                        )
+                    }
                 }
             )
         }
@@ -417,6 +439,41 @@ private fun formatEndDateLabel(context: Context, endDateEpochMs: Long?, closed: 
             }
             "Ends ${endDateTime.format(formatter)}"
         }
+    }
+}
+
+internal data class EventWidgetRenderState(
+    val size: DpSize,
+    val selection: EventWidgetSelection?,
+    val snapshot: EventWidgetSnapshot?,
+    val disableInteractions: Boolean
+)
+
+
+@OptIn(ExperimentalGlancePreviewApi::class)
+@Preview(widthDp = 320, heightDp = 180)
+@Composable
+private fun EventWidgetContentBinaryPreview() {
+    GlanceTheme {
+        EventWidgetContent(state = WidgetPreviewMocks.previewWidgetState(eventType = EventType.BinaryEvent))
+    }
+}
+
+@OptIn(ExperimentalGlancePreviewApi::class)
+@Preview(widthDp = 320, heightDp = 180)
+@Composable
+private fun EventWidgetContentCategoricalPreview() {
+    GlanceTheme {
+        EventWidgetContent(state = WidgetPreviewMocks.previewWidgetState(eventType = EventType.CategoricalMarket))
+    }
+}
+
+@OptIn(ExperimentalGlancePreviewApi::class)
+@Preview(widthDp = 320, heightDp = 220)
+@Composable
+private fun EventWidgetContentMultiMarketPreview() {
+    GlanceTheme {
+        EventWidgetContent(state = WidgetPreviewMocks.previewWidgetState(eventType = EventType.MultiMarket, size = DpSize(180.dp, 180.dp)))
     }
 }
 

@@ -18,9 +18,9 @@ import coil3.request.transformations
 import coil3.size.Scale
 import coil3.transform.RoundedCornersTransformation
 import com.streamatico.polymarketviewer.data.model.gamma_api.BaseEventDto
-import com.streamatico.polymarketviewer.data.model.gamma_api.EventType
 import com.streamatico.polymarketviewer.data.model.gamma_api.MarketResolutionStatus
 import com.streamatico.polymarketviewer.data.model.gamma_api.yesPrice
+import com.streamatico.polymarketviewer.domain.model.EventType
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import com.streamatico.polymarketviewer.ui.shared.MarketDisplayRow
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
@@ -94,7 +94,7 @@ internal object EventWidgetRefresher : KoinComponent {
             eventId = selection.eventId,
             eventSlug = selection.eventSlug,
             eventTitle = event.title,
-            eventType = event.eventType.name,
+            eventType = event.eventType,
             closed = event.closed,
             volume = event.volume,
             updatedAtEpochMs = Instant.now().toEpochMilli(),

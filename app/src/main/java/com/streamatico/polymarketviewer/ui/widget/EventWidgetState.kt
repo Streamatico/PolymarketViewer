@@ -2,6 +2,7 @@ package com.streamatico.polymarketviewer.ui.widget
 
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.streamatico.polymarketviewer.domain.model.EventType
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -22,7 +23,7 @@ internal data class EventWidgetSnapshot(
     val eventId: String,
     val eventSlug: String,
     val eventTitle: String,
-    val eventType: String,
+    val eventType: EventType,
     val closed: Boolean,
     val volume: Double?,
     val updatedAtEpochMs: Long,

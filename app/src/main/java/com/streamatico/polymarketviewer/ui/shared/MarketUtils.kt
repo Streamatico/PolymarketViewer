@@ -2,14 +2,14 @@ package com.streamatico.polymarketviewer.ui.shared
 
 import com.streamatico.polymarketviewer.data.model.gamma_api.BaseEventDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.BaseMarketDto
-import com.streamatico.polymarketviewer.data.model.gamma_api.EventMarketsSortBy
-import com.streamatico.polymarketviewer.data.model.gamma_api.EventType
 import com.streamatico.polymarketviewer.data.model.gamma_api.MarketResolutionStatus
 import com.streamatico.polymarketviewer.data.model.gamma_api.getResolutionStatus
 import com.streamatico.polymarketviewer.data.model.gamma_api.getResolvedOutcome
 import com.streamatico.polymarketviewer.data.model.gamma_api.getTitleOrDefault
 import com.streamatico.polymarketviewer.data.model.gamma_api.getYesTitle
 import com.streamatico.polymarketviewer.data.model.gamma_api.yesPrice
+import com.streamatico.polymarketviewer.domain.model.EventMarketsSortBy
+import com.streamatico.polymarketviewer.domain.model.EventType
 
 fun <T : BaseMarketDto> List<T>.sortedByViewPriority(sortByEnum: EventMarketsSortBy): List<T> {
     return when(sortByEnum) {

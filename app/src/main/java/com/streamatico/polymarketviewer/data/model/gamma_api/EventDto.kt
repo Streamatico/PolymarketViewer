@@ -2,6 +2,7 @@ package com.streamatico.polymarketviewer.data.model.gamma_api
 
 import com.streamatico.polymarketviewer.data.model.clob_api.SeriesDto
 import com.streamatico.polymarketviewer.data.serializers.OffsetDateTimeSerializer
+import com.streamatico.polymarketviewer.domain.model.EventType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.OffsetDateTime
@@ -82,7 +83,7 @@ data class EventDto(
         val activeMarkets = rawMarkets.filter { it.active } // Filter only active markets
 
         // TODO: Detect if the event is a sport market more accurately
-        val isSportMarket = !showAllOutcomes && series != null && series.isNotEmpty()
+        val isSportMarket = !showAllOutcomes && !series.isNullOrEmpty()
 
         if(isSportMarket) {
             // TODO: Handle sport markets (example: NBA id=23714)
@@ -104,17 +105,6 @@ data class EventDto(
             else -> EventType.MultiMarket
         }
     }
-}
-
-enum class EventType {
-    BinaryEvent,
-    CategoricalMarket,
-    MultiMarket,
-}
-
-enum class EventMarketsSortBy {
-    None,
-    Price
 }
 
 fun demoEventDto(
