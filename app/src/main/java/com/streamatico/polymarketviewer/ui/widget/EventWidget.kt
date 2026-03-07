@@ -78,6 +78,13 @@ internal class EventWidgetReceiver : GlanceAppWidgetReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
+
+        if (intent.action == AppWidgetManager.ACTION_APPWIDGET_UPDATE ||
+            intent.action == AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED
+        ) {
+            EventWidgetGeneratedPreviewPublisher.publishIfSupported(context.applicationContext)
+        }
+
         if (intent.action == AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED) {
             CoroutineScope(Dispatchers.IO).launch {
                 runCatching {
@@ -115,10 +122,9 @@ private fun EventWidgetContent() {
     val hasProgress = snapshot?.eventType == "BinaryEvent" && progress != null
     val hasHero = hasProgress
 
-    val bitmap =
-        snapshot?.imageCachePath?.let { path ->
-            runCatching { BitmapFactory.decodeFile(path) }.getOrNull()
-        }
+    val bitmap = snapshot?.imageCachePath?.let { path ->
+        runCatching { BitmapFactory.decodeFile(path) }.getOrNull()
+    }
 
     val showFooter = shouldShowFooter(size.height)
     val maxRows = calculateRowLimit(
@@ -143,6 +149,7 @@ private fun EventWidgetContent() {
     val clickAction = selection?.eventSlug?.let {
         actionStartActivity(createOpenEventIntent(context, it))
     }
+
     val themeColors = GlanceTheme.colors
 
     val rowTitleStyle = TextStyle(
@@ -421,9 +428,7 @@ private val ROW_CONTENT_HEIGHT = 19.dp
 private val PROGRESS_BAR_HEIGHT = 8.dp
 private val PROGRESS_SECTION_HEIGHT = PROGRESS_BAR_HEIGHT + 10.dp  // Updated spacer from 6dp to 10dp
 private val HERO_HEIGHT = 36.dp + 4.dp
-private val IMAGE_HEIGHT = 40.dp  // Changed from 56.dp to match in-app cards
 private val IMAGE_WIDTH = 40.dp   // Changed from 56.dp to match in-app cards
-//private val IMAGE_SECTION_HEIGHT = IMAGE_HEIGHT + 6.dp
 private val FOOTER_MIN_HEIGHT = 112.dp
 private val ROW_BOTTOM_PADDING = 5.dp  // Increased from 2.dp for better readability
 private val ROW_SLOT_HEIGHT = ROW_CONTENT_HEIGHT + ROW_BOTTOM_PADDING
