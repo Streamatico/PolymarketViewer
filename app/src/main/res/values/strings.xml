@@ -69,7 +69,7 @@
 
     <!-- Widget -->
     <string name="widget_select_event">Select an event</string>
-    <string name="widget_loading">Updating...</string>
+    <string name="widget_loading">Updating…</string>
     <string name="widget_status_open">● Open</string>
     <string name="widget_status_closed">◯ Closed</string>
     <string name="widget_updated_format">Updated %s</string>
@@ -83,4 +83,14 @@
     <string name="widget_search_hint">Search events…</string>
     <string name="widget_search_empty_message">Start typing to search events</string>
     <string name="widget_search_no_results">No events found</string>
+
+    <string name="widget_preview_event_title">Will Bitcoin close above $120k by the end of 2026?</string>
+    <string name="widget_preview_event_updated_at">Updated 2:18 PM</string>
+    <string name="widget_preview_event_ends_at">Ends in 5d</string>
+    <string name="widget_preview_event_volume">$12.8M Vol.</string>
+    <string name="widget_preview_event_outcome_yes_value">64%</string>
+    <string name="widget_preview_event_outcome_no_value">36%</string>
+    <string name="widget_preview_event_outcome_yes">Yes</string>
+    <string name="widget_preview_event_outcome_no">No</string>
+
 </resources>

@@ -16,7 +16,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:contentDescription="@null"
-            android:src="@drawable/ic_trend_flat" />
+            android:src="@drawable/ic_widget_preview_bitcoin" />
 
         <TextView
             android:layout_width="0dp"
@@ -24,7 +24,7 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:maxLines="2"
-            android:text="Will Bitcoin close above $120k by the end of 2026?"
+            android:text="@string/widget_preview_event_title"
             android:textColor="#101828"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -34,7 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="64%"
+        android:text="@string/widget_preview_event_outcome_yes_value"
         android:textColor="#1D4ED8"
         android:textSize="30sp"
         android:textStyle="bold" />
@@ -59,14 +59,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Yes"
+            android:text="@string/widget_preview_event_outcome_yes"
             android:textColor="#101828"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="64%"
+            android:text="@string/widget_preview_event_outcome_yes_value"
             android:textColor="#1D4ED8"
             android:textStyle="bold" />
     </LinearLayout>
@@ -81,13 +81,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="No"
+            android:text="@string/widget_preview_event_outcome_no"
             android:textColor="#667085" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="36%"
+            android:text="@string/widget_preview_event_outcome_no_value"
             android:textColor="#667085" />
     </LinearLayout>
 
@@ -108,14 +108,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="$12.8M Vol."
+            android:text="@string/widget_preview_event_volume"
             android:textColor="#667085"
             android:textSize="12sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Updated 2:18 PM"
+            android:text="@string/widget_preview_event_updated_at"
             android:textColor="#667085"
             android:textSize="12sp" />
     </LinearLayout>
@@ -124,7 +124,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="Ends in 5d"
+        android:text="@string/widget_preview_event_ends_at"
         android:textColor="#667085"
         android:textSize="12sp" />
 

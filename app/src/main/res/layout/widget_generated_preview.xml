@@ -15,7 +15,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:contentDescription="@null"
-            android:src="@drawable/ic_trend_flat" />
+            android:src="@drawable/ic_widget_preview_bitcoin" />
 
         <TextView
             android:layout_width="0dp"
@@ -23,7 +23,7 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:maxLines="2"
-            android:text="Will Bitcoin close above $120k by the end of 2026?"
+            android:text="@string/widget_preview_event_title"
             android:textSize="14sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -32,7 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="64%"
+        android:text="@string/widget_preview_event_outcome_yes_value"
         android:textSize="28sp"
         android:textStyle="bold" />
 
@@ -54,13 +54,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Yes"
+            android:text="@string/widget_preview_event_outcome_yes"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="64%"
+            android:text="@string/widget_preview_event_outcome_yes_value"
             android:textStyle="bold" />
     </LinearLayout>
 
@@ -74,12 +74,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="No" />
+            android:text="@string/widget_preview_event_outcome_no" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="36%" />
+            android:text="@string/widget_preview_event_outcome_no_value" />
     </LinearLayout>
 
 </LinearLayout>
