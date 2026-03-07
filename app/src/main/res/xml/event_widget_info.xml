@@ -3,13 +3,10 @@
     android:configure="com.streamatico.polymarketviewer.ui.widget.EventWidgetConfigActivity"
     android:description="@string/widget_description"
     android:initialLayout="@layout/widget_placeholder"
-    android:previewLayout="@layout/widget_preview"
     android:minHeight="120dp"
     android:minWidth="220dp"
     android:minResizeHeight="100dp"
     android:minResizeWidth="180dp"
     android:resizeMode="horizontal|vertical"
-    android:targetCellHeight="2"
-    android:targetCellWidth="4"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen" />
