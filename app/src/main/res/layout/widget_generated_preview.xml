@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/widget_preview_background"
     android:orientation="vertical"
     android:padding="12dp">
 
@@ -24,6 +25,7 @@
             android:layout_weight="1"
             android:maxLines="2"
             android:text="@string/widget_preview_event_title"
+            android:textColor="@color/widget_preview_text_primary"
             android:textSize="14sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -33,6 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="@string/widget_preview_event_outcome_yes_value"
+        android:textColor="@color/widget_preview_text_accent"
         android:textSize="28sp"
         android:textStyle="bold" />
 
@@ -42,7 +45,9 @@
         android:layout_height="8dp"
         android:layout_marginTop="6dp"
         android:max="100"
-        android:progress="64" />
+        android:progress="64"
+        android:progressBackgroundTint="@color/widget_preview_progress_track"
+        android:progressTint="@color/widget_preview_text_accent" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -55,12 +60,14 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/widget_preview_event_outcome_yes"
+            android:textColor="@color/widget_preview_text_primary"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/widget_preview_event_outcome_yes_value"
+            android:textColor="@color/widget_preview_text_accent"
             android:textStyle="bold" />
     </LinearLayout>
 
@@ -74,13 +81,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/widget_preview_event_outcome_no" />
+            android:text="@string/widget_preview_event_outcome_no"
+            android:textColor="@color/widget_preview_text_secondary" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/widget_preview_event_outcome_no_value" />
+            android:text="@string/widget_preview_event_outcome_no_value"
+            android:textColor="@color/widget_preview_text_secondary" />
     </LinearLayout>
 
 </LinearLayout>
-

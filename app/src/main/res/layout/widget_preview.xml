@@ -25,7 +25,7 @@
             android:layout_weight="1"
             android:maxLines="2"
             android:text="@string/widget_preview_event_title"
-            android:textColor="#101828"
+            android:textColor="@color/widget_preview_text_primary"
             android:textSize="14sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="@string/widget_preview_event_outcome_yes_value"
-        android:textColor="#1D4ED8"
+        android:textColor="@color/widget_preview_text_accent"
         android:textSize="30sp"
         android:textStyle="bold" />
 
@@ -46,8 +46,8 @@
         android:layout_marginTop="6dp"
         android:max="100"
         android:progress="64"
-        android:progressBackgroundTint="#D0D5DD"
-        android:progressTint="#1D4ED8" />
+        android:progressBackgroundTint="@color/widget_preview_progress_track"
+        android:progressTint="@color/widget_preview_text_accent" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -60,14 +60,14 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/widget_preview_event_outcome_yes"
-            android:textColor="#101828"
+            android:textColor="@color/widget_preview_text_primary"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/widget_preview_event_outcome_yes_value"
-            android:textColor="#1D4ED8"
+            android:textColor="@color/widget_preview_text_accent"
             android:textStyle="bold" />
     </LinearLayout>
 
@@ -82,20 +82,20 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/widget_preview_event_outcome_no"
-            android:textColor="#667085" />
+            android:textColor="@color/widget_preview_text_secondary" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/widget_preview_event_outcome_no_value"
-            android:textColor="#667085" />
+            android:textColor="@color/widget_preview_text_secondary" />
     </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="10dp"
-        android:background="#EAECF0"
+        android:background="@color/widget_preview_divider"
         android:text="" />
 
     <LinearLayout
@@ -109,14 +109,14 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/widget_preview_event_volume"
-            android:textColor="#667085"
+            android:textColor="@color/widget_preview_text_secondary"
             android:textSize="12sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/widget_preview_event_updated_at"
-            android:textColor="#667085"
+            android:textColor="@color/widget_preview_text_secondary"
             android:textSize="12sp" />
     </LinearLayout>
 
@@ -125,7 +125,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:text="@string/widget_preview_event_ends_at"
-        android:textColor="#667085"
+        android:textColor="@color/widget_preview_text_secondary"
         android:textSize="12sp" />
 
 </LinearLayout>

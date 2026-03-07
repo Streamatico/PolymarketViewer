@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_preview_container_bg">#FF182033</color>
+    <color name="widget_preview_container_stroke">#4D2B76FE</color>
+
+    <color name="widget_preview_text_primary">#FFE4E7EC</color>
+    <color name="widget_preview_text_secondary">#FF98A2B3</color>
+    <color name="widget_preview_text_accent">#FF8CB4FF</color>
+
+    <color name="widget_preview_progress_track">#FF344054</color>
+    <color name="widget_preview_divider">#FF344054</color>
+</resources>
+

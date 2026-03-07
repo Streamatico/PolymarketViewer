@@ -179,7 +179,7 @@ private fun EventWidgetContent() {
             .let { modifier ->
                 if (clickAction != null) modifier.clickable(clickAction) else modifier
             },
-        backgroundColor = themeColors.surface,
+        backgroundColor = themeColors.surfaceVariant,
         titleBar = {
             val startIcon = if(bitmap != null) ImageProvider(bitmap)
             else ImageProvider(R.drawable.ic_event_default)
