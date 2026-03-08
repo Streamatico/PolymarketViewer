@@ -140,6 +140,7 @@ dependencies {
     implementation(libs.androidx.data.store)
     implementation(libs.androidx.glance)
     implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.work.runtime)
 
     // Preview support for Glance widgets in Android Studio.

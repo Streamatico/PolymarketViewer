@@ -1,7 +1,9 @@
 package com.streamatico.polymarketviewer.ui.theme
 
+import android.content.Context
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -75,15 +77,11 @@ fun PolymarketAppTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val baseColorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val baseColorScheme = getPolymarketColorScheme(
+        context = LocalContext.current,
+        isDarkTheme = darkTheme,
+        dynamicColor = dynamicColor
+    )
 
     // Determine which set of extended colors to use
     val extendedColors = if (darkTheme) darkExtendedColors else lightExtendedColors
@@ -95,6 +93,17 @@ fun PolymarketAppTheme(
             typography = Typography,
             content = content
         )
+    }
+}
+
+internal fun getPolymarketColorScheme(context: Context, isDarkTheme: Boolean, dynamicColor: Boolean = true): ColorScheme {
+    return when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            if (isDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+
+        isDarkTheme -> DarkColorScheme
+        else -> LightColorScheme
     }
 }
 

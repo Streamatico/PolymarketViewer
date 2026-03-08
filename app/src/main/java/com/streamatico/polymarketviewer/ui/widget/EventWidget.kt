@@ -5,12 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
-import androidx.glance.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
+import androidx.core.os.ConfigurationCompat
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -41,22 +41,23 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
+import androidx.glance.preview.ExperimentalGlancePreviewApi
+import androidx.glance.preview.Preview
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
+import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.streamatico.polymarketviewer.MainActivity
 import com.streamatico.polymarketviewer.R
+import com.streamatico.polymarketviewer.domain.model.EventType
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
+import com.streamatico.polymarketviewer.ui.widget.components.WidgetHorizontalDivider
 import com.streamatico.polymarketviewer.ui.widget.components.WidgetTitleBar
+import com.streamatico.polymarketviewer.ui.widget.theme.PolymarketGlanceTheme
+import com.streamatico.polymarketviewer.ui.widget.tooling.WidgetPreviewMocks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import androidx.core.os.ConfigurationCompat
-import androidx.glance.preview.ExperimentalGlancePreviewApi
-import androidx.glance.text.TextAlign
-import com.streamatico.polymarketviewer.domain.model.EventType
-import com.streamatico.polymarketviewer.ui.widget.components.WidgetHorizontalDivider
-import com.streamatico.polymarketviewer.ui.widget.tooling.WidgetPreviewMocks
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
@@ -71,7 +72,7 @@ internal class EventWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            GlanceTheme {
+            PolymarketGlanceTheme {
                 EventWidgetContent()
             }
         }
@@ -194,6 +195,8 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
     )
     val secondaryStyle = TextStyle(color = themeColors.onSurfaceVariant)
 
+    val widgetBackgroundColor = themeColors.surface
+
     Scaffold(
         modifier = GlanceModifier
             .fillMaxSize()
@@ -201,7 +204,7 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
             .let { modifier ->
                 if (clickAction != null) modifier.clickable(clickAction) else modifier
             },
-        backgroundColor = themeColors.surfaceVariant,
+        backgroundColor = widgetBackgroundColor,
         titleBar = {
             val startIcon = if (bitmap != null) ImageProvider(bitmap) else ImageProvider(R.drawable.ic_event_default)
             val refreshAction = actionRunCallback<EventWidgetRefreshAction>()
@@ -216,6 +219,7 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
                             onClick = refreshAction,
                             imageProvider = ImageProvider(R.drawable.ic_refresh),
                             contentDescription = null,
+                            backgroundColor = widgetBackgroundColor,
                         )
                     }
                 }
@@ -257,7 +261,7 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
                                 color = themeColors.primary,
                                 backgroundColor = themeColors.surfaceVariant
                             )
-                            Spacer(modifier = GlanceModifier.height(10.dp))  // Increased from 6dp for better visual separation
+                            Spacer(modifier = GlanceModifier.height(10.dp))
                         }
                     }
 
@@ -454,7 +458,7 @@ internal data class EventWidgetRenderState(
 @Preview(widthDp = 320, heightDp = 180)
 @Composable
 private fun EventWidgetContentBinaryPreview() {
-    GlanceTheme {
+    PolymarketGlanceTheme {
         EventWidgetContent(state = WidgetPreviewMocks.previewWidgetState(eventType = EventType.BinaryEvent))
     }
 }
@@ -463,7 +467,7 @@ private fun EventWidgetContentBinaryPreview() {
 @Preview(widthDp = 320, heightDp = 180)
 @Composable
 private fun EventWidgetContentCategoricalPreview() {
-    GlanceTheme {
+    PolymarketGlanceTheme {
         EventWidgetContent(state = WidgetPreviewMocks.previewWidgetState(eventType = EventType.CategoricalMarket))
     }
 }
@@ -472,13 +476,13 @@ private fun EventWidgetContentCategoricalPreview() {
 @Preview(widthDp = 320, heightDp = 220)
 @Composable
 private fun EventWidgetContentMultiMarketPreview() {
-    GlanceTheme {
+    PolymarketGlanceTheme {
         EventWidgetContent(state = WidgetPreviewMocks.previewWidgetState(eventType = EventType.MultiMarket, size = DpSize(180.dp, 180.dp)))
     }
 }
 
 private val CONTENT_VERTICAL_PADDING = 16.dp
-private val HEADER_HEIGHT = 40.dp //+ 40.dp + 6.dp
+private val HEADER_HEIGHT = 40.dp
 private val FOOTER_BOTTOM_PADDING = 8.dp
 private val FOOTER_HEIGHT = (18.dp * 2) + 2.dp + FOOTER_BOTTOM_PADDING  // Two rows + spacer between + bottom padding
 private val ROW_CONTENT_HEIGHT = 19.dp

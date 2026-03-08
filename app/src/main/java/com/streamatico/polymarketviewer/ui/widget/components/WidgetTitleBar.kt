@@ -26,7 +26,6 @@ internal fun WidgetTitleBar(
     startIcon: ImageProvider,
     startIconSize: Dp,
     title: String,
-    iconColor: ColorProvider? = GlanceTheme.colors.onSurface,
     textColor: ColorProvider = GlanceTheme.colors.onSurface,
     modifier: GlanceModifier = GlanceModifier,
     fontFamily: FontFamily? = null,
@@ -44,9 +43,7 @@ internal fun WidgetTitleBar(
             Image(
                 modifier = GlanceModifier.size(startIconSize),
                 provider = startIcon,
-                contentDescription = "",
-                //contentScale = ContentScale.Fit,
-                //colorFilter = iconColor?.let { ColorFilter.tint(iconColor) }
+                contentDescription = null,
             )
         }
     }
