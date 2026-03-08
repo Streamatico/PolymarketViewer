@@ -37,7 +37,13 @@ val dataModule = module {
     // Repositories & Services
     singleOf(::UserPreferencesRepository)
     singleOf(::DefaultWatchlistInteractor) bind WatchlistInteractor::class
-    single { AnalyticsService(get(named(PolymarketHttpClientNames.ANALYTICS_CLIENT)), get()) }
+    single {
+        AnalyticsService(
+            httpClient = get(named(PolymarketHttpClientNames.ANALYTICS_CLIENT)),
+            userPreferencesRepository = get(),
+            appScope = get(named(APP_SCOPE))
+        )
+    }
 
     // API Clients
     single { PolymarketGammaApiClient(get(named(PolymarketHttpClientNames.GAMMA_CLIENT))) }

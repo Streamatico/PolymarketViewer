@@ -45,6 +45,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.streamatico.polymarketviewer.R
+import com.streamatico.polymarketviewer.data.analytics.AnalyticsEvent
+import com.streamatico.polymarketviewer.data.analytics.AnalyticsService
 import com.streamatico.polymarketviewer.data.model.gamma_api.OptimizedEventDto
 import com.streamatico.polymarketviewer.ui.search_screen.SearchUiState
 import com.streamatico.polymarketviewer.ui.search_screen.SearchViewModel
@@ -53,6 +55,7 @@ import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
 
 class EventWidgetConfigActivity : ComponentActivity() {
@@ -62,6 +65,8 @@ class EventWidgetConfigActivity : ComponentActivity() {
             AppWidgetManager.INVALID_APPWIDGET_ID
         ) ?: AppWidgetManager.INVALID_APPWIDGET_ID
     }
+
+    private val analyticsService: AnalyticsService by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,6 +92,7 @@ class EventWidgetConfigActivity : ComponentActivity() {
                                     eventTitle = event.title
                                 )
                             )
+                            analyticsService.track(AnalyticsEvent.WidgetCreated)
                             val result = Intent().putExtra(
                                 AppWidgetManager.EXTRA_APPWIDGET_ID,
                                 appWidgetId
