@@ -92,5 +92,8 @@
     <string name="widget_preview_event_outcome_no_value">36%</string>
     <string name="widget_preview_event_outcome_yes">Yes</string>
     <string name="widget_preview_event_outcome_no">No</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="add_widget">Add widget</string>
+    <string name="widget_pin_not_supported">Widget pinning is not supported on this launcher.</string>
 
 </resources>

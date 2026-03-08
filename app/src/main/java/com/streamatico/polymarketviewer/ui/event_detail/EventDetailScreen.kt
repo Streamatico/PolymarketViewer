@@ -1,6 +1,8 @@
 package com.streamatico.polymarketviewer.ui.event_detail
 
+import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +14,13 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,6 +34,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -47,15 +57,15 @@ import com.streamatico.polymarketviewer.ui.event_detail.components.TranslateActi
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
-import com.streamatico.polymarketviewer.ui.shared.components.OpenInBrowserIconButton
 import com.streamatico.polymarketviewer.ui.shared.sortedByViewPriority
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import com.streamatico.polymarketviewer.domain.model.EventType
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.net.toUri
+import com.streamatico.polymarketviewer.ui.widget.EventWidgetPinRequester
+import kotlinx.coroutines.launch
 
 @Composable
 fun EventDetailScreen(
@@ -178,19 +188,13 @@ private fun EventDetailsContent(
                         }
                     }
 
-                    // Translate Action - Use composable from TranslateAction.kt
                     TranslateAction(
                         isVisible = !isEnglishLocale && uiState is EventDetailUiState.Success,
                         event = (uiState as? EventDetailUiState.Success)?.event,
                     )
 
-                    // Open in Browser Action
                     if (uiState is EventDetailUiState.Success) {
-                        uiState.event.slug.let { slug ->
-                            OpenInBrowserIconButton(
-                                "https://polymarket.com/event/$slug"
-                            )
-                        }
+                        EventDetailMoreActions(event = uiState.event)
                     }
                 }
             )
@@ -281,6 +285,9 @@ private fun EventDetailsContentSuccess(
     val sortedMarkets = remember(event.markets) {
          event.markets.sortedByViewPriority(event.sortByEnum)
     }
+    val isBinaryEvent = remember(event.markets) {
+        event.markets.size == 1 && event.markets.firstOrNull()?.isBinaryMarket == true
+    }
 
     LazyColumn(
         state = listState, // Use passed state
@@ -308,7 +315,7 @@ private fun EventDetailsContentSuccess(
         // Event markets (outcomes)
         eventDetailMarketList(
             sortedMarkets = sortedMarkets,
-            showMarketImages = event.showMarketImages && event.eventType != EventType.BinaryEvent,
+            showMarketImages = event.showMarketImages && !isBinaryEvent,
             isMarketListExpanded = isMarketListExpanded,
             onMarketExpandToggle = {
                 isMarketListExpanded = !isMarketListExpanded
@@ -391,7 +398,7 @@ private fun EventDetailsContentPreviewTemplate(uiState: EventDetailUiState) {
     }
 }
 
-@Preview(showBackground = true, name = "Event Detail - Success")
+@Preview(showBackground = true, name = "Event Detail - Success", locale = "fr" /* show translate action */)
 @Composable
 private fun EventDetailScreenPreviewSuccess() {
     EventDetailsContentPreviewTemplate(
@@ -413,4 +420,62 @@ private fun EventDetailScreenPreviewError() {
     EventDetailsContentPreviewTemplate(
         uiState = EventDetailUiState.Error("Failed to load event data.")
     )
+}
+
+@Composable
+private fun EventDetailMoreActions(event: EventDto) {
+    var showMenu by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+
+    IconButton(onClick = { showMenu = true }) {
+        Icon(
+            imageVector = Icons.Filled.MoreVert,
+            contentDescription = stringResource(id = R.string.more_options_tooltip)
+        )
+    }
+
+    DropdownMenu(
+        expanded = showMenu,
+        onDismissRequest = { showMenu = false }
+    ) {
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(id = R.string.open_in_browser)) },
+            onClick = {
+                showMenu = false
+                val eventUrl = "https://polymarket.com/event/${event.slug}"
+                runCatching {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, eventUrl.toUri()))
+                }.onFailure { error ->
+                    Log.e("EventDetailMoreActions", "Failed to open URL: $eventUrl", error)
+                }
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(id = R.string.add_widget)) },
+            onClick = {
+                showMenu = false
+                coroutineScope.launch {
+                    val isPinned = EventWidgetPinRequester.requestPinWidget(context = context, event = event)
+                    if (!isPinned) {
+                        Toast.makeText(context, R.string.widget_pin_not_supported, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        )
+    }
 }

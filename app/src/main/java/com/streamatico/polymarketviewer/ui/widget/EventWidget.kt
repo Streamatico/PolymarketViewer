@@ -1,12 +1,9 @@
 package com.streamatico.polymarketviewer.ui.widget
 
-import android.appwidget.AppWidgetManager
 import android.content.Context
-import android.content.Intent
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
@@ -18,20 +15,14 @@ import androidx.glance.GlanceTheme
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
-import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.SizeMode
-import androidx.glance.appwidget.action.ActionCallback
-import androidx.glance.appwidget.action.actionRunCallback
-import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
-import androidx.glance.appwidget.updateAll
 import androidx.glance.currentState
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
@@ -47,7 +38,6 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
-import com.streamatico.polymarketviewer.MainActivity
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.domain.model.EventType
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
@@ -55,9 +45,6 @@ import com.streamatico.polymarketviewer.ui.widget.components.WidgetHorizontalDiv
 import com.streamatico.polymarketviewer.ui.widget.components.WidgetTitleBar
 import com.streamatico.polymarketviewer.ui.widget.theme.PolymarketGlanceTheme
 import com.streamatico.polymarketviewer.ui.widget.tooling.WidgetPreviewMocks
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
@@ -67,70 +54,53 @@ import java.util.Locale
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-internal class EventWidget : GlanceAppWidget() {
+internal class EventWidget : GlanceAppWidget {
     override val sizeMode: SizeMode = SizeMode.Exact
+
+    private val _pinPreviewState: WidgetPinPreviewState
+
+    constructor () : this(null) {
+    }
+
+    private constructor (pinPreviewState: EventWidgetRenderState?) : super() {
+        _pinPreviewState = WidgetPinPreviewState(pinPreviewState)
+    }
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             PolymarketGlanceTheme {
-                EventWidgetContent()
+                EventWidgetContent(_pinPreviewState)
             }
         }
     }
-}
 
-internal class EventWidgetReceiver : GlanceAppWidgetReceiver() {
-    override val glanceAppWidget: GlanceAppWidget = EventWidget()
-
-    override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
-
-        if (intent.action == AppWidgetManager.ACTION_APPWIDGET_UPDATE ||
-            intent.action == AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED
-        ) {
-            EventWidgetGeneratedPreviewPublisher.publishIfSupported(context.applicationContext)
-        }
-
-        if (intent.action == AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED) {
-            CoroutineScope(Dispatchers.IO).launch {
-                runCatching {
-                    EventWidget().updateAll(context.applicationContext)
-                    EventWidgetUpdater.enqueueImmediate(context.applicationContext)
-                }
-            }
-        }
-    }
-}
-
-internal class EventWidgetRefreshAction : ActionCallback {
-    override suspend fun onAction(
-        context: Context,
-        glanceId: GlanceId,
-        parameters: ActionParameters
-    ) {
-        EventWidgetRefresher.refresh(context.applicationContext, glanceId)
+    companion object {
+        fun createWithPreview(state: EventWidgetRenderState) = EventWidget(state)
     }
 }
 
 @Composable
-private fun EventWidgetContent() {
-    val size = LocalSize.current
-    val preferences = currentState<Preferences>()
+private fun EventWidgetContent(previewState: WidgetPinPreviewState) {
+    val state = if (previewState.state != null) {
+        previewState.state
+    } else {
+        val preferences = currentState<Preferences>()
 
-    EventWidgetContent(
-        state = EventWidgetRenderState(
-            size = size,
+        EventWidgetRenderState(
             selection = preferences.readSelection(),
             snapshot = preferences.readSnapshot(),
             disableInteractions = false
         )
+    }
+
+    EventWidgetContent(
+        state = state
     )
 }
 
 @Composable
 private fun EventWidgetContent(state: EventWidgetRenderState) {
     val context = LocalContext.current
-    //val size = state.size
     val size = LocalSize.current
     val sizeClass = resolveSizeClass(size.height)
 
@@ -170,7 +140,7 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
     val clickAction = if (state.disableInteractions) {
         null
     } else {
-        selection?.eventSlug?.let { actionStartActivity(createOpenEventIntent(context, it)) }
+        selection?.eventSlug?.let { EventWidgetActions.openEventAction(context, eventSlug = it) }
     }
 
     val themeColors = GlanceTheme.colors
@@ -207,7 +177,6 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
         backgroundColor = widgetBackgroundColor,
         titleBar = {
             val startIcon = if (bitmap != null) ImageProvider(bitmap) else ImageProvider(R.drawable.ic_event_default)
-            val refreshAction = actionRunCallback<EventWidgetRefreshAction>()
 
             WidgetTitleBar(
                 startIcon = startIcon,
@@ -216,7 +185,7 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
                 actions = {
                     if (!state.disableInteractions) {
                         CircleIconButton(
-                            onClick = refreshAction,
+                            onClick = EventWidgetActions.refreshWidgetAction(),
                             imageProvider = ImageProvider(R.drawable.ic_refresh),
                             contentDescription = null,
                             backgroundColor = widgetBackgroundColor,
@@ -344,12 +313,6 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
     }
 }
 
-private fun createOpenEventIntent(context: Context, eventSlug: String): Intent =
-    Intent(context, MainActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        putExtra(MainActivity.EXTRA_EVENT_SLUG, eventSlug)
-    }
-
 private fun formatHeroPercent(progress: Float): String {
     val percent = (progress * 100).roundToInt().coerceIn(0, 100)
     return "$percent%"
@@ -446,14 +409,18 @@ private fun formatEndDateLabel(context: Context, endDateEpochMs: Long?, closed: 
     }
 }
 
+private data class WidgetPinPreviewState(
+    val state: EventWidgetRenderState?
+)
+
 internal data class EventWidgetRenderState(
-    val size: DpSize,
     val selection: EventWidgetSelection?,
     val snapshot: EventWidgetSnapshot?,
     val disableInteractions: Boolean
 )
 
 
+@Suppress("unused")
 @OptIn(ExperimentalGlancePreviewApi::class)
 @Preview(widthDp = 320, heightDp = 180)
 @Composable
@@ -463,6 +430,7 @@ private fun EventWidgetContentBinaryPreview() {
     }
 }
 
+@Suppress("unused")
 @OptIn(ExperimentalGlancePreviewApi::class)
 @Preview(widthDp = 320, heightDp = 180)
 @Composable
@@ -472,12 +440,23 @@ private fun EventWidgetContentCategoricalPreview() {
     }
 }
 
+@Suppress("unused")
 @OptIn(ExperimentalGlancePreviewApi::class)
 @Preview(widthDp = 320, heightDp = 220)
 @Composable
 private fun EventWidgetContentMultiMarketPreview() {
     PolymarketGlanceTheme {
-        EventWidgetContent(state = WidgetPreviewMocks.previewWidgetState(eventType = EventType.MultiMarket, size = DpSize(180.dp, 180.dp)))
+        EventWidgetContent(state = WidgetPreviewMocks.previewWidgetState(eventType = EventType.MultiMarket))
+    }
+}
+
+@Suppress("unused")
+@OptIn(ExperimentalGlancePreviewApi::class)
+@Preview(widthDp = 320, heightDp = 180)
+@Composable
+private fun EventWidgetLoadingPreview() {
+    PolymarketGlanceTheme {
+        EventWidgetContent(state = WidgetPreviewMocks.previewWidgetState(eventType = EventType.MultiMarket, isEmpty = true))
     }
 }
 
