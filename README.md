@@ -14,7 +14,7 @@ Android client application for browsing Polymarket prediction markets. Built wit
 ## Features
 
 *   📊 Browse a list of active prediction market events from Polymarket.com
-*   🔍 Filter by category and search events by keywords  
+*   🔍 Filter by category and search events by keywords
 *   📈 Sort events by various criteria (Volume 24h/All Time, Liquidity, Newest, Ending Soon, Competitive)
 *   📋 View detailed event information with description, markets, and volume data
 *   📊 Display interactive price history charts for events
@@ -50,7 +50,7 @@ This project follows **Clean Architecture** principles with clear separation of 
 *   **UI**: [Jetpack Compose](https://developer.android.com/jetpack/compose) with [Material 3](https://m3.material.io/)
 *   **Architecture**: Clean Architecture with MVVM
 *   **Navigation**: [Navigation 3](https://developer.android.com/develop/ui/compose/navigation/navigation3)
-*   **Networking**: [Ktor Client](https://ktor.io/) 
+*   **Networking**: [Ktor Client](https://ktor.io/)
 *   **Charts**: [Vico Charts](https://github.com/patrykandpatrick/vico)
 *   **DI**: [Koin](https://insert-koin.io/)
 *   **Images**: [Coil](https://coil-kt.github.io/coil/)
@@ -78,4 +78,4 @@ This is an unofficial, experimental application and is not affiliated with Polym
 
 If you have any questions or suggestions, please contact us at: <streamatico+polymarket@gmail.com>.
 
-Visit our website: [streamatico.net](https://streamatico.net/)
+Visit our website: [streamatico.com](https://streamatico.com/)
