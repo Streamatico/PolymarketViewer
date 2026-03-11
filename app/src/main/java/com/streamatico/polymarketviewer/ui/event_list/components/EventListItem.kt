@@ -388,6 +388,7 @@ private fun OutcomeTextRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
+            modifier = Modifier.weight(1f, fill = false),
             text = title, // Show passed outcome text
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 2,
@@ -405,6 +406,7 @@ private fun OutcomeTextRow(
                 text = resolutionText,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
             )
         }
     }
