@@ -2,6 +2,7 @@ package com.streamatico.polymarketviewer.ui.widget
 
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.streamatico.polymarketviewer.data.model.gamma_api.MarketResolutionStatus
 import com.streamatico.polymarketviewer.domain.model.EventType
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -15,7 +16,7 @@ internal val SNAPSHOT_KEY = stringPreferencesKey("widget_snapshot")
 internal data class EventWidgetRow(
     val title: String,
     val value: String,
-    val isResolved: Boolean = false
+    val resolutionStatus: MarketResolutionStatus? = null
 )
 
 @Serializable

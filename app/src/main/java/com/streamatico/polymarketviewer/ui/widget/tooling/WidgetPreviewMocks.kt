@@ -1,5 +1,6 @@
 package com.streamatico.polymarketviewer.ui.widget.tooling
 
+import com.streamatico.polymarketviewer.data.model.gamma_api.MarketResolutionStatus
 import com.streamatico.polymarketviewer.domain.model.EventType
 import com.streamatico.polymarketviewer.ui.widget.EventWidgetRenderState
 import com.streamatico.polymarketviewer.ui.widget.EventWidgetRow
@@ -20,9 +21,9 @@ internal object WidgetPreviewMocks {
             when (eventType) {
                 EventType.CategoricalMarket -> listOf(
                     EventWidgetRow(title = "Trump", value = "39%"),
-                    EventWidgetRow(title = "Harris", value = "35%"),
+                    EventWidgetRow(title = "Harris This is a long text that should wrap", value = "35%", resolutionStatus = MarketResolutionStatus.DISPUTED),
                     EventWidgetRow(title = "Newsom", value = "9%"),
-                    EventWidgetRow(title = "Other", value = "17%")
+                    EventWidgetRow(title = "Other", value = "17%", resolutionStatus = MarketResolutionStatus.RESOLVED)
                 )
 
                 EventType.MultiMarket -> listOf(

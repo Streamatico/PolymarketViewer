@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.MarketDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.MarketResolutionStatus
 import com.streamatico.polymarketviewer.data.model.gamma_api.getResolutionStatus
@@ -191,10 +193,10 @@ private fun EventDetailMarketRow(
                         )
                     }
 
-                    if(resolutionStatus != null) {
-                        val resolutionText = when(resolutionStatus) {
-                            MarketResolutionStatus.RESOLVED -> "(Resolved)"
-                            MarketResolutionStatus.DISPUTED -> "(Disputed)"
+                    if (resolutionStatus != null) {
+                        val resolutionText = when (resolutionStatus) {
+                            MarketResolutionStatus.RESOLVED -> stringResource(R.string.status_resolved)
+                            MarketResolutionStatus.DISPUTED -> stringResource(R.string.status_disputed)
                         }
 
                         Text(

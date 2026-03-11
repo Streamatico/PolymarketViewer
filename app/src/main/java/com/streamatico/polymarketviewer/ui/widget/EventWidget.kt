@@ -2,7 +2,9 @@ package com.streamatico.polymarketviewer.ui.widget
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,6 +41,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.streamatico.polymarketviewer.R
+import com.streamatico.polymarketviewer.data.model.gamma_api.MarketResolutionStatus
 import com.streamatico.polymarketviewer.domain.model.EventType
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.widget.components.WidgetHorizontalDivider
@@ -59,8 +62,7 @@ internal class EventWidget : GlanceAppWidget {
 
     private val _pinPreviewState: WidgetPinPreviewState
 
-    constructor () : this(null) {
-    }
+    constructor () : this(null)
 
     private constructor (pinPreviewState: EventWidgetRenderState?) : super() {
         _pinPreviewState = WidgetPinPreviewState(pinPreviewState)
@@ -144,25 +146,6 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
     }
 
     val themeColors = GlanceTheme.colors
-
-    val rowTitleStyle = TextStyle(
-        color = themeColors.onSurface,
-        fontWeight = FontWeight.Medium
-    )
-    val primaryRowTitleStyle = TextStyle(
-        color = themeColors.onSurface,
-        fontWeight = FontWeight.Bold,
-        fontSize = 15.sp
-    )
-    val primaryValueStyle = TextStyle(
-        color = themeColors.primary,
-        fontWeight = FontWeight.Bold,
-        fontSize = 16.sp
-    )
-    val secondaryValueStyle = TextStyle(
-        color = themeColors.onSurfaceVariant,
-        fontWeight = FontWeight.Medium
-    )
     val secondaryStyle = TextStyle(color = themeColors.onSurfaceVariant)
 
     val widgetBackgroundColor = themeColors.surface
@@ -240,24 +223,7 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
                         Column {
                             chunk.fastForEach { row ->
                                 val isFirst = overallIndex == 0
-                                Row(
-                                    modifier = GlanceModifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = ROW_BOTTOM_PADDING)
-                                ) {
-                                    Text(
-                                        text = row.title,
-                                        modifier = GlanceModifier.defaultWeight(),
-                                        maxLines = 1,
-                                        style = if (isFirst) primaryRowTitleStyle else rowTitleStyle
-                                    )
-                                    Spacer(modifier = GlanceModifier.width(8.dp))
-                                    Text(
-                                        text = row.value,
-                                        maxLines = 1,
-                                        style = if (isFirst) primaryValueStyle else secondaryValueStyle
-                                    )
-                                }
+                                OutcomeRowContent(row, isFirst)
                                 overallIndex++
                             }
                         }
@@ -312,6 +278,70 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
         }
     }
 }
+
+@Composable
+private fun OutcomeRowContent(
+    row: EventWidgetRow,
+    isFirst: Boolean
+) {
+    val themeColors = GlanceTheme.colors
+
+    val rowTitleStyle = TextStyle(
+        color = themeColors.onSurface,
+        fontWeight = FontWeight.Medium
+    )
+    val primaryValueStyle = TextStyle(
+        color = themeColors.primary,
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp
+    )
+    val secondaryValueStyle = TextStyle(
+        color = themeColors.onSurfaceVariant,
+        fontWeight = FontWeight.Medium
+    )
+
+    Row(
+        modifier = GlanceModifier
+            .fillMaxWidth()
+            .padding(bottom = ROW_BOTTOM_PADDING)
+    ) {
+        Text(
+            text = row.title,
+            modifier = GlanceModifier.defaultWeight(),
+            maxLines = 1,
+            style = rowTitleStyle
+        )
+        if (row.resolutionStatus != null) {
+            Spacer(modifier = GlanceModifier.width(8.dp))
+
+            val resolutionText = when (row.resolutionStatus) {
+                MarketResolutionStatus.RESOLVED -> glanceStringResource(R.string.status_resolved)
+                MarketResolutionStatus.DISPUTED -> glanceStringResource(R.string.status_disputed)
+            }
+
+            Text(
+                text = resolutionText,
+                maxLines = 1,
+                style = TextStyle(
+                    color = themeColors.primary,
+                    fontWeight = FontWeight.Medium
+                )
+            )
+        }
+
+        Spacer(modifier = GlanceModifier.width(8.dp))
+        Text(
+            text = row.value,
+            maxLines = 1,
+            style = if (isFirst) primaryValueStyle else secondaryValueStyle
+        )
+    }
+}
+
+@Composable
+@ReadOnlyComposable
+private fun glanceStringResource(@StringRes id: Int): String =
+    LocalContext.current.getString(id)
 
 private fun formatHeroPercent(progress: Float): String {
     val percent = (progress * 100).roundToInt().coerceIn(0, 100)

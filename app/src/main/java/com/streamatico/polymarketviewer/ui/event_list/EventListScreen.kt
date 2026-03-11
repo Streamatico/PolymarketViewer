@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Check
@@ -70,6 +71,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 import com.streamatico.polymarketviewer.R
+import com.streamatico.polymarketviewer.data.model.gamma_api.BaseEventDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.TagDto
 import com.streamatico.polymarketviewer.domain.repository.PolymarketEventsSortOrder
 import com.streamatico.polymarketviewer.ui.event_list.components.EventListItem
@@ -82,6 +84,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun EventListScreen(
@@ -89,6 +92,39 @@ fun EventListScreen(
     onNavigateToEventDetail: (String) -> Unit,
     onNavigateToAbout: () -> Unit,
     onNavigateToSearch: () -> Unit,
+) {
+    InternalEventListScreen(
+        viewModel = viewModel,
+        onEventClick = {
+            onNavigateToEventDetail(it.slug)
+        },
+        onNavigateToAbout = onNavigateToAbout,
+        onNavigateToSearch = onNavigateToSearch
+    )
+}
+
+@Composable
+fun SelectEventForWidgetScreen(
+    onEventSelected: (event: BaseEventDto) -> Unit,
+    onNavigateBack: () -> Unit,
+    viewModel: EventListViewModel = koinViewModel()
+) {
+    InternalEventListScreen(
+        viewModel = viewModel,
+        onEventClick = onEventSelected,
+        onNavigateToAbout = null,
+        onNavigateToSearch = null,
+        onNavigateBack = onNavigateBack
+    )
+}
+
+@Composable
+private fun InternalEventListScreen(
+    viewModel: EventListViewModel,
+    onEventClick: (event: BaseEventDto) -> Unit,
+    onNavigateToAbout: (() -> Unit)?,
+    onNavigateToSearch: (() -> Unit)?,
+    onNavigateBack: (() -> Unit)? = null,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val tags by viewModel.tagsState.collectAsState()
@@ -118,12 +154,13 @@ fun EventListScreen(
         onSortOrderSelected = viewModel::selectSortOrder,
         onRetry = viewModel::retryLoad,
         onToggleWatchlist = viewModel::toggleWatchlist,
-        onNavigateToEventDetail = onNavigateToEventDetail,
+        onEventClick = onEventClick,
         showBottomSheet = showBottomSheet,
         onShowSortOptionsClick = { showBottomSheet = true },
         onDismissRequest = { showBottomSheet = false },
         onNavigateToAbout = onNavigateToAbout,
         onNavigateToSearch = onNavigateToSearch,
+        onNavigateBack = onNavigateBack
     )
 }
 
@@ -145,12 +182,13 @@ private fun EventListScreenContent(
     onSortOrderSelected: (PolymarketEventsSortOrder) -> Unit,
     onRetry: () -> Unit,
     onToggleWatchlist: (String) -> Unit,
-    onNavigateToEventDetail: (String) -> Unit,
+    onEventClick: (event: BaseEventDto) -> Unit,
     showBottomSheet: Boolean,
     onShowSortOptionsClick: () -> Unit,
     onDismissRequest: () -> Unit,
-    onNavigateToAbout: () -> Unit,
-    onNavigateToSearch: () -> Unit,
+    onNavigateToAbout: (() -> Unit)?,
+    onNavigateToSearch: (() -> Unit)?,
+    onNavigateBack: (() -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -169,10 +207,11 @@ private fun EventListScreenContent(
         onTagSelected = onTagSelected,
         onRetry = onRetry,
         onToggleWatchlist = onToggleWatchlist,
-        onNavigateToEventDetail = onNavigateToEventDetail,
+        onEventClick = onEventClick,
         onShowSortOptionsClick = onShowSortOptionsClick,
         onNavigateToAbout = onNavigateToAbout,
-        onSearchClick = onNavigateToSearch
+        onSearchClick = onNavigateToSearch,
+        onNavigateBack = onNavigateBack
     )
 
     if (showBottomSheet) {
@@ -275,10 +314,11 @@ fun EventListContent(
     onTagSelected: (String) -> Unit,
     onRetry: () -> Unit,
     onToggleWatchlist: (String) -> Unit,
-    onNavigateToEventDetail: (String) -> Unit,
+    onEventClick: (event: BaseEventDto) -> Unit,
     onShowSortOptionsClick: () -> Unit,
-    onSearchClick: () -> Unit,
-    onNavigateToAbout: () -> Unit
+    onSearchClick: (() -> Unit)?,
+    onNavigateBack: (() -> Unit)?,
+    onNavigateToAbout: (() -> Unit)?
 ) {
     val gridState = rememberLazyGridState()
 
@@ -297,25 +337,48 @@ fun EventListContent(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                navigationIcon = { AppLogoIcon(52.dp) },
-                title = { Text(stringResource(R.string.app_name), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                navigationIcon = {
+                    if (onNavigateBack != null) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(id = R.string.navigate_back)
+                            )
+                        }
+                    } else {
+                        AppLogoIcon(52.dp)
+                    }
+                 },
+                title = {
+                    val titleText = if (onNavigateBack != null) {
+                        stringResource(R.string.widget_select_event)
+                    } else {
+                        stringResource(R.string.app_name)
+                    }
+
+                    Text(titleText, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                },
                 actions = {
+                    if (onSearchClick != null) {
                         IconButton(onClick = onSearchClick) {
                             Icon(
                                 imageVector = Icons.Filled.Search,
                                 contentDescription = stringResource(id = R.string.search_tooltip)
                             )
                         }
-                        IconButton(onClick = onShowSortOptionsClick) {
-                            Icon(
-                                imageVector = Icons.Filled.FilterList,
-                                contentDescription = stringResource(id = R.string.filter_tooltip)
-                            )
-                        }
+                    }
+                    IconButton(onClick = onShowSortOptionsClick) {
+                        Icon(
+                            imageVector = Icons.Filled.FilterList,
+                            contentDescription = stringResource(id = R.string.filter_tooltip)
+                        )
+                    }
 
+                    if (onNavigateToAbout != null) {
                         AboutAction(
                             onNavigateToAbout = onNavigateToAbout
                         )
+                    }
                 },
                 scrollBehavior = scrollBehavior
             )
@@ -401,7 +464,7 @@ fun EventListContent(
                                             event = event,
                                             isInWatchlist = watchlistIds.contains(event.id),
                                             onToggleWatchlist = { onToggleWatchlist(event.id) },
-                                            onClick = { onNavigateToEventDetail(event.slug) }
+                                            onClick = { onEventClick(event) }
                                         )
                                     }
                                     if (isLoadingMore) {
@@ -569,12 +632,11 @@ private fun TagChip(
 
 // ====== Preview ========
 
-@Preview(showBackground = true)
 @Composable
-private fun EventListScreenPreview_Success() {
+private fun TemplateEventListScreenPreview_Success(isSelectWidgetMode: Boolean) {
     val sampleEvents = listOf(
         PreviewMocks.sampleEvent1.copy(id = "1", title = "Will event 1 happen?", slug = "event-1", volume = 100.0, liquidity = 50.0, featured = false),
-        PreviewMocks.sampleEvent1.copy(id = "2", title = "What about event 2?", slug = "event-2", volume = 200.0, liquidity = 100.0, featured = true, featuredOrder = 1),
+        PreviewMocks.sampleBinaryEvent.copy(id = "2", title = "What about event 2?", slug = "event-2", volume = 200.0, liquidity = 100.0, featured = true, featuredOrder = 1),
         PreviewMocks.sampleEvent1.copy(id = "3", title = "A third event?", slug = "event-3", volume = 300.0, liquidity = 150.0, featured = false)
     )
     val sampleTags = listOf(
@@ -582,6 +644,20 @@ private fun EventListScreenPreview_Success() {
         TagDto(id = "tag2", label = "Crypto", slug = "crypto", forceShow = false),
         TagDto(id = "tag3", label = "Sports", slug = "sports", forceShow = false)
     )
+
+    val onNavigateToSearch: (() -> Unit)?
+    val onNavigateBack: (() -> Unit)?
+    val onNavigateToAbout: (() -> Unit)?
+
+    if (isSelectWidgetMode) {
+        onNavigateToSearch = null
+        onNavigateBack = {}
+        onNavigateToAbout = null
+    } else {
+        onNavigateToSearch = {}
+        onNavigateBack = null
+        onNavigateToAbout = {}
+    }
 
     MaterialTheme {
         EventListScreenContent(
@@ -600,14 +676,27 @@ private fun EventListScreenPreview_Success() {
             onSortOrderSelected = {},
             onRetry = {},
             onToggleWatchlist = {},
-            onNavigateToEventDetail = {},
+            onEventClick = {},
             showBottomSheet = false,
             onShowSortOptionsClick = {},
             onDismissRequest = {},
-            onNavigateToAbout = {},
-            onNavigateToSearch = {},
+            onNavigateToAbout = onNavigateToAbout,
+            onNavigateToSearch = onNavigateToSearch,
+            onNavigateBack = onNavigateBack
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun EventListScreenPreview_Success() {
+    TemplateEventListScreenPreview_Success(false)
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WidgetSelectEventListScreenPreview_Success() {
+    TemplateEventListScreenPreview_Success(true)
 }
 
 @Preview(showBackground = true, name = "Loading State")
@@ -630,7 +719,7 @@ private fun EventListScreenPreview_Loading() {
             onSortOrderSelected = {},
             onRetry = {},
             onToggleWatchlist = {},
-            onNavigateToEventDetail = {},
+            onEventClick = {},
             showBottomSheet = false,
             onShowSortOptionsClick = {},
             onDismissRequest = {},
@@ -662,7 +751,7 @@ private fun EventListScreenPreview_EmptyWatchlist() {
             onSortOrderSelected = {},
             onRetry = {},
             onToggleWatchlist = {},
-            onNavigateToEventDetail = {},
+            onEventClick = {},
             showBottomSheet = false,
             onShowSortOptionsClick = {},
             onDismissRequest = {},
@@ -692,7 +781,7 @@ private fun EventListScreenPreview_Error() {
             onSortOrderSelected = {},
             onRetry = {},
             onToggleWatchlist = {},
-            onNavigateToEventDetail = {},
+            onEventClick = {},
             showBottomSheet = false,
             onShowSortOptionsClick = {},
             onDismissRequest = {},

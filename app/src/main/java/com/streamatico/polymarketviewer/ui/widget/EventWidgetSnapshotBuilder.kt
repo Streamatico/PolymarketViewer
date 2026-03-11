@@ -11,7 +11,6 @@ import coil3.request.transformations
 import coil3.size.Scale
 import coil3.transform.RoundedCornersTransformation
 import com.streamatico.polymarketviewer.data.model.gamma_api.BaseEventDto
-import com.streamatico.polymarketviewer.data.model.gamma_api.MarketResolutionStatus
 import com.streamatico.polymarketviewer.data.model.gamma_api.yesPrice
 import com.streamatico.polymarketviewer.domain.model.EventType
 import com.streamatico.polymarketviewer.ui.shared.MarketDisplayRow
@@ -93,5 +92,5 @@ private const val IMAGE_CORNER_RADIUS = 24f
 private fun MarketDisplayRow.toWidgetRow() = EventWidgetRow(
     title = title,
     value = resolvedOutcome ?: UiFormatter.formatPriceAsPercentage(price),
-    isResolved = resolutionStatus == MarketResolutionStatus.RESOLVED
+    resolutionStatus = resolutionStatus
 )
