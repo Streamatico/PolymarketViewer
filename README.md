@@ -69,6 +69,9 @@ Special thanks to the maintainers and contributors of the open source libraries 
 
 *   **Android**: 8.1+ (API level 27)
 *   **Target SDK**: 36 (Android 16)
+*   **Build JDK**: 21 (Temurin/Adoptium)
+
+Gradle daemon JVM is pinned in `gradle/gradle-daemon-jvm.properties` and should stay aligned with CI.
 
 ## Disclaimer
 
