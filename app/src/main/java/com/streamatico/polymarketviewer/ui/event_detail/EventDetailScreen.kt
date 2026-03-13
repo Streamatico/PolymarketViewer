@@ -27,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -88,6 +89,7 @@ fun EventDetailScreen(
     // Collect the token map
     val eventOutcomeTokensMap by viewModel.eventOutcomeTokensMap.collectAsState()
     val eventTokenToGroupTitleMap by viewModel.eventTokenToGroupTitleMap.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     val isChartAvailable by viewModel.isChartAvailable.collectAsState()
 
@@ -97,8 +99,10 @@ fun EventDetailScreen(
         onMarketClick = onNavigateToMarketDetail,
         chartModelProducer = viewModel.chartModelProducer,
         isChartAvailable = isChartAvailable,
+        isRefreshing = isRefreshing,
         selectedRange = selectedTimeRange,
         onRangeSelected = viewModel::selectTimeRange,
+        onRefresh = viewModel::refreshEventDetails,
         onToggleWatchlist = viewModel::toggleWatchlist,
         // Pass hierarchical comments
         displayableComments = hierarchicalComments,
@@ -129,8 +133,10 @@ private fun EventDetailsContent(
     onMarketClick: (String) -> Unit,
     chartModelProducer: CartesianChartModelProducer,
     isChartAvailable: Boolean,
+    isRefreshing: Boolean,
     selectedRange: TimeRange,
     onRangeSelected: (TimeRange) -> Unit,
+    onRefresh: () -> Unit,
     onToggleWatchlist: () -> Unit,
 
     displayableComments: List<HierarchicalComment>,
@@ -167,13 +173,20 @@ private fun EventDetailsContent(
         topBar = {
             TopAppBar(
                 title = {
-                    // Show event title if scrolled past the main title, otherwise show "Event Details"
-                    val titleText = if (showTitleInAppBar && eventTitle != null) eventTitle else "Event Details"
+                    // Show event title if scrolled past the main title, otherwise show generic title.
+                    val titleText = if (showTitleInAppBar && eventTitle != null) {
+                        eventTitle
+                    } else {
+                        stringResource(R.string.event_details_title)
+                    }
                     Text(titleText, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.navigate_back)
+                        )
                     }
                 },
                 actions = {
@@ -210,32 +223,39 @@ private fun EventDetailsContent(
                 }
             }
             is EventDetailUiState.Success -> {
-                EventDetailsContentSuccess(
-                    listState = listState, // Pass listState down
-                    event = uiState.event,
-                    modifier = Modifier.padding(paddingValues),
-                    onMarketClick = onMarketClick,
-                    chartModelProducer = chartModelProducer,
-                    isChartAvailable = isChartAvailable,
-                    selectedRange = selectedRange,
-                    onRangeSelected = onRangeSelected,
-                    // Pass hierarchical comments
-                    displayableComments = displayableComments,
-                    // Pass other states/callbacks as before
-                    commentsLoading = commentsLoading,
-                    commentsError = commentsError,
-                    onNavigateToUserProfile = onNavigateToUserProfile,
-                    holdersOnly = holdersOnly,
-                    commentsSortOrder = commentsSortOrder,
-                    canLoadMoreComments = canLoadMoreComments,
-                    onToggleHoldersOnly = onToggleHoldersOnly,
-                    onCommentsSortOrderChange = onCommentsSortOrderChange,
-                    onLoadMoreComments = onLoadMoreComments,
-                    onRefreshComments = onRefreshComments,
-                    // Pass the token map
-                    eventOutcomeTokensMap = eventOutcomeTokensMap,
-                    eventTokenToGroupTitleMap = eventTokenToGroupTitleMap
-                )
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = onRefresh,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    EventDetailsContentSuccess(
+                        listState = listState, // Pass listState down
+                        event = uiState.event,
+                        onMarketClick = onMarketClick,
+                        chartModelProducer = chartModelProducer,
+                        isChartAvailable = isChartAvailable,
+                        selectedRange = selectedRange,
+                        onRangeSelected = onRangeSelected,
+                        // Pass hierarchical comments
+                        displayableComments = displayableComments,
+                        // Pass other states/callbacks as before
+                        commentsLoading = commentsLoading,
+                        commentsError = commentsError,
+                        onNavigateToUserProfile = onNavigateToUserProfile,
+                        holdersOnly = holdersOnly,
+                        commentsSortOrder = commentsSortOrder,
+                        canLoadMoreComments = canLoadMoreComments,
+                        onToggleHoldersOnly = onToggleHoldersOnly,
+                        onCommentsSortOrderChange = onCommentsSortOrderChange,
+                        onLoadMoreComments = onLoadMoreComments,
+                        onRefreshComments = onRefreshComments,
+                        // Pass the token map
+                        eventOutcomeTokensMap = eventOutcomeTokensMap,
+                        eventTokenToGroupTitleMap = eventTokenToGroupTitleMap
+                    )
+                }
             }
             is EventDetailUiState.Error -> {
                 Box(
@@ -256,7 +276,6 @@ private fun EventDetailsContent(
 private fun EventDetailsContentSuccess(
     listState: LazyListState, // Receive listState
     event: EventDto,
-    modifier: Modifier = Modifier,
     onMarketClick: (String) -> Unit,
     chartModelProducer: CartesianChartModelProducer,
     isChartAvailable: Boolean,
@@ -291,7 +310,7 @@ private fun EventDetailsContentSuccess(
 
     LazyColumn(
         state = listState, // Use passed state
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
     ) {
         // Header (Title, Image, Description, Info)
@@ -376,8 +395,10 @@ private fun EventDetailsContentPreviewTemplate(uiState: EventDetailUiState) {
             onMarketClick = { },
             chartModelProducer = PreviewMocks.previewChartModelProducer, // Use the mock producer
             isChartAvailable = true,
+            isRefreshing = false,
             selectedRange = TimeRange.D1,
             onRangeSelected = { },
+            onRefresh = { },
             onToggleWatchlist = { },
             displayableComments = PreviewMocks.sampleHierarchicalComments,
             commentsLoading = false,
@@ -418,7 +439,7 @@ private fun EventDetailScreenPreviewLoading() {
 @Composable
 private fun EventDetailScreenPreviewError() {
     EventDetailsContentPreviewTemplate(
-        uiState = EventDetailUiState.Error("Failed to load event data.")
+        uiState = EventDetailUiState.Error(stringResource(R.string.event_details_failed_to_load_preview))
     )
 }
 

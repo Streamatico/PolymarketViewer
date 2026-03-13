@@ -55,6 +55,15 @@
     <string name="sort_option_competitive">Competitive</string>
     <string name="cd_selected">Selected</string>
 
+    <!-- Event Detail -->
+    <string name="event_details_title">Event Details</string>
+    <string name="event_details_failed_to_load_preview">Failed to load event data.</string>
+
+    <!-- Market Detail -->
+    <string name="market_details_title">Market Details</string>
+    <string name="market_details_loading_title">Loading Details…</string>
+    <string name="market_details_failed_to_load_preview">Failed to load market details.</string>
+
     <!-- Event Item -->
     <string name="volume_suffix">" Vol."</string>
     <string name="action_show_less">Show less</string>

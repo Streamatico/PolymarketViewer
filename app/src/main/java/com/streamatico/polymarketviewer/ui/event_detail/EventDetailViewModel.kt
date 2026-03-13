@@ -44,6 +44,9 @@ class EventDetailViewModel(
     private val _uiState = MutableStateFlow<EventDetailUiState>(EventDetailUiState.Loading)
     val uiState: StateFlow<EventDetailUiState> = _uiState.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     // --- Watchlist State --- //
     val isInWatchlist: StateFlow<Boolean> = combine(
         watchlistInteractor.watchlistIds,
@@ -104,11 +107,18 @@ class EventDetailViewModel(
         loadEventDetailsAndInitialData()
     }
 
-    private fun loadEventDetailsAndInitialData() {
+    private fun loadEventDetailsAndInitialData(isManualRefresh: Boolean = false) {
+        if (isManualRefresh && _isRefreshing.value) return
+
         viewModelScope.launch {
-            _uiState.value = EventDetailUiState.Loading
-            _eventOutcomeTokensMap.value = emptyMap() // Reset maps
-            _eventTokenToGroupTitleMap.value = emptyMap()
+            if (isManualRefresh) {
+                _isRefreshing.value = true
+            } else {
+                _uiState.value = EventDetailUiState.Loading
+                _eventOutcomeTokensMap.value = emptyMap() // Reset maps
+                _eventTokenToGroupTitleMap.value = emptyMap()
+            }
+
             val eventResult = polymarketRepository.getEventDetailsBySlug(eventSlug)
 
             eventResult.onSuccess {
@@ -121,7 +131,15 @@ class EventDetailViewModel(
                 loadChartData(_selectedTimeRange.value)
                 refreshComments()
             }.onFailure {
-                _uiState.value = EventDetailUiState.Error(it.message ?: "Failed to load event details")
+                if (isManualRefresh && _uiState.value is EventDetailUiState.Success) {
+                    Log.e(TAG, "Failed to refresh event details for event $eventSlug", it)
+                } else {
+                    _uiState.value = EventDetailUiState.Error(it.message ?: "Failed to load event details")
+                }
+            }
+
+            if (isManualRefresh) {
+                _isRefreshing.value = false
             }
         }
     }
@@ -336,6 +354,10 @@ class EventDetailViewModel(
             // If only comments failed, retry refreshing comments
             refreshComments()
         }
+    }
+
+    fun refreshEventDetails() {
+        loadEventDetailsAndInitialData(isManualRefresh = true)
     }
 
     private data class InternalMarketTimeseries(

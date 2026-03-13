@@ -26,6 +26,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,12 +37,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.MarketDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.getTitleOrDefault
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
@@ -58,8 +61,12 @@ fun MarketDetailScreen(
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+
     MarketDetailContent(
         uiState = uiState,
+        isRefreshing = isRefreshing,
+        onRefresh = viewModel::refreshMarketDetails,
         onNavigateBack = onNavigateBack,
         onRetry = { viewModel.retryLoad() }
     )
@@ -70,6 +77,8 @@ fun MarketDetailScreen(
 @Composable
 private fun MarketDetailContent(
     uiState: MarketDetailUiState,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
     onNavigateBack: () -> Unit,
     onRetry: () -> Unit
 ) {
@@ -78,34 +87,55 @@ private fun MarketDetailContent(
             TopAppBar(
                 title = {
                     val titleText = when (uiState) {
-                        is MarketDetailUiState.Success -> uiState.market.getTitleOrDefault("Market Details")
-                        is MarketDetailUiState.Loading -> "Loading Details..."
-                        is MarketDetailUiState.Error -> "Market Details"
+                        is MarketDetailUiState.Success -> uiState.market.getTitleOrDefault(stringResource(R.string.market_details_title))
+                        is MarketDetailUiState.Loading -> stringResource(R.string.market_details_loading_title)
+                        is MarketDetailUiState.Error -> stringResource(R.string.market_details_title)
                     }
                     Text(titleText, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.navigate_back)
+                        )
                     }
                 }
             )
         }
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
-        ) {
-            when (uiState) {
-                is MarketDetailUiState.Loading -> {
+        when (uiState) {
+            is MarketDetailUiState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
                     LoadingBox()
                 }
-                is MarketDetailUiState.Success -> {
-                    MarketDetailsContent(market = uiState.market, modifier = Modifier.fillMaxSize())
+            }
+            is MarketDetailUiState.Success -> {
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = onRefresh,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    MarketDetailsContent(
+                        market = uiState.market,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
-                is MarketDetailUiState.Error -> {
+            }
+            is MarketDetailUiState.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
                     ErrorBox(
                         message = uiState.message,
                         onRetry = onRetry,
@@ -305,6 +335,8 @@ private fun MarketDetailViewPreviewSuccessShortDesc() {
     MaterialTheme { // Wrap preview in MaterialTheme
         MarketDetailContent(
             uiState = MarketDetailUiState.Success(shortDescMarket),
+            isRefreshing = false,
+            onRefresh = {},
             onNavigateBack = {},
             onRetry = {}
         )
@@ -325,6 +357,8 @@ private fun MarketDetailViewPreviewSuccessNoMetrics() {
     MaterialTheme { // Wrap preview in MaterialTheme
         MarketDetailContent(
             uiState = MarketDetailUiState.Success(noMetricsMarket),
+            isRefreshing = false,
+            onRefresh = {},
             onNavigateBack = {},
             onRetry = {}
         )
@@ -337,6 +371,8 @@ private fun MarketDetailViewPreviewLoading() {
     MaterialTheme { // Wrap preview in MaterialTheme
         MarketDetailContent(
             uiState = MarketDetailUiState.Loading,
+            isRefreshing = false,
+            onRefresh = {},
             onNavigateBack = {},
             onRetry = {}
         )
@@ -349,6 +385,8 @@ private fun MarketDetailViewPreviewSuccess() { // Removed PreviewParameter
     MaterialTheme { // Wrap preview in MaterialTheme
         MarketDetailContent(
             uiState = MarketDetailUiState.Success(PreviewMocks.sampleMarket1), // Use the sample market directly
+            isRefreshing = false,
+            onRefresh = {},
             onNavigateBack = {},
             onRetry = {}
         )
@@ -360,7 +398,9 @@ private fun MarketDetailViewPreviewSuccess() { // Removed PreviewParameter
 private fun MarketDetailViewPreviewError() {
     MaterialTheme { // Wrap preview in MaterialTheme
         MarketDetailContent(
-            uiState = MarketDetailUiState.Error("Failed to load market details."),
+            uiState = MarketDetailUiState.Error(stringResource(R.string.market_details_failed_to_load_preview)),
+            isRefreshing = false,
+            onRefresh = {},
             onNavigateBack = {},
             onRetry = {}
         )
