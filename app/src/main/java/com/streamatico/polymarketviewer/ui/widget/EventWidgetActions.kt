@@ -21,7 +21,9 @@ internal object EventWidgetActions {
 
     private fun createOpenEventIntent(context: Context, eventSlug: String): Intent =
         Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra(MainActivity.EXTRA_EVENT_SLUG, eventSlug)
         }
 }

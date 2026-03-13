@@ -6,6 +6,8 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -25,15 +27,28 @@ import com.streamatico.polymarketviewer.ui.search_screen.SearchScreen
 import com.streamatico.polymarketviewer.ui.search_screen.SearchViewModel
 import com.streamatico.polymarketviewer.ui.user_profile.UserProfileScreen
 import com.streamatico.polymarketviewer.ui.user_profile.UserProfileViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 @Composable
-fun AppNavigation(initialEventSlug: String? = null) {
-    val backStack = rememberNavBackStack(NavKeys.EventList)
-
-    LaunchedEffect(initialEventSlug) {
-        if (!initialEventSlug.isNullOrBlank()) {
-            backStack.add(NavKeys.EventDetail(initialEventSlug))
+fun AppNavigation(
+    initialEventSlug: String? = null,
+    onTopEventSlugChanged: (String?) -> Unit = {}
+) {
+    val initialBackStack = remember(initialEventSlug) {
+        if (initialEventSlug.isNullOrBlank()) {
+            listOf(NavKeys.EventList)
+        } else {
+            listOf(NavKeys.EventList, NavKeys.EventDetail(initialEventSlug))
         }
+    }
+    val backStack = rememberNavBackStack(*initialBackStack.toTypedArray())
+
+    LaunchedEffect(backStack) {
+        snapshotFlow { backStack.lastOrNull() }
+            .map { (it as? NavKeys.EventDetail)?.eventSlug }
+            .distinctUntilChanged()
+            .collect { onTopEventSlugChanged(it) }
     }
 
     NavDisplay(
