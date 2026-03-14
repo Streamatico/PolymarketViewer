@@ -15,7 +15,8 @@ internal val SNAPSHOT_KEY = stringPreferencesKey("widget_snapshot")
 @Serializable
 internal data class EventWidgetRow(
     val title: String,
-    val value: String,
+    val price: Double?,
+    val displayValue: String,
     val resolutionStatus: MarketResolutionStatus? = null
 )
 
@@ -31,7 +32,6 @@ internal data class EventWidgetSnapshot(
     val endDateEpochMs: Long? = null,  // End date of the event (when it closes/ends)
     val rows: List<EventWidgetRow>,
     val totalRowsCount: Int = 0,
-    val binaryYesPrice: Double? = null,
     val imageCachePath: String? = null
 )
 

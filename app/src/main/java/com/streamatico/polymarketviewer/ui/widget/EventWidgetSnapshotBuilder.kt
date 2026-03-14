@@ -11,8 +11,6 @@ import coil3.request.transformations
 import coil3.size.Scale
 import coil3.transform.RoundedCornersTransformation
 import com.streamatico.polymarketviewer.data.model.gamma_api.BaseEventDto
-import com.streamatico.polymarketviewer.data.model.gamma_api.yesPrice
-import com.streamatico.polymarketviewer.domain.model.EventType
 import com.streamatico.polymarketviewer.ui.shared.MarketDisplayRow
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.toDisplayRows
@@ -25,16 +23,30 @@ internal object EventWidgetSnapshotBuilder {
         context: Context,
         event: BaseEventDto
     ): EventWidgetSnapshot {
-        val rows = buildRows(event, MAX_CACHED_ROWS)
-        val totalRowsCount = buildTotalRowsCount(event)
-        val binaryYesPrice = if (event.eventType == EventType.BinaryEvent) {
-            event.baseMarkets.firstOrNull()?.yesPrice()
-        } else {
-            null
-        }
         val imageCachePath = event.imageUrl?.let {
             downloadAndCacheImage(context, it, event.id)
         }
+
+        return internalBuild(
+            event = event,
+            imageCachePath = imageCachePath
+        )
+    }
+
+    internal fun buildMock(event: BaseEventDto) : EventWidgetSnapshot {
+        return internalBuild(
+            event = event,
+            imageCachePath = null
+        )
+    }
+
+    private fun internalBuild(
+        event: BaseEventDto,
+        imageCachePath: String?
+    ): EventWidgetSnapshot {
+        val rows: List<EventWidgetRow> = buildRows(event)
+        val totalRowsCount = buildTotalRowsCount(event)
+
         val endDateEpochMs = event.endDate?.toInstant()?.toEpochMilli()
 
         return EventWidgetSnapshot(
@@ -48,7 +60,6 @@ internal object EventWidgetSnapshotBuilder {
             endDateEpochMs = endDateEpochMs,
             rows = rows,
             totalRowsCount = totalRowsCount,
-            binaryYesPrice = binaryYesPrice,
             imageCachePath = imageCachePath
         )
     }
@@ -78,8 +89,8 @@ internal object EventWidgetSnapshotBuilder {
         file.absolutePath
     }.getOrNull()
 
-    private fun buildRows(event: BaseEventDto, limit: Int): List<EventWidgetRow> =
-        event.toDisplayRows(limit).map { it.toWidgetRow() }
+    private fun buildRows(event: BaseEventDto): List<EventWidgetRow> =
+        event.toDisplayRows(MAX_CACHED_ROWS).map { it.toWidgetRow() }
 
     private fun buildTotalRowsCount(event: BaseEventDto): Int =
         event.totalDisplayRowsCount()
@@ -91,6 +102,7 @@ private const val IMAGE_CORNER_RADIUS = 24f
 
 private fun MarketDisplayRow.toWidgetRow() = EventWidgetRow(
     title = title,
-    value = resolvedOutcome ?: UiFormatter.formatPriceAsPercentage(price),
+    price = price,
+    displayValue = resolvedOutcome ?: UiFormatter.formatPriceAsPercentage(price),
     resolutionStatus = resolutionStatus
 )

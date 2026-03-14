@@ -25,7 +25,9 @@ import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
+import androidx.glance.color.ColorProviders
 import androidx.glance.currentState
+import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
@@ -55,7 +57,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 import kotlin.math.max
-import kotlin.math.roundToInt
 
 internal class EventWidget : GlanceAppWidget {
     override val sizeMode: SizeMode = SizeMode.Exact
@@ -111,9 +112,8 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
 
     val rows = snapshot?.rows.orEmpty()
     val totalRowsCount = (snapshot?.totalRowsCount ?: 0).takeIf { it > 0 } ?: rows.size
-    val progress = snapshot?.binaryYesPrice?.toFloat()
-    val hasProgress = snapshot?.eventType == EventType.BinaryEvent && progress != null
-    val hasHero = hasProgress
+
+    val isBinaryEvent = snapshot?.eventType == EventType.BinaryEvent
 
     val bitmap = snapshot?.imageCachePath?.let { path ->
         runCatching { BitmapFactory.decodeFile(path) }.getOrNull()
@@ -122,8 +122,7 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
     val showFooter = shouldShowFooter(size.height)
     val maxRows = calculateRowLimit(
         height = size.height,
-        hasProgress = hasProgress,
-        hasHero = hasHero,
+        isBinaryEvent = isBinaryEvent,
         showFooter = showFooter,
         sizeClass = sizeClass
     )
@@ -188,57 +187,16 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
                     }
                     Text(text = placeholderText, style = secondaryStyle)
                 } else {
-                    // Wrap header elements (image + hero + progress) in a single Column
-                    // so the outer defaultWeight Column's child count stays within the
-                    // RemoteViews 10-child-per-container limit.
-                    Column {
-                        if (hasHero) {
-                            Text(
-                                text = formatHeroPercent(progress),
-                                style = TextStyle(
-                                    color = themeColors.primary,
-                                    fontSize = 28.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            )
-                            Spacer(modifier = GlanceModifier.height(4.dp))
-                        }
-
-                        if (hasProgress) {
-                            LinearProgressIndicator(
-                                progress = progress.coerceIn(0f, 1f),
-                                modifier = GlanceModifier
-                                    .fillMaxWidth()
-                                    .height(PROGRESS_BAR_HEIGHT),
-                                color = themeColors.primary,
-                                backgroundColor = themeColors.surfaceVariant
-                            )
-                            Spacer(modifier = GlanceModifier.height(10.dp))
-                        }
-                    }
-
-                    // Chunk rows into groups to respect RemoteViews' 10-child-per-container limit.
-                    var overallIndex = 0
-                    visibleRows.chunked(MAX_ROWS_PER_GROUP).fastForEach { chunk ->
-                        Column {
-                            chunk.fastForEach { row ->
-                                val isFirst = overallIndex == 0
-                                OutcomeRowContent(row, isFirst)
-                                overallIndex++
-                            }
-                        }
-                    }
-
-                    if (remaining > 0) {
-                        Text(
-                            modifier = GlanceModifier
-                                .fillMaxWidth(),
-                            text = context.getString(R.string.widget_more_format, remaining),
-                            style = TextStyle(
-                                color = themeColors.onSurfaceVariant,
-                                fontWeight = FontWeight.Medium,
-                                textAlign = TextAlign.Center
-                            )
+                    if (isBinaryEvent) {
+                        BinaryEventContent(
+                            themeColors = themeColors,
+                            row = visibleRows.first()
+                        )
+                    } else {
+                        MultiRowEventContent(
+                            themeColors = themeColors,
+                            rows = visibleRows,
+                            remaining = remaining
                         )
                     }
                 }
@@ -280,12 +238,96 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
 }
 
 @Composable
+private fun MultiRowEventContent(
+    themeColors: ColorProviders,
+    rows: List<EventWidgetRow>,
+    remaining: Int
+) {
+    // Wrap header elements in a single Column
+    // so the outer defaultWeight Column's child count stays within the
+    // RemoteViews 10-child-per-container limit.
+
+    // Chunk rows into groups to respect RemoteViews' 10-child-per-container limit.
+    var overallIndex = 0
+    rows.chunked(MAX_ROWS_PER_GROUP).fastForEach { chunk ->
+        Column {
+            chunk.fastForEach { row ->
+                val isFirst = overallIndex == 0
+                OutcomeRowContent(
+                    themeColors = themeColors,
+                    row = row,
+                    isFirst = isFirst
+                )
+                overallIndex++
+            }
+        }
+    }
+
+    if (remaining > 0) {
+        Text(
+            modifier = GlanceModifier
+                .fillMaxWidth(),
+            text = glanceStringResource(R.string.widget_more_format, remaining),
+            style = TextStyle(
+                color = themeColors.onSurfaceVariant,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center
+            )
+        )
+    }
+}
+
+@Composable
+private fun BinaryEventContent(
+    themeColors: ColorProviders,
+    row: EventWidgetRow,
+) {
+    val progress = row.price?.toFloat() ?: 0f
+    val textStyle = TextStyle(
+        color = themeColors.primary,
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold
+    )
+
+    Column(
+        modifier = GlanceModifier.fillMaxSize(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Row(modifier = GlanceModifier.fillMaxWidth()) {
+                Text(
+                    text = row.title,
+                    style = textStyle
+                )
+
+                Spacer(modifier = GlanceModifier.defaultWeight())
+
+                Text(
+                    text = row.displayValue,//formatHeroPercent(progress),
+                    style = textStyle
+                )
+            }
+            Spacer(modifier = GlanceModifier.height(4.dp))
+
+            LinearProgressIndicator(
+                progress = progress.coerceIn(0f, 1f),
+                modifier = GlanceModifier
+                    .fillMaxWidth()
+                    .height(PROGRESS_BAR_HEIGHT),
+                color = themeColors.primary,
+                backgroundColor = themeColors.surfaceVariant
+            )
+            Spacer(modifier = GlanceModifier.height(10.dp))
+        }
+    }
+}
+
+@Composable
 private fun OutcomeRowContent(
+    themeColors: ColorProviders,
     row: EventWidgetRow,
     isFirst: Boolean
 ) {
-    val themeColors = GlanceTheme.colors
-
     val rowTitleStyle = TextStyle(
         color = themeColors.onSurface,
         fontWeight = FontWeight.Medium
@@ -331,7 +373,7 @@ private fun OutcomeRowContent(
 
         Spacer(modifier = GlanceModifier.width(8.dp))
         Text(
-            text = row.value,
+            text = row.displayValue,
             maxLines = 1,
             style = if (isFirst) primaryValueStyle else secondaryValueStyle
         )
@@ -343,15 +385,14 @@ private fun OutcomeRowContent(
 private fun glanceStringResource(@StringRes id: Int): String =
     LocalContext.current.getString(id)
 
-private fun formatHeroPercent(progress: Float): String {
-    val percent = (progress * 100).roundToInt().coerceIn(0, 100)
-    return "$percent%"
-}
+@Composable
+@ReadOnlyComposable
+private fun glanceStringResource(@StringRes id: Int, vararg formatArgs: Any): String =
+    LocalContext.current.getString(id, *formatArgs)
 
 private fun calculateRowLimit(
     height: Dp,
-    hasProgress: Boolean,
-    hasHero: Boolean,
+    isBinaryEvent: Boolean,
     showFooter: Boolean,
     sizeClass: WidgetSizeClass
 ): Int {
@@ -359,9 +400,9 @@ private fun calculateRowLimit(
     val available = height -
         CONTENT_VERTICAL_PADDING -
         headerHeight -
-        if (showFooter) FOOTER_HEIGHT else 0.dp -
-        if (hasProgress) PROGRESS_SECTION_HEIGHT else 0.dp -
-        if (hasHero) HERO_HEIGHT else 0.dp
+        (if (showFooter) FOOTER_HEIGHT else 0.dp) -
+        (if (isBinaryEvent) PROGRESS_SECTION_HEIGHT else 0.dp) -
+        (if (isBinaryEvent) HERO_HEIGHT else 0.dp)
     val rows = (max(0f, available.value) / ROW_SLOT_HEIGHT.value).toInt() - ROW_FIT_SAFETY_ROWS
     return rows.coerceIn(sizeClass.minRows, sizeClass.maxRows)
 }
@@ -449,6 +490,8 @@ internal data class EventWidgetRenderState(
     val disableInteractions: Boolean
 )
 
+
+// ===== Previews ===================
 
 @Suppress("unused")
 @OptIn(ExperimentalGlancePreviewApi::class)

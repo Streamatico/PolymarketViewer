@@ -160,6 +160,20 @@ internal object PreviewMocks {
         oneDayPriceChange = -0.05,
     )
 
+    val sampleMarket5 = demoMarketDto(
+        id = "market-5",
+        groupItemTitle = "Will it close above $500k?",
+        slug = "price-500k",
+        outcomesJson = "[\"Yes\", \"No\"]",
+        outcomePricesJson = "[\"0.4\", \"0.96\"]",
+        volume = 30000.0,
+        liquidity = 1000.0,
+        lastTradePrice = 0.4,
+        active = true,
+        closed = false,
+        oneDayPriceChange = -0.08
+    )
+
 
     val sampleEvent1 = EventDto(
         id = "event-1",
@@ -179,7 +193,9 @@ internal object PreviewMocks {
         rawMarkets = listOf(
             sampleMarket1,
             sampleMarket2,
-            sampleMarket3
+            sampleMarket3,
+            sampleMarket4LowPrice,
+            sampleMarket5
         ),
         featured = true,
         featuredOrder = 1,
