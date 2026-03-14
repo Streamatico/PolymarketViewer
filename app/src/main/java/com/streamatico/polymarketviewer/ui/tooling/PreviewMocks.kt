@@ -1,6 +1,6 @@
 package com.streamatico.polymarketviewer.ui.tooling
 
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.streamatico.polymarketviewer.data.model.gamma_api.CommentCreatorProfileDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.CommentDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.ProfilePositionDto
