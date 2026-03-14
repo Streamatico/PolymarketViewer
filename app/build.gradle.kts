@@ -146,6 +146,8 @@ dependencies {
     // Preview support for Glance widgets in Android Studio.
     debugImplementation(libs.androidx.glance.preview)
     debugImplementation(libs.androidx.glance.appwidget.preview)
+    releaseCompileOnly(libs.androidx.glance.preview)
+    releaseCompileOnly(libs.androidx.glance.appwidget.preview)
 
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
