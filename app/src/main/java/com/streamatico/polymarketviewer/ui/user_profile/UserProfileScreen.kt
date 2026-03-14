@@ -1,5 +1,7 @@
 package com.streamatico.polymarketviewer.ui.user_profile
 
+import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,9 +16,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -38,22 +44,23 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.data_api.UserActivityDto
 import com.streamatico.polymarketviewer.data.model.data_api.UserClosedPositionDto
 import com.streamatico.polymarketviewer.data.model.data_api.UserPositionDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.UserProfileDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.getDisplayName
-import com.streamatico.polymarketviewer.ui.shared.components.ProfileIcon
 import com.streamatico.polymarketviewer.ui.shared.PaginatedDataLoader
 import com.streamatico.polymarketviewer.ui.shared.PaginatedList
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
-import com.streamatico.polymarketviewer.ui.shared.components.OpenInBrowserIconButton
+import com.streamatico.polymarketviewer.ui.shared.components.ProfileIcon
 import com.streamatico.polymarketviewer.ui.tooling.ProfilePreviewMocks
 import com.streamatico.polymarketviewer.ui.user_profile.components.ClosedPositionItem
 import com.streamatico.polymarketviewer.ui.user_profile.components.PaginatedListContent
@@ -113,9 +120,7 @@ private fun UserProfileScaffold(
                 },
                 actions = {
                     if (userProfile != null) {
-                        OpenInBrowserIconButton(
-                            "https://polymarket.com/profile/${userProfile.proxyWallet}"
-                        )
+                        UserProfileMoreActions(profileWallet = userProfile.proxyWallet)
                     }
                 },
                 navigationIcon = {
@@ -404,6 +409,43 @@ private fun ActivityTab(
     }
 }
 
+@Composable
+private fun UserProfileMoreActions(profileWallet: String) {
+    var showMenu by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    IconButton(onClick = { showMenu = true }) {
+        Icon(
+            imageVector = Icons.Default.MoreVert,
+            contentDescription = stringResource(id = R.string.more_options_tooltip)
+        )
+    }
+
+    DropdownMenu(
+        expanded = showMenu,
+        onDismissRequest = { showMenu = false }
+    ) {
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(id = R.string.open_in_browser)) },
+            onClick = {
+                showMenu = false
+                val profileUrl = "https://polymarket.com/profile/$profileWallet"
+                runCatching {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, profileUrl.toUri()))
+                }.onFailure { error ->
+                    Log.e("UserProfileMoreActions", "Failed to open URL: $profileUrl", error)
+                }
+            }
+        )
+    }
+}
+
 
 // === Previews ===
 
@@ -430,4 +472,3 @@ fun UserProfileScreenPreview() {
         ),
     )
 }
-

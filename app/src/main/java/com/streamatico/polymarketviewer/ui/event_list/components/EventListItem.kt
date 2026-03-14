@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,24 +42,14 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.BaseEventDto
-import com.streamatico.polymarketviewer.data.model.gamma_api.BaseMarketDto
-import com.streamatico.polymarketviewer.data.model.gamma_api.EventType
 import com.streamatico.polymarketviewer.data.model.gamma_api.MarketResolutionStatus
-import com.streamatico.polymarketviewer.data.model.gamma_api.getResolutionStatus
-import com.streamatico.polymarketviewer.data.model.gamma_api.getResolvedOutcome
-import com.streamatico.polymarketviewer.data.model.gamma_api.getTitleOrDefault
-import com.streamatico.polymarketviewer.data.model.gamma_api.getYesTitle
-import com.streamatico.polymarketviewer.data.model.gamma_api.yesPrice
+import com.streamatico.polymarketviewer.domain.model.EventType
 import com.streamatico.polymarketviewer.ui.shared.ComposableUiFormatter
+import com.streamatico.polymarketviewer.ui.shared.MarketDisplayRow
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
-import com.streamatico.polymarketviewer.ui.shared.sortedByViewPriority
-import com.streamatico.polymarketviewer.ui.shared.sortedForShortView
+import com.streamatico.polymarketviewer.ui.shared.toDisplayRows
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 
 // Constant for maximum number of visible markets
 private const val MAX_VISIBLE_MARKETS = 3
@@ -116,29 +110,30 @@ fun EventListItem(
                 // --- Market Content (choose display style) --- //
                 when (event.eventType) {
                     EventType.BinaryEvent -> {
-                        BinaryMarketContent(market = event.baseMarkets.first())
+                        val market = remember(event) {
+                            event.toDisplayRows().first()
+                        }
+                        BinaryMarketContent(market = market)
                     }
 
                     EventType.CategoricalMarket -> {
-                        val mainMarketByThreshold = event.baseMarkets
-                            .firstOrNull { it.groupItemThreshold == 0 }
-
+                        val rows = remember(event) { event.toDisplayRows() }
                         CategoricalMarketContent(
-                            market = mainMarketByThreshold ?: event.baseMarkets.first(),
-                            isExpanded = isMarketListExpanded, // Pass state
-                            onToggleExpand = {
-                                isMarketListExpanded = !isMarketListExpanded
-                            } // Pass lambda
+                            rows = rows,
+                            isExpanded = isMarketListExpanded,
+                            onToggleExpand = { isMarketListExpanded = !isMarketListExpanded }
                         )
                     }
 
                     EventType.MultiMarket -> {
                         val sortedMarkets = remember(event, isMarketListExpanded) {
                             if (isMarketListExpanded || event.baseMarkets.size <= (MAX_VISIBLE_MARKETS + 1)) {
-                                event.baseMarkets.sortedByViewPriority(event.sortByEnum)
+                                //event.baseMarkets.sortedByViewPriority(event.sortByEnum)
+                                event.toDisplayRows()
                             } else {
-                                event.baseMarkets
-                                    .sortedForShortView(MAX_VISIBLE_MARKETS)
+                                //event.baseMarkets
+                                //    .sortedForShortView(MAX_VISIBLE_MARKETS)
+                                event.toDisplayRows(MAX_VISIBLE_MARKETS)
                             }
                         }
 
@@ -209,10 +204,8 @@ fun EventListItem(
 // --- Composable for "Binary market" style --- //
 @Composable
 private fun BinaryMarketContent(
-    market: BaseMarketDto
+    market: MarketDisplayRow
 ) {
-    val yesPrice = market.yesPrice()
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -220,11 +213,11 @@ private fun BinaryMarketContent(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutcomeTextRow(
-                title = market.getYesTitle(),
-                marketResolutionStatus = market.getResolutionStatus(),
+                title = market.title,
+                marketResolutionStatus = market.resolutionStatus,
                 modifier = Modifier.weight(1f) // Takes remaining space
             )
-            yesPrice?.let {
+            market.price?.let {
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = UiFormatter.formatPriceAsPercentage(it),
@@ -235,7 +228,7 @@ private fun BinaryMarketContent(
             }
         }
         // Add ProgressIndicator
-        yesPrice?.let {
+        market.price?.let {
              Spacer(modifier = Modifier.height(8.dp))
              LinearProgressIndicator(
                  progress = { it.toFloat() }, // Use lambda for deferred reading
@@ -248,50 +241,42 @@ private fun BinaryMarketContent(
 // --- Composable for SINGLE CATEGORICAL market --- //
 @Composable
 private fun CategoricalMarketContent(
-    market: BaseMarketDto,
+    rows: List<MarketDisplayRow>,
     isExpanded: Boolean,
     onToggleExpand: () -> Unit
 ) {
-    val outcomes = market.outcomes
-    val prices = market.outcomePrices
-
-    // Create (Outcome, Price) pairs for sorting and display
-    val outcomePricePairs = remember(outcomes, prices) {
-        outcomes.zip(prices) { outcome, price -> outcome to price }
-            //.sortedByDescending { it.second } // Sort by descending price
-    }
-
     Column(modifier = Modifier.padding(bottom = 8.dp)) {
-        // Show all if expanded or if there are exactly 4 outcomes
-        val visibleOutcomes = if (isExpanded || outcomePricePairs.size == MAX_VISIBLE_MARKETS + 1) {
-            outcomePricePairs
+        val visibleRows = if (isExpanded || rows.size == MAX_VISIBLE_MARKETS + 1) {
+            rows
         } else {
-            outcomePricePairs.take(MAX_VISIBLE_MARKETS)
+            rows.take(MAX_VISIBLE_MARKETS)
         }
 
-        visibleOutcomes.forEach { (outcome, price) ->
-            // Use universal MarketRow
-            MarketRow(title = outcome, price = price, marketResolutionStatus = market.getResolutionStatus())
+        visibleRows.forEach { row ->
+            MarketRow(
+                title = row.title,
+                price = row.price,
+                marketResolutionStatus = row.resolutionStatus,
+                resolvedOutcome = row.resolvedOutcome
+            )
         }
 
-        // Show button only if there are more than 4 outcomes (more than 1 hidden)
-        if (outcomePricePairs.size > MAX_VISIBLE_MARKETS + 1) {
-            // Display "+ X more outcomes"
-             Spacer(modifier = Modifier.height(4.dp))
-             Text(
+        if (rows.size > MAX_VISIBLE_MARKETS + 1) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
                 text = if (isExpanded) stringResource(R.string.action_show_less) else {
-                    val count = outcomePricePairs.size - MAX_VISIBLE_MARKETS
+                    val count = rows.size - MAX_VISIBLE_MARKETS
                     pluralStringResource(R.plurals.more_outcomes_count, count, count)
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary, // Make color clickable
+                color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
-                    .clickable { onToggleExpand() } // Make clickable
-             )
+                    .clickable { onToggleExpand() }
+            )
         }
     }
 }
@@ -299,7 +284,7 @@ private fun CategoricalMarketContent(
 // --- Composable for MULTIPLE BINARY markets (elections) --- //
 @Composable
 private fun MultiMarketContent(
-    markets: List<BaseMarketDto>,
+    markets: List<MarketDisplayRow>,
     totalMarketsSize: Int,
     isExpanded: Boolean,
     onToggleExpand: () -> Unit
@@ -311,17 +296,12 @@ private fun MultiMarketContent(
 
     Column(modifier = Modifier.padding(bottom = 8.dp)) {
         markets.forEach { market ->
-            val price = market.yesPrice()
-
-            // Use groupItemTitle or question for text
-            val outcomeText = if(markets.size == 1) market.getYesTitle()
-                else market.getTitleOrDefault(market.question)
             // Use universal MarketRow
             MarketRow(
-                title = outcomeText,
-                price = price,
-                marketResolutionStatus = market.getResolutionStatus(),
-                resolvedOutcome = market.getResolvedOutcome()
+                title = market.title,
+                price = market.price,
+                marketResolutionStatus = market.resolutionStatus,
+                resolvedOutcome = market.resolvedOutcome
             )
         }
 
@@ -408,6 +388,7 @@ private fun OutcomeTextRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
+            modifier = Modifier.weight(1f, fill = false),
             text = title, // Show passed outcome text
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 2,
@@ -425,6 +406,7 @@ private fun OutcomeTextRow(
                 text = resolutionText,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
             )
         }
     }

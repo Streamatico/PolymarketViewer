@@ -6,60 +6,64 @@ import com.streamatico.polymarketviewer.BuildConfig
 import com.streamatico.polymarketviewer.data.preferences.UserPreferencesRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import java.util.Locale
 
-
-private const val ANALYTICS_ENDPOINT = "https://polymarket-ping.streamatico.workers.dev/ping"
-
-
+// Analytics service
+// Sends anonymous analytics with minimal technical information.
+// Helps to improve the app.
 class AnalyticsService(
     private val httpClient: HttpClient,
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val appScope: CoroutineScope
 ) {
-    /**
-     * Sends an anonymous ping to analytics endpoint with minimal technical information.
-     * Silently ignores all errors.
-     */
-    suspend fun sendPing() {
-        try {
-            // Check if analytics is enabled
-            val userPreferences = userPreferencesRepository.userPreferencesFlow.first()
-            if (!userPreferences.analyticsEnabled) {
-                return
-            }
+    companion object {
+        private const val TAG = "AnalyticsService"
+        private const val ANALYTICS_ENDPOINT = "https://polymarket-ping.streamatico.workers.dev/ping"
+    }
 
-            // Build parameters
+    fun track(event: AnalyticsEvent) {
+        appScope.launch {
+            sendEventRequest(event)
+        }
+    }
+
+    private suspend fun sendEventRequest(event: AnalyticsEvent) {
+        try {
+            val preferences = userPreferencesRepository.userPreferencesFlow.first()
+            if (!preferences.analyticsEnabled) return
+
             val version = BuildConfig.VERSION_NAME
             val sdk = Build.VERSION.SDK_INT
             val language = Locale.getDefault().language
             val buildType = if (BuildConfig.DEBUG) "debug" else "release"
-            val isFirstLaunch = userPreferences.isFirstLaunch
+            val isFirstLaunch = event.includeFirstLaunchFlag && preferences.isFirstLaunch
 
-            // Send GET request
             httpClient.get(ANALYTICS_ENDPOINT) {
                 url {
-                    parameters.append("event", "ping")
+                    parameters.append("event", event.wireName)
                     parameters.append("v", version)
                     parameters.append("sdk", sdk.toString())
                     parameters.append("lang", language)
                     parameters.append("build", buildType)
 
-                    // Only send first=true on first launch
                     if (isFirstLaunch) {
                         parameters.append("first", "true")
                     }
                 }
             }
 
-            // Mark first launch as completed after successful ping
             if (isFirstLaunch) {
                 userPreferencesRepository.setFirstLaunchCompleted()
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            // Silently ignore all errors - analytics should never affect app functionality
-            Log.e("AnalyticsService", "Failed to send ping", e)
+            // Analytics failures should never break app flow.
+            Log.e(TAG, "Failed to send ping", e)
         }
     }
 }
-

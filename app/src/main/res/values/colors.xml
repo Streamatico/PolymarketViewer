@@ -9,4 +9,14 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="app_brand_primary">#FF2B76FE</color>
+
+    <color name="widget_preview_container_bg">#FFF2F6FF</color>
+    <color name="widget_preview_container_stroke">#242B76FE</color>
+
+    <color name="widget_preview_text_primary">#FF101828</color>
+    <color name="widget_preview_text_secondary">#FF667085</color>
+    <color name="widget_preview_text_accent">#FF1D4ED8</color>
+
+    <color name="widget_preview_progress_track">#FFD0D5DD</color>
+    <color name="widget_preview_divider">#FFEAECF0</color>
 </resources>

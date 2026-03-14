@@ -1,6 +1,8 @@
 package com.streamatico.polymarketviewer.ui.event_detail
 
+import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -12,12 +14,20 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,6 +35,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -35,10 +46,9 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
-import com.streamatico.polymarketviewer.data.model.gamma_api.EventType
 import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
 import com.streamatico.polymarketviewer.ui.event_detail.components.EventChartSection
 import com.streamatico.polymarketviewer.ui.event_detail.components.eventCommentsSection
@@ -48,14 +58,15 @@ import com.streamatico.polymarketviewer.ui.event_detail.components.TranslateActi
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
-import com.streamatico.polymarketviewer.ui.shared.components.OpenInBrowserIconButton
 import com.streamatico.polymarketviewer.ui.shared.sortedByViewPriority
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.net.toUri
+import com.streamatico.polymarketviewer.ui.widget.EventWidgetPinRequester
+import kotlinx.coroutines.launch
 
 @Composable
 fun EventDetailScreen(
@@ -78,6 +89,7 @@ fun EventDetailScreen(
     // Collect the token map
     val eventOutcomeTokensMap by viewModel.eventOutcomeTokensMap.collectAsState()
     val eventTokenToGroupTitleMap by viewModel.eventTokenToGroupTitleMap.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     val isChartAvailable by viewModel.isChartAvailable.collectAsState()
 
@@ -87,8 +99,10 @@ fun EventDetailScreen(
         onMarketClick = onNavigateToMarketDetail,
         chartModelProducer = viewModel.chartModelProducer,
         isChartAvailable = isChartAvailable,
+        isRefreshing = isRefreshing,
         selectedRange = selectedTimeRange,
         onRangeSelected = viewModel::selectTimeRange,
+        onRefresh = viewModel::refreshEventDetails,
         onToggleWatchlist = viewModel::toggleWatchlist,
         // Pass hierarchical comments
         displayableComments = hierarchicalComments,
@@ -119,8 +133,10 @@ private fun EventDetailsContent(
     onMarketClick: (String) -> Unit,
     chartModelProducer: CartesianChartModelProducer,
     isChartAvailable: Boolean,
+    isRefreshing: Boolean,
     selectedRange: TimeRange,
     onRangeSelected: (TimeRange) -> Unit,
+    onRefresh: () -> Unit,
     onToggleWatchlist: () -> Unit,
 
     displayableComments: List<HierarchicalComment>,
@@ -157,13 +173,20 @@ private fun EventDetailsContent(
         topBar = {
             TopAppBar(
                 title = {
-                    // Show event title if scrolled past the main title, otherwise show "Event Details"
-                    val titleText = if (showTitleInAppBar && eventTitle != null) eventTitle else "Event Details"
+                    // Show event title if scrolled past the main title, otherwise show generic title.
+                    val titleText = if (showTitleInAppBar && eventTitle != null) {
+                        eventTitle
+                    } else {
+                        stringResource(R.string.event_details_title)
+                    }
                     Text(titleText, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.navigate_back)
+                        )
                     }
                 },
                 actions = {
@@ -178,19 +201,13 @@ private fun EventDetailsContent(
                         }
                     }
 
-                    // Translate Action - Use composable from TranslateAction.kt
                     TranslateAction(
                         isVisible = !isEnglishLocale && uiState is EventDetailUiState.Success,
                         event = (uiState as? EventDetailUiState.Success)?.event,
                     )
 
-                    // Open in Browser Action
                     if (uiState is EventDetailUiState.Success) {
-                        uiState.event.slug.let { slug ->
-                            OpenInBrowserIconButton(
-                                "https://polymarket.com/event/$slug"
-                            )
-                        }
+                        EventDetailMoreActions(event = uiState.event)
                     }
                 }
             )
@@ -206,32 +223,39 @@ private fun EventDetailsContent(
                 }
             }
             is EventDetailUiState.Success -> {
-                EventDetailsContentSuccess(
-                    listState = listState, // Pass listState down
-                    event = uiState.event,
-                    modifier = Modifier.padding(paddingValues),
-                    onMarketClick = onMarketClick,
-                    chartModelProducer = chartModelProducer,
-                    isChartAvailable = isChartAvailable,
-                    selectedRange = selectedRange,
-                    onRangeSelected = onRangeSelected,
-                    // Pass hierarchical comments
-                    displayableComments = displayableComments,
-                    // Pass other states/callbacks as before
-                    commentsLoading = commentsLoading,
-                    commentsError = commentsError,
-                    onNavigateToUserProfile = onNavigateToUserProfile,
-                    holdersOnly = holdersOnly,
-                    commentsSortOrder = commentsSortOrder,
-                    canLoadMoreComments = canLoadMoreComments,
-                    onToggleHoldersOnly = onToggleHoldersOnly,
-                    onCommentsSortOrderChange = onCommentsSortOrderChange,
-                    onLoadMoreComments = onLoadMoreComments,
-                    onRefreshComments = onRefreshComments,
-                    // Pass the token map
-                    eventOutcomeTokensMap = eventOutcomeTokensMap,
-                    eventTokenToGroupTitleMap = eventTokenToGroupTitleMap
-                )
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = onRefresh,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    EventDetailsContentSuccess(
+                        listState = listState, // Pass listState down
+                        event = uiState.event,
+                        onMarketClick = onMarketClick,
+                        chartModelProducer = chartModelProducer,
+                        isChartAvailable = isChartAvailable,
+                        selectedRange = selectedRange,
+                        onRangeSelected = onRangeSelected,
+                        // Pass hierarchical comments
+                        displayableComments = displayableComments,
+                        // Pass other states/callbacks as before
+                        commentsLoading = commentsLoading,
+                        commentsError = commentsError,
+                        onNavigateToUserProfile = onNavigateToUserProfile,
+                        holdersOnly = holdersOnly,
+                        commentsSortOrder = commentsSortOrder,
+                        canLoadMoreComments = canLoadMoreComments,
+                        onToggleHoldersOnly = onToggleHoldersOnly,
+                        onCommentsSortOrderChange = onCommentsSortOrderChange,
+                        onLoadMoreComments = onLoadMoreComments,
+                        onRefreshComments = onRefreshComments,
+                        // Pass the token map
+                        eventOutcomeTokensMap = eventOutcomeTokensMap,
+                        eventTokenToGroupTitleMap = eventTokenToGroupTitleMap
+                    )
+                }
             }
             is EventDetailUiState.Error -> {
                 Box(
@@ -252,7 +276,6 @@ private fun EventDetailsContent(
 private fun EventDetailsContentSuccess(
     listState: LazyListState, // Receive listState
     event: EventDto,
-    modifier: Modifier = Modifier,
     onMarketClick: (String) -> Unit,
     chartModelProducer: CartesianChartModelProducer,
     isChartAvailable: Boolean,
@@ -281,10 +304,13 @@ private fun EventDetailsContentSuccess(
     val sortedMarkets = remember(event.markets) {
          event.markets.sortedByViewPriority(event.sortByEnum)
     }
+    val isBinaryEvent = remember(event.markets) {
+        event.markets.size == 1 && event.markets.firstOrNull()?.isBinaryMarket == true
+    }
 
     LazyColumn(
         state = listState, // Use passed state
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
     ) {
         // Header (Title, Image, Description, Info)
@@ -308,7 +334,7 @@ private fun EventDetailsContentSuccess(
         // Event markets (outcomes)
         eventDetailMarketList(
             sortedMarkets = sortedMarkets,
-            showMarketImages = event.showMarketImages && event.eventType != EventType.BinaryEvent,
+            showMarketImages = event.showMarketImages && !isBinaryEvent,
             isMarketListExpanded = isMarketListExpanded,
             onMarketExpandToggle = {
                 isMarketListExpanded = !isMarketListExpanded
@@ -369,8 +395,10 @@ private fun EventDetailsContentPreviewTemplate(uiState: EventDetailUiState) {
             onMarketClick = { },
             chartModelProducer = PreviewMocks.previewChartModelProducer, // Use the mock producer
             isChartAvailable = true,
+            isRefreshing = false,
             selectedRange = TimeRange.D1,
             onRangeSelected = { },
+            onRefresh = { },
             onToggleWatchlist = { },
             displayableComments = PreviewMocks.sampleHierarchicalComments,
             commentsLoading = false,
@@ -391,7 +419,7 @@ private fun EventDetailsContentPreviewTemplate(uiState: EventDetailUiState) {
     }
 }
 
-@Preview(showBackground = true, name = "Event Detail - Success")
+@Preview(showBackground = true, name = "Event Detail - Success", locale = "fr" /* show translate action */)
 @Composable
 private fun EventDetailScreenPreviewSuccess() {
     EventDetailsContentPreviewTemplate(
@@ -411,6 +439,64 @@ private fun EventDetailScreenPreviewLoading() {
 @Composable
 private fun EventDetailScreenPreviewError() {
     EventDetailsContentPreviewTemplate(
-        uiState = EventDetailUiState.Error("Failed to load event data.")
+        uiState = EventDetailUiState.Error(stringResource(R.string.event_details_failed_to_load_preview))
     )
+}
+
+@Composable
+private fun EventDetailMoreActions(event: EventDto) {
+    var showMenu by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+
+    IconButton(onClick = { showMenu = true }) {
+        Icon(
+            imageVector = Icons.Filled.MoreVert,
+            contentDescription = stringResource(id = R.string.more_options_tooltip)
+        )
+    }
+
+    DropdownMenu(
+        expanded = showMenu,
+        onDismissRequest = { showMenu = false }
+    ) {
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(id = R.string.open_in_browser)) },
+            onClick = {
+                showMenu = false
+                val eventUrl = "https://polymarket.com/event/${event.slug}"
+                runCatching {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, eventUrl.toUri()))
+                }.onFailure { error ->
+                    Log.e("EventDetailMoreActions", "Failed to open URL: $eventUrl", error)
+                }
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(id = R.string.add_widget)) },
+            onClick = {
+                showMenu = false
+                coroutineScope.launch {
+                    val isPinned = EventWidgetPinRequester.requestPinWidget(context = context, event = event)
+                    if (!isPinned) {
+                        Toast.makeText(context, R.string.widget_pin_not_supported, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        )
+    }
 }

@@ -1,6 +1,7 @@
 package com.streamatico.polymarketviewer.ui.event_detail.components
 
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -18,31 +20,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
+import com.patrykandpatrick.vico.compose.cartesian.CartesianDrawingContext
+import com.patrykandpatrick.vico.compose.cartesian.CartesianMeasuringContext
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.common.Fill
+import com.patrykandpatrick.vico.compose.common.Insets
+import com.patrykandpatrick.vico.compose.common.Legend
+import com.patrykandpatrick.vico.compose.common.LegendItem
+import com.patrykandpatrick.vico.compose.common.component.ShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
-import com.patrykandpatrick.vico.compose.common.component.shapeComponent
-import com.patrykandpatrick.vico.compose.common.fill
-import com.patrykandpatrick.vico.compose.common.insets
 import com.patrykandpatrick.vico.compose.common.rememberHorizontalLegend
-import com.patrykandpatrick.vico.compose.common.vicoTheme
-import com.patrykandpatrick.vico.core.cartesian.CartesianDrawingContext
-import com.patrykandpatrick.vico.core.cartesian.CartesianMeasuringContext
-import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
-import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.core.common.Legend
-import com.patrykandpatrick.vico.core.common.LegendItem
-import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
 import com.streamatico.polymarketviewer.ui.event_detail.LegendLabelKey
 import com.streamatico.polymarketviewer.ui.event_detail.TimeRange
@@ -125,7 +124,7 @@ fun EventChartSection(
         val lineLayer = rememberLineCartesianLayer(
             LineCartesianLayer.LineProvider.series(
                 lineColors.map { color ->
-                    LineCartesianLayer.rememberLine(LineCartesianLayer.LineFill.single(fill(color)))
+                    LineCartesianLayer.rememberLine(LineCartesianLayer.LineFill.single(Fill(color)))
                 }
             ),
             rangeProvider = EventChartRangeProvider
@@ -172,7 +171,7 @@ fun EventChartSection(
 private fun rememberEventChartLegend(
     lineColors: List<Color>
 ) : Legend<CartesianMeasuringContext, CartesianDrawingContext> {
-    val legendItemLabelComponent = rememberTextComponent(vicoTheme.textColor)
+    val legendItemLabelComponent = rememberTextComponent(style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
 
     return rememberHorizontalLegend(
         items = { extraStore ->
@@ -182,14 +181,14 @@ private fun rememberEventChartLegend(
                 .forEachIndexed { index, orderedLabel ->
                     add(
                         LegendItem(
-                            shapeComponent(fill(lineColors[index]), CorneredShape.Pill),
+                            ShapeComponent(Fill(lineColors[index]), CircleShape),
                             legendItemLabelComponent,
                             orderedLabel.label,
                         )
                     )
                 }
         },
-        padding = insets(top = 16.dp),
+        padding = Insets(top = 16.dp),
     )
 }
 

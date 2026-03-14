@@ -55,6 +55,15 @@
     <string name="sort_option_competitive">Competitive</string>
     <string name="cd_selected">Selected</string>
 
+    <!-- Event Detail -->
+    <string name="event_details_title">Event Details</string>
+    <string name="event_details_failed_to_load_preview">Failed to load event data.</string>
+
+    <!-- Market Detail -->
+    <string name="market_details_title">Market Details</string>
+    <string name="market_details_loading_title">Loading Details…</string>
+    <string name="market_details_failed_to_load_preview">Failed to load market details.</string>
+
     <!-- Event Item -->
     <string name="volume_suffix">" Vol."</string>
     <string name="action_show_less">Show less</string>
@@ -66,4 +75,34 @@
         <item quantity="one">+ %d more outcome</item>
         <item quantity="other">+ %d more outcomes</item>
     </plurals>
+
+    <!-- Widget -->
+    <string name="widget_select_event">Select an event</string>
+    <string name="widget_loading">Updating…</string>
+    <string name="widget_status_open">● Open</string>
+    <string name="widget_status_closed">◯ Closed</string>
+    <string name="widget_updated_format">Updated %s</string>
+    <string name="widget_refresh">Refresh</string>
+    <string name="widget_refresh_short">Upd</string>
+    <string name="widget_description">Track a selected Polymarket event on your home screen.</string>
+    <string name="widget_more_format">+%d more</string>
+    <string name="widget_trend_up">Trend: bullish</string>
+    <string name="widget_trend_down">Trend: bearish</string>
+    <string name="widget_trend_flat">Trend: neutral</string>
+    <string name="widget_search_hint">Search events…</string>
+    <string name="widget_search_empty_message">Start typing to search events</string>
+    <string name="widget_search_no_results">No events found</string>
+
+    <string name="widget_preview_event_title">Will Bitcoin close above $120k by the end of 2026?</string>
+    <string name="widget_preview_event_updated_at">Updated 2:18 PM</string>
+    <string name="widget_preview_event_ends_at">Ends in 5d</string>
+    <string name="widget_preview_event_volume">$12.8M Vol.</string>
+    <string name="widget_preview_event_outcome_yes_value">64%</string>
+    <string name="widget_preview_event_outcome_no_value">36%</string>
+    <string name="widget_preview_event_outcome_yes">Yes</string>
+    <string name="widget_preview_event_outcome_no">No</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="add_widget">Add widget</string>
+    <string name="widget_pin_not_supported">Widget pinning is not supported on this launcher.</string>
+
 </resources>

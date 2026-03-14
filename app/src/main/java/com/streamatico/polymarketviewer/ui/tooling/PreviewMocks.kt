@@ -1,6 +1,6 @@
 package com.streamatico.polymarketviewer.ui.tooling
 
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.streamatico.polymarketviewer.data.model.gamma_api.CommentCreatorProfileDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.CommentDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.ProfilePositionDto
@@ -245,7 +245,7 @@ internal object PreviewMocks {
             demoOptimizedMarketDto("Will Mark Carney be the next Canadian Prime Minister?", "m1-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.77, 0.23), groupItemTitle = "Mark Carney"),
             demoOptimizedMarketDto("Will Pierre Poilievre be the next Canadian Prime Minister?", "m2-slug", active = true, closed = true, listOf("Yes", "No"), listOf(0.24, 0.76), groupItemTitle = "Pierre Poilievre"),
             demoOptimizedMarketDto("Will Jagmeet Singh be the next Canadian Prime Minister?", "m3-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.01, 0.99), groupItemTitle = "Jagmeet Singh", umaResolutionStatus = "resolved"),
-            demoOptimizedMarketDto("Will Someone Else be the next Canadian Prime Minister?", "m4-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.01, 0.99), groupItemTitle = "Someone Else"),
+            demoOptimizedMarketDto("Will Someone Else be the next Canadian Prime Minister?", "m4-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.01, 0.99), groupItemTitle = "Someone Else Very long text 0123456789", umaResolutionStatus = "resolved"),
             //demoOptimizedMarketDto("Will Yet Another Candidate be the next Canadian Prime Minister?", "m5-slug", active = true, closed = false, listOf("Yes", "No"), listOf(0.00, 1.00), groupItemTitle = "Yet Another Candidate")
         )
     )

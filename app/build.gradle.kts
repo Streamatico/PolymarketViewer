@@ -138,6 +138,16 @@ dependencies {
 
     // User Preferences storage
     implementation(libs.androidx.data.store)
+    implementation(libs.androidx.glance)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
+    implementation(libs.androidx.work.runtime)
+
+    // Preview support for Glance widgets in Android Studio.
+    debugImplementation(libs.androidx.glance.preview)
+    debugImplementation(libs.androidx.glance.appwidget.preview)
+    releaseCompileOnly(libs.androidx.glance.preview)
+    releaseCompileOnly(libs.androidx.glance.appwidget.preview)
 
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)

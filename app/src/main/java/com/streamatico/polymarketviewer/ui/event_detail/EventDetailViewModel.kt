@@ -3,9 +3,9 @@ package com.streamatico.polymarketviewer.ui.event_detail
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
-import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import com.streamatico.polymarketviewer.data.model.clob_api.TimeseriesPointDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.CommentDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
@@ -43,6 +43,9 @@ class EventDetailViewModel(
     // --- Event Details State --- //
     private val _uiState = MutableStateFlow<EventDetailUiState>(EventDetailUiState.Loading)
     val uiState: StateFlow<EventDetailUiState> = _uiState.asStateFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     // --- Watchlist State --- //
     val isInWatchlist: StateFlow<Boolean> = combine(
@@ -104,11 +107,18 @@ class EventDetailViewModel(
         loadEventDetailsAndInitialData()
     }
 
-    private fun loadEventDetailsAndInitialData() {
+    private fun loadEventDetailsAndInitialData(isManualRefresh: Boolean = false) {
+        if (isManualRefresh && _isRefreshing.value) return
+
         viewModelScope.launch {
-            _uiState.value = EventDetailUiState.Loading
-            _eventOutcomeTokensMap.value = emptyMap() // Reset maps
-            _eventTokenToGroupTitleMap.value = emptyMap()
+            if (isManualRefresh) {
+                _isRefreshing.value = true
+            } else {
+                _uiState.value = EventDetailUiState.Loading
+                _eventOutcomeTokensMap.value = emptyMap() // Reset maps
+                _eventTokenToGroupTitleMap.value = emptyMap()
+            }
+
             val eventResult = polymarketRepository.getEventDetailsBySlug(eventSlug)
 
             eventResult.onSuccess {
@@ -121,7 +131,15 @@ class EventDetailViewModel(
                 loadChartData(_selectedTimeRange.value)
                 refreshComments()
             }.onFailure {
-                _uiState.value = EventDetailUiState.Error(it.message ?: "Failed to load event details")
+                if (isManualRefresh && _uiState.value is EventDetailUiState.Success) {
+                    Log.e(TAG, "Failed to refresh event details for event $eventSlug", it)
+                } else {
+                    _uiState.value = EventDetailUiState.Error(it.message ?: "Failed to load event details")
+                }
+            }
+
+            if (isManualRefresh) {
+                _isRefreshing.value = false
             }
         }
     }
@@ -336,6 +354,10 @@ class EventDetailViewModel(
             // If only comments failed, retry refreshing comments
             refreshComments()
         }
+    }
+
+    fun refreshEventDetails() {
+        loadEventDetailsAndInitialData(isManualRefresh = true)
     }
 
     private data class InternalMarketTimeseries(
