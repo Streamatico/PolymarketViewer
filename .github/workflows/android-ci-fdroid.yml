@@ -22,7 +22,7 @@ jobs:
     name: Run Tests
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Set up Java and Gradle
       uses: ./.github/actions/setup-gradle-java
@@ -41,7 +41,7 @@ jobs:
     needs: test
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Set up Java and Gradle
       uses: ./.github/actions/setup-gradle-java
@@ -50,7 +50,7 @@ jobs:
       run: ./gradlew assembleRelease
 
     - name: Upload release APK (unsigned)
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: app-release-unsigned
         path: app/build/outputs/apk/release/app-release-unsigned.apk
@@ -62,17 +62,17 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && inputs.release == true
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Download unsigned APK
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: app-release-unsigned
         path: app/build/outputs/apk/release
 
     - name: Sign APK
       id: sign_apk
-      uses: ilharp/sign-android-release@v1
+      uses: ilharp/sign-android-release@v2
       with:
         releaseDir: app/build/outputs/apk/release
         signingKey: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
