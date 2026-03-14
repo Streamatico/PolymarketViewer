@@ -8,7 +8,6 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.OutOfQuotaPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
@@ -37,7 +36,8 @@ internal object EventWidgetUpdater {
 
     fun enqueueImmediate(context: Context) {
         val request = OneTimeWorkRequestBuilder<EventWidgetWorker>()
-            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            // Keep this non-expedited: expedited CoroutineWorker may require
+            // foreground info on older Android versions and fail initial widget load.
             .build()
 
         WorkManager.getInstance(context).enqueueUniqueWork(
