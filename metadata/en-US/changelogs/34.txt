@@ -1,0 +1,5 @@
+- Added home screen widget support with in-app pinning and event selection
+- Added widget tap-to-open navigation to Event Details with improved open handling
+- Added pull-to-refresh for Event Details and Market Details screens
+- Fix: Improved EventList item layout for long outcome titles
+- Updated dependencies and build tooling
