@@ -22,7 +22,7 @@ Android app for convenient Polymarket market browsing, including home screen wid
 *   📊 Display interactive price history charts for event markets
 *   💬 Read comments with hierarchical threading and holder filtering
 *   👤 Open user profiles with positions and activity history
-*   🆕🧩 NEW: Add a selected event as a home screen widget directly from event details
+*   🧩 NEW: Add a selected event as a home screen widget directly from event details
 *   🔄 Open event details from the widget, refresh manually, and receive periodic background updates
 *   🎨 Adaptive card layouts with Material 3 dynamic theming
 *   📄 Pagination for loading more events and comments
