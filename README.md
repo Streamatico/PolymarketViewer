@@ -1,6 +1,7 @@
 # Polymarket Viewer
 
-Android app for convenient Polymarket market browsing, including home screen widget support. Built with Jetpack Compose and modern Android practices following Clean Architecture.
+Android app for convenient Polymarket market browsing, including home screen widget support.<br>
+Built with Jetpack Compose and modern Android practices following Clean Architecture.
 
 ## Screenshots
 
