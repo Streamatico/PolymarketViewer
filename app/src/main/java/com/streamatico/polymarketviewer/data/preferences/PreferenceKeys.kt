@@ -1,7 +1,6 @@
 package com.streamatico.polymarketviewer.data.preferences
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.intPreferencesKey
 
 object PreferenceKeys {
     // Analytics opt-out setting (enabled by default)

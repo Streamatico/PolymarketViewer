@@ -40,7 +40,9 @@ class AnalyticsService(
             val sdk = Build.VERSION.SDK_INT
             val language = Locale.getDefault().language
             val buildType = if (BuildConfig.DEBUG) "debug" else "release"
-            val isFirstLaunch = event.includeFirstLaunchFlag && preferences.isFirstLaunch
+            val isFirstLaunch =
+                if (event is AnalyticsEvent.AppLaunched) preferences.isFirstLaunch
+                else false
 
             httpClient.get(ANALYTICS_ENDPOINT) {
                 url {
@@ -56,7 +58,7 @@ class AnalyticsService(
                 }
             }
 
-            if (isFirstLaunch) {
+            if (event == AnalyticsEvent.AppLaunched && isFirstLaunch) {
                 userPreferencesRepository.setFirstLaunchCompleted()
             }
         } catch (e: CancellationException) {

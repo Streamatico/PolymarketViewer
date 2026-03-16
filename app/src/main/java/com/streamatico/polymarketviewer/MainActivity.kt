@@ -8,21 +8,24 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-
+import androidx.compose.ui.Modifier
+import com.streamatico.polymarketviewer.data.analytics.AnalyticsEvent
+import com.streamatico.polymarketviewer.data.analytics.AnalyticsService
 import com.streamatico.polymarketviewer.ui.navigation.AppNavigation
 import com.streamatico.polymarketviewer.ui.navigation.WidgetOpenCoordinator
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
-
-
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
 
+    private val analyticsService: AnalyticsService by inject()
+
     companion object {
         const val EXTRA_EVENT_SLUG = "extra_event_slug"
+        private var firstLaunchTracked = false
     }
 
     private val widgetOpenCoordinator = WidgetOpenCoordinator()
@@ -30,6 +33,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        trackAppLaunched()
 
         widgetOpenCoordinator.onWidgetIntentSlug(intent?.getStringExtra(EXTRA_EVENT_SLUG))
 
@@ -58,5 +62,13 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         widgetOpenCoordinator.onWidgetIntentSlug(intent.getStringExtra(EXTRA_EVENT_SLUG))
+    }
+
+    private fun trackAppLaunched() {
+        // Track only once per app launch
+        if (!firstLaunchTracked) {
+            firstLaunchTracked = true
+            analyticsService.track(AnalyticsEvent.AppLaunched)
+        }
     }
 }
