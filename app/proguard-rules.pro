@@ -63,3 +63,9 @@
 
 # Navigation 3 NavKey classes
 -keep class com.streamatico.polymarketviewer.ui.navigation.** { *; }
+
+# Glance widget actions: ActionCallback is instantiated at runtime.
+# Keep implementations and their public zero-arg constructors in minified builds.
+-keep class * implements androidx.glance.appwidget.action.ActionCallback {
+    public <init>();
+}
