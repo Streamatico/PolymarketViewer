@@ -15,18 +15,22 @@ Built with Jetpack Compose and modern Android practices following Clean Architec
 
 ## Features
 
-*   📊 Browse active prediction market events from Polymarket.com
-*   🔍 Filter by category and search events by keywords
-*   ⭐ Save events to a watchlist for quick access
-*   📈 Sort events by various criteria (Volume 24h/All Time, Liquidity, Newest, Ending Soon, Competitive)
-*   📋 View detailed event information with description, outcomes, markets, and volume data
-*   📊 Display interactive price history charts for event markets
-*   💬 Read comments with hierarchical threading and holder filtering
-*   👤 Open user profiles with positions and activity history
-*   🧩 NEW: Add a selected event as a home screen widget directly from event details
-*   🔄 Open event details from the widget, refresh manually, and receive periodic background updates
-*   🎨 Adaptive card layouts with Material 3 dynamic theming
-*   📄 Pagination for loading more events and comments
+### Discover
+
+*   📊 Browse active prediction market events
+*   🔍 Search, filter, and sort with key metrics
+*   ⭐ Save favorite events to your watchlist
+
+### Analyze
+
+*   📋 View event details, outcomes, markets, and volume
+*   📈 Explore interactive market price history charts
+*   💬 Read threaded comments and open user profiles
+
+### Widget
+
+*   🧩 Add selected events as home screen widgets
+*   🔄 Open from widget and refresh manually or periodically
 
 ## Download
 
