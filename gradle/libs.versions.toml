@@ -1,7 +1,7 @@
 [versions]
 agp = "9.1.0"
 
-kotlin = "2.3.10"
+kotlin = "2.3.20"
 
 coreKtx = "1.18.0"
 #junit = "4.13.2"
@@ -12,21 +12,21 @@ espressoCore = "3.7.0"
 activityCompose = "1.13.0"
 datastore = "1.2.1"
 
-composeBom = "2026.03.00"
+composeBom = "2026.03.01"
 
 lifecycleVersion = "2.10.0"
-nav3Core = "1.0.1"
+nav3Core = "1.1.0"
 
 coil = "3.4.0"
 coroutines = "1.10.2"
-vico = "3.0.3"
+vico = "3.1.0"
 glance = "1.2.0-rc01"
-work = "2.11.1"
+work = "2.11.2"
 
-ktor = "3.4.1"  # Ktor version
-kotlinx-serialization = "1.10.0" # Kotlinx Serialization version
+ktor = "3.4.2"  # Ktor version
+kotlinx-serialization = "1.11.0" # Kotlinx Serialization version
 
-koin = "4.1.1"
+koin = "4.2.1"
 
 
 
