@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.data_api.UserActivityDto
-import com.streamatico.polymarketviewer.ui.shared.ComposableUiFormatter
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.TrendText
 import com.streamatico.polymarketviewer.ui.tooling.ProfilePreviewMocks
@@ -105,7 +104,7 @@ internal fun UserActivityItem(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
 
-                val relativeTime = ComposableUiFormatter.formatRelativeTime(userActivity.timestamp)
+                val relativeTime = UiFormatter.formatRelativePastTime(userActivity.timestamp)
                 Text(
                     text = relativeTime,
                     style = MaterialTheme.typography.bodyMedium,

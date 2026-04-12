@@ -39,7 +39,6 @@ import com.streamatico.polymarketviewer.data.model.gamma_api.PolymarketUserProfi
 import com.streamatico.polymarketviewer.data.model.gamma_api.ProfilePositionDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.getDisplayName
 import com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment
-import com.streamatico.polymarketviewer.ui.shared.ComposableUiFormatter
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.ProfileIcon
 import com.streamatico.polymarketviewer.ui.theme.ExtendedTheme
@@ -230,7 +229,7 @@ private fun CommentContent(
                 Row(verticalAlignment = Alignment.CenterVertically) { // Row for timestamp and reactions
                     comment.createdAt?.let {
                         Text(
-                            ComposableUiFormatter.formatRelativeTime(it),
+                            UiFormatter.formatRelativePastTime(it),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.outline
                         )

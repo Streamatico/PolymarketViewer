@@ -16,7 +16,7 @@ import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.toDisplayRows
 import com.streamatico.polymarketviewer.ui.shared.totalDisplayRowsCount
 import java.io.File
-import java.time.Instant
+import java.time.OffsetDateTime
 
 internal object EventWidgetSnapshotBuilder {
     suspend fun build(
@@ -47,17 +47,16 @@ internal object EventWidgetSnapshotBuilder {
         val rows: List<EventWidgetRow> = buildRows(event)
         val totalRowsCount = buildTotalRowsCount(event)
 
-        val endDateEpochMs = event.endDate?.toInstant()?.toEpochMilli()
-
         return EventWidgetSnapshot(
             eventId = event.id,
             eventSlug = event.slug,
             eventTitle = event.title,
             eventType = event.eventType,
+            active = event.active,
             closed = event.closed,
             volume = event.volume,
-            updatedAtEpochMs = Instant.now().toEpochMilli(),
-            endDateEpochMs = endDateEpochMs,
+            updatedAt = OffsetDateTime.now(),
+            endDate = event.endDate,
             rows = rows,
             totalRowsCount = totalRowsCount,
             imageCachePath = imageCachePath

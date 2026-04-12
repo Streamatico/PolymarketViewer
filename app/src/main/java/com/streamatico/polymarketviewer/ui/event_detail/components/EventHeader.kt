@@ -20,12 +20,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
@@ -128,26 +130,43 @@ fun EventHeader(
         ) {
             event.volume?.let {
                 InfoRow(label = "Total Volume", value = UiFormatter.formatLargeValueUsd(it))
-                Spacer(Modifier.height(8.dp))
+                EventHeaderHorizontalSpacer()
             }
             event.category?.let {
                 InfoRow(label = "Category", value = it)
-                Spacer(Modifier.height(8.dp))
+                EventHeaderHorizontalSpacer()
             }
             event.startDate?.let {
                 InfoRow(label = "Starts", value = UiFormatter.formatDateTimeLong(it))
-                Spacer(Modifier.height(8.dp))
+                EventHeaderHorizontalSpacer()
             }
             event.endDate?.let {
-                InfoRow(label = "Ends", value = UiFormatter.formatDateTimeLong(it))
-                Spacer(Modifier.height(8.dp))
+                InfoRow(label = "Ends (estimated)", value = UiFormatter.formatDateTimeLong(it))
+                EventHeaderHorizontalSpacer()
             }
+
+            InfoRow(label = "Status", value = getEventStatusText(event))
+            EventHeaderHorizontalSpacer()
+
             event.resolutionSource?.takeIf { it.isNotBlank() }?.let {
                 InfoRow(label = "Resolution Source", value = it)
             }
         }
     }
 }
+
+@Composable
+private fun EventHeaderHorizontalSpacer() {
+    Spacer(Modifier.height(8.dp))
+}
+
+@Composable
+private fun getEventStatusText(event: EventDto): String {
+    if (event.closed) return stringResource(R.string.event_state_closed)
+    if (event.active) return stringResource(R.string.event_state_active)
+    return stringResource(R.string.event_state_inactive)
+}
+
 
 @Composable
 private fun InfoRow(label: String, value: String) {

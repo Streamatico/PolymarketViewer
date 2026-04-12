@@ -229,7 +229,7 @@ fun MarketDetailsContent(market: MarketDto, modifier: Modifier = Modifier) {
                         Spacer(Modifier.height(8.dp))
                     }
                     market.endDate?.let {
-                        InfoRow(label = "Ends", value = UiFormatter.formatDateTimeLong(it))
+                        InfoRow(label = "Ends (estimated)", value = UiFormatter.formatDateTimeLong(it))
                         Spacer(Modifier.height(8.dp))
                     }
                     market.umaResolutionStatus?.let {

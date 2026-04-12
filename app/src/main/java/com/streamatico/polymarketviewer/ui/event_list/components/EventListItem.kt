@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,7 +45,7 @@ import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.BaseEventDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.MarketResolutionStatus
 import com.streamatico.polymarketviewer.domain.model.EventType
-import com.streamatico.polymarketviewer.ui.shared.ComposableUiFormatter
+import com.streamatico.polymarketviewer.ui.shared.MarketBadgeState
 import com.streamatico.polymarketviewer.ui.shared.MarketDisplayRow
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.toDisplayRows
@@ -171,14 +172,16 @@ fun EventListItem(
 
                     Spacer(modifier = Modifier.weight(1f)) // Push end date to the right
 
-                    // End Date/Time Remaining on the right
-                    val (endDateText, hasEnded) = ComposableUiFormatter.formatTimeRemainingOrDate(
-                        event.endDate
+                    // Badge status on the right
+                    val badgeState = MarketBadgeState.from(
+                        active = event.active,
+                        closed = event.closed,
+                        endDate = event.endDate
                     )
                     Text(
-                        text = endDateText,
+                        text = badgeState.toEventListBadgeText(),
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (hasEnded) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
+                        color = badgeState.toEventListBadgeColor(),
                         textAlign = TextAlign.End // Align text to the end
                     )
                 }
@@ -199,6 +202,20 @@ fun EventListItem(
             }
         }
     }
+}
+
+@Composable
+private fun MarketBadgeState.toEventListBadgeText(): String {
+    return UiFormatter.getMarketBadgeText(LocalContext.current, this)
+}
+
+@Composable
+private fun MarketBadgeState.toEventListBadgeColor() = when (this) {
+    MarketBadgeState.Resolved -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
+    MarketBadgeState.Locked -> MaterialTheme.colorScheme.error
+    MarketBadgeState.Resolving,
+    is MarketBadgeState.ActiveEndsOnDate,
+    MarketBadgeState.Unknown -> MaterialTheme.colorScheme.outline
 }
 
 // --- Composable for "Binary market" style --- //

@@ -7,7 +7,6 @@
     <string name="filter_tooltip">Sort Options</string>
     <string name="search_tooltip">Search</string>
     <string name="more_options_tooltip">More options</string>
-    <string name="app_logo_content_description">App Logo</string>
     <string name="developed_by">Developed by</string>
     <string name="about_data_source_title">Data Source</string>
     <string name="about_data_source_text">This is an unofficial application that displays publicly available data from the Polymarket platform (polymarket.com).</string>
@@ -65,9 +64,22 @@
     <string name="market_details_failed_to_load_preview">Failed to load market details.</string>
 
     <!-- Event Item -->
+    <string name="event_state_active">Active</string>
+    <string name="event_state_inactive">Inactive</string>
+    <string name="event_state_closed">Closed</string>
+
     <string name="volume_suffix">" Vol."</string>
     <string name="action_show_less">Show less</string>
     <string name="error_no_market_data">No market data available</string>
+    <string name="market_badge_resolved">Resolved</string>
+    <string name="market_badge_locked">Locked</string>
+    <string name="market_badge_resolving">Resolving</string>
+    <string name="market_badge_ends_in_less_than_minute">Ends in &lt;1m</string>
+    <string name="market_badge_ends_in_minutes">Ends in %1$dm</string>
+    <string name="market_badge_ends_in_hours">Ends in %1$dh</string>
+    <string name="market_badge_ends_in_days">Ends in %1$dd</string>
+    <string name="market_badge_ends_on_date">Ends %1$s</string>
+    <string name="market_badge_unknown">Unknown</string>
     <string name="status_disputed">(Disputed)</string>
     <string name="status_resolved">(Resolved)</string>
 
@@ -79,19 +91,12 @@
     <!-- Widget -->
     <string name="widget_select_event">Select an event</string>
     <string name="widget_loading">Updating…</string>
-    <string name="widget_status_open">● Open</string>
-    <string name="widget_status_closed">◯ Closed</string>
     <string name="widget_updated_format">Updated %s</string>
-    <string name="widget_refresh">Refresh</string>
-    <string name="widget_refresh_short">Upd</string>
     <string name="widget_description">Track a selected Polymarket event on your home screen.</string>
-    <string name="widget_more_format">+%d more</string>
-    <string name="widget_trend_up">Trend: bullish</string>
-    <string name="widget_trend_down">Trend: bearish</string>
-    <string name="widget_trend_flat">Trend: neutral</string>
-    <string name="widget_search_hint">Search events…</string>
-    <string name="widget_search_empty_message">Start typing to search events</string>
-    <string name="widget_search_no_results">No events found</string>
+    <plurals name="widget_more_count">
+        <item quantity="one">+%d more</item>
+        <item quantity="other">+%d more</item>
+    </plurals>
 
     <string name="widget_preview_event_title">Will Bitcoin close above $120k by the end of 2026?</string>
     <string name="widget_preview_event_updated_at">Updated 2:18 PM</string>

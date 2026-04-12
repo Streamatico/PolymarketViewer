@@ -2,6 +2,7 @@ package com.streamatico.polymarketviewer.ui.widget
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -45,6 +46,7 @@ import androidx.glance.text.TextStyle
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.MarketResolutionStatus
 import com.streamatico.polymarketviewer.domain.model.EventType
+import com.streamatico.polymarketviewer.ui.shared.MarketBadgeState
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.widget.components.WidgetHorizontalDivider
 import com.streamatico.polymarketviewer.ui.widget.components.WidgetTitleBar
@@ -52,6 +54,7 @@ import com.streamatico.polymarketviewer.ui.widget.theme.PolymarketGlanceTheme
 import com.streamatico.polymarketviewer.ui.widget.tooling.WidgetPreviewMocks
 import java.time.Duration
 import java.time.Instant
+import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -135,8 +138,15 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
         ?: selection?.eventTitle
         ?: context.getString(R.string.widget_select_event)
     val volumeText = UiFormatter.formatLargeValueUsd(snapshot?.volume ?: 0.0, suffix = " Vol.")
-    val endDateText = snapshot?.let { formatEndDateLabel(context, it.endDateEpochMs, it.closed) }
-    val updatedText = formatUpdatedLabel(context, snapshot?.updatedAtEpochMs)
+    val badgeState = snapshot?.let {
+        MarketBadgeState.from(
+            active = it.active,
+            closed = it.closed,
+            endDate = it.endDate
+        )
+    }
+    val badgeText = badgeState?.let { UiFormatter.getMarketBadgeText(context, it) }
+    val updatedText = formatUpdatedLabel(context, snapshot?.updatedAt)
 
     val clickAction = if (state.disableInteractions) {
         null
@@ -146,6 +156,16 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
 
     val themeColors = GlanceTheme.colors
     val secondaryStyle = TextStyle(color = themeColors.onSurfaceVariant)
+    val badgeStyle = TextStyle(
+        color = when (badgeState) {
+            MarketBadgeState.Resolved -> themeColors.onSurfaceVariant
+            MarketBadgeState.Locked -> themeColors.error
+            MarketBadgeState.Resolving,
+            is MarketBadgeState.ActiveEndsOnDate,
+            MarketBadgeState.Unknown,
+            null -> themeColors.onSurfaceVariant
+        }
+    )
 
     val widgetBackgroundColor = themeColors.surface
 
@@ -217,12 +237,12 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
                         //Text(text = sizeClass.toString(), maxLines = 1, style = secondaryStyle)
                     }
 
-                    // Row 2: End Date (left), Updated time (right)
-                    if (endDateText != null || updatedText != null) {
+                    // Row 2: Status badge (left), Updated time (right)
+                    if (badgeText != null || updatedText != null) {
                         Spacer(modifier = GlanceModifier.height(2.dp))
                         Row(modifier = GlanceModifier.fillMaxWidth()) {
-                            endDateText?.let {
-                                Text(text = it, maxLines = 1, style = secondaryStyle)
+                            badgeText?.let {
+                                Text(text = it, maxLines = 1, style = badgeStyle)
                             }
                             Spacer(modifier = GlanceModifier.defaultWeight())
                             updatedText?.let {
@@ -267,7 +287,7 @@ private fun MultiRowEventContent(
         Text(
             modifier = GlanceModifier
                 .fillMaxWidth(),
-            text = glanceStringResource(R.string.widget_more_format, remaining),
+            text = glancePluralResource(R.plurals.widget_more_count, remaining, remaining),
             style = TextStyle(
                 color = themeColors.onSurfaceVariant,
                 fontWeight = FontWeight.Medium,
@@ -387,8 +407,8 @@ private fun glanceStringResource(@StringRes id: Int): String =
 
 @Composable
 @ReadOnlyComposable
-private fun glanceStringResource(@StringRes id: Int, vararg formatArgs: Any): String =
-    LocalContext.current.getString(id, *formatArgs)
+private fun glancePluralResource(@PluralsRes id: Int, quantity: Int, vararg formatArgs: Any): String =
+    LocalContext.current.resources.getQuantityString(id, quantity, *formatArgs)
 
 private fun calculateRowLimit(
     height: Dp,
@@ -420,16 +440,15 @@ private fun resolveSizeClass(height: Dp): WidgetSizeClass {
     }
 }
 
-private fun formatUpdatedLabel(context: Context, updatedAtEpochMs: Long?): String? {
-    if (updatedAtEpochMs == null) return null
-    val instant = Instant.ofEpochMilli(updatedAtEpochMs)
-    val duration = Duration.between(instant, Instant.now())
+private fun formatUpdatedLabel(context: Context, updatedAt: OffsetDateTime?): String? {
+    if (updatedAt == null) return null
+    val duration = Duration.between(updatedAt.toInstant(), Instant.now())
     val minutes = max(1, duration.toMinutes())
 
     val value = if (minutes < 60 * 24) {
-        val locale = ConfigurationCompat.getLocales(context.resources.configuration)[0] ?: Locale.getDefault()
+        val locale = context.getCurrentLocale()
         val formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)
-        instant.atZone(ZoneId.systemDefault()).format(formatter)
+        updatedAt.atZoneSameInstant(ZoneId.systemDefault()).format(formatter)
     } else {
         "${minutes / (60 * 24)}d"
     }
@@ -437,47 +456,8 @@ private fun formatUpdatedLabel(context: Context, updatedAtEpochMs: Long?): Strin
     return context.getString(R.string.widget_updated_format, value)
 }
 
-private fun formatEndDateLabel(context: Context, endDateEpochMs: Long?, closed: Boolean): String? {
-    if (endDateEpochMs == null) return null
-
-    val endInstant = Instant.ofEpochMilli(endDateEpochMs)
-    val endDateTime = endInstant.atZone(ZoneId.systemDefault())
-    val now = Instant.now().atZone(ZoneId.systemDefault())
-    val duration = Duration.between(now.toInstant(), endInstant)
-
-    // If event already ended/closed
-    if (closed || duration.isNegative) {
-        val daysSinceEnd = kotlin.math.abs(duration.toDays())
-        return when {
-            daysSinceEnd == 0L -> "Ended today"
-            daysSinceEnd == 1L -> "Ended yesterday"
-            daysSinceEnd < 7 -> "Ended ${daysSinceEnd}d ago"
-            else -> {
-                val locale = ConfigurationCompat.getLocales(context.resources.configuration)[0] ?: Locale.getDefault()
-                val formatter = DateTimeFormatter.ofPattern("MMM d", locale)
-                "Ended ${endDateTime.format(formatter)}"
-            }
-        }
-    }
-
-    // Event is active - show remaining time or date
-    val hours = duration.toHours()
-    val days = duration.toDays()
-
-    return when {
-        hours < 1 -> "Ends in <1h"
-        hours < 24 -> "Ends in ${hours}h"
-        days < 7 -> "Ends in ${days}d"
-        else -> {
-            val locale = ConfigurationCompat.getLocales(context.resources.configuration)[0] ?: Locale.getDefault()
-            val formatter = if (endDateTime.year == now.year) {
-                DateTimeFormatter.ofPattern("MMM d", locale)
-            } else {
-                DateTimeFormatter.ofPattern("MMM d, yyyy", locale)
-            }
-            "Ends ${endDateTime.format(formatter)}"
-        }
-    }
+private fun Context.getCurrentLocale(): Locale {
+    return ConfigurationCompat.getLocales(this.resources.configuration)[0] ?: Locale.getDefault()
 }
 
 private data class WidgetPinPreviewState(

@@ -1,11 +1,16 @@
+@file:UseSerializers(OffsetDateTimeSerializer::class)
+
 package com.streamatico.polymarketviewer.ui.widget
 
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.streamatico.polymarketviewer.data.model.gamma_api.MarketResolutionStatus
+import com.streamatico.polymarketviewer.data.serializers.OffsetDateTimeSerializer
 import com.streamatico.polymarketviewer.domain.model.EventType
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import kotlinx.serialization.json.Json
+import java.time.OffsetDateTime
 
 internal val EVENT_ID_KEY = stringPreferencesKey("widget_event_id")
 internal val EVENT_SLUG_KEY = stringPreferencesKey("widget_event_slug")
@@ -26,10 +31,11 @@ internal data class EventWidgetSnapshot(
     val eventSlug: String,
     val eventTitle: String,
     val eventType: EventType,
+    val active: Boolean = true,
     val closed: Boolean,
     val volume: Double?,
-    val updatedAtEpochMs: Long,
-    val endDateEpochMs: Long? = null,  // End date of the event (when it closes/ends)
+    val updatedAt: OffsetDateTime? = null, // null for backward compatibility
+    val endDate: OffsetDateTime? = null,
     val rows: List<EventWidgetRow>,
     val totalRowsCount: Int = 0,
     val imageCachePath: String? = null
