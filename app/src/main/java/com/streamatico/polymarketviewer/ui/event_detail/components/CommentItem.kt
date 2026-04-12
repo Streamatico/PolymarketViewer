@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -173,6 +174,7 @@ private fun CommentContent(
     isExpanded: Boolean,
     onToggleReplies: () -> Unit
 ) {
+    val context = LocalContext.current
     val userProfile = comment.profile
 
     Column(modifier = modifier) {
@@ -229,7 +231,7 @@ private fun CommentContent(
                 Row(verticalAlignment = Alignment.CenterVertically) { // Row for timestamp and reactions
                     comment.createdAt?.let {
                         Text(
-                            UiFormatter.formatRelativePastTime(it),
+                            UiFormatter.formatRelativePastTime(context = context, dateTime = it),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.outline
                         )

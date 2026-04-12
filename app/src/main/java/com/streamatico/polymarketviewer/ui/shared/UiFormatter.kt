@@ -1,6 +1,7 @@
 package com.streamatico.polymarketviewer.ui.shared
 
 import android.content.Context
+import android.text.format.DateFormat
 import android.util.Log
 import androidx.core.os.ConfigurationCompat
 import com.streamatico.polymarketviewer.R
@@ -21,14 +22,17 @@ internal object UiFormatter {
     private val DAY_IN_SECONDS = Duration.ofDays(1).seconds
     private val WEEK_IN_SECONDS = Duration.ofDays(7).seconds
 
+    private const val SKELETON_MONTH_DAY = "MMMd"
+    private const val SKELETON_MONTH_DAY_YEAR = "yMMMd"
+
     fun formatDateTimeLong(dateTime: OffsetDateTime): String {
         val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
         return dateTime.format(formatter)
     }
 
-    // Format like: 12 Oct 2024
+    // Locale-aware date-only formatting (example in en: Oct 12, 2024)
     fun formatDateOnly(dateTime: OffsetDateTime): String {
-        val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
+        val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
         return dateTime.format(formatter)
     }
 
@@ -127,20 +131,32 @@ internal object UiFormatter {
     }
 
     fun formatRelativePastTime(
+        context: Context,
         dateTime: OffsetDateTime,
         now: OffsetDateTime = OffsetDateTime.now(dateTime.offset),
         locale: Locale = Locale.getDefault()
     ): String {
-        val durationSeconds = ChronoUnit.SECONDS.between(dateTime, now)
+        val durationSeconds = ChronoUnit.SECONDS.between(dateTime, now).coerceAtLeast(0)
 
         return when {
-            durationSeconds < 0 -> "0s ago"
-            durationSeconds < MINUTE_IN_SECONDS -> "${durationSeconds}s ago"
-            durationSeconds < HOUR_IN_SECONDS -> "${durationSeconds / MINUTE_IN_SECONDS}m ago"
-            durationSeconds < DAY_IN_SECONDS -> "${durationSeconds / HOUR_IN_SECONDS}h ago"
-            durationSeconds < WEEK_IN_SECONDS -> "${durationSeconds / DAY_IN_SECONDS}d ago"
+            durationSeconds < MINUTE_IN_SECONDS -> context.getString(
+                R.string.relative_time_seconds_ago,
+                durationSeconds
+            )
+            durationSeconds < HOUR_IN_SECONDS -> {
+                val minutes = durationSeconds / MINUTE_IN_SECONDS
+                context.getString(R.string.relative_time_minutes_ago, minutes)
+            }
+            durationSeconds < DAY_IN_SECONDS -> {
+                val hours = durationSeconds / HOUR_IN_SECONDS
+                context.getString(R.string.relative_time_hours_ago, hours)
+            }
+            durationSeconds < WEEK_IN_SECONDS -> {
+                val days = durationSeconds / DAY_IN_SECONDS
+                context.getString(R.string.relative_time_days_ago, days)
+            }
             else -> {
-                val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", locale)
+                val formatter = localizedPatternFormatter(locale, SKELETON_MONTH_DAY_YEAR)
                 dateTime.format(formatter)
             }
         }
@@ -158,8 +174,8 @@ internal object UiFormatter {
         val durationSeconds = ChronoUnit.SECONDS.between(currentTime, dateTime)
         if (durationSeconds < 0) return context.getString(R.string.market_badge_resolving)
 
-        val shortDateFormatter = DateTimeFormatter.ofPattern("MMM d", locale)
-        val longDateFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy", locale)
+        val shortDateFormatter = localizedPatternFormatter(locale, SKELETON_MONTH_DAY)
+        val longDateFormatter = localizedPatternFormatter(locale, SKELETON_MONTH_DAY_YEAR)
 
         return when {
             durationSeconds < MINUTE_IN_SECONDS -> context.getString(R.string.market_badge_ends_in_less_than_minute)
@@ -184,5 +200,10 @@ internal object UiFormatter {
                 dateTime.format(longDateFormatter)
             )
         }
+    }
+
+    private fun localizedPatternFormatter(locale: Locale, skeleton: String): DateTimeFormatter {
+        val pattern = DateFormat.getBestDateTimePattern(locale, skeleton)
+        return DateTimeFormatter.ofPattern(pattern, locale)
     }
 }

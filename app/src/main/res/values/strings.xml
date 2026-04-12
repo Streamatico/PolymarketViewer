@@ -110,4 +110,9 @@
     <string name="add_widget">Add widget</string>
     <string name="widget_pin_not_supported">Widget pinning is not supported on this launcher.</string>
 
+    <string name="relative_time_seconds_ago">%1$ds ago</string>
+    <string name="relative_time_minutes_ago">%1$dm ago</string>
+    <string name="relative_time_hours_ago">%1$dh ago</string>
+    <string name="relative_time_days_ago">%1$dd ago</string>
+
 </resources>

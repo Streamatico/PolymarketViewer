@@ -35,12 +35,15 @@ import com.streamatico.polymarketviewer.data.model.data_api.UserActivityDto
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.TrendText
 import com.streamatico.polymarketviewer.ui.tooling.ProfilePreviewMocks
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 internal fun UserActivityItem(
     userActivity: UserActivityDto,
     onClick: (() -> Unit)?
 ) {
+    val context = LocalContext.current
+
     PositionCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -104,7 +107,7 @@ internal fun UserActivityItem(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
 
-                val relativeTime = UiFormatter.formatRelativePastTime(userActivity.timestamp)
+                val relativeTime = UiFormatter.formatRelativePastTime(context = context, dateTime = userActivity.timestamp)
                 Text(
                     text = relativeTime,
                     style = MaterialTheme.typography.bodyMedium,
