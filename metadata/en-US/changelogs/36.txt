@@ -1,0 +1,2 @@
+- Fix: Improved event status handling for clearer state display
+- Fix: Updated event UI formatting for better readability
