@@ -1,0 +1,2 @@
+- Added clearer watchlist limit feedback with a global in-app snackbar
+- Increased the watchlist limit to 100 events for heavy bookmark usage
