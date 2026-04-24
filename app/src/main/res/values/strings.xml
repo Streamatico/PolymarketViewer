@@ -40,6 +40,7 @@
     <string name="cd_remove_from_watchlist">Remove from watchlist</string>
     <string name="cd_add_to_watchlist">Add to watchlist</string>
     <string name="tag_watchlist">Watchlist</string>
+    <string name="watchlist_limit_reached">Watchlist limit reached (%1$d).</string>
 
     <!-- Event List -->
     <string name="tag_all">All</string>

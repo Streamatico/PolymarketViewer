@@ -1,5 +1,7 @@
 package com.streamatico.polymarketviewer.di
 
+import com.streamatico.polymarketviewer.core.events.DefaultUiEventBus
+import com.streamatico.polymarketviewer.core.events.UiEventBus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -17,6 +19,7 @@ val appModule = module {
     single<CoroutineScope>(named(APP_SCOPE)) {
         CoroutineScope(SupervisorJob() + Dispatchers.IO)
     }
+    single<UiEventBus> { DefaultUiEventBus() }
 
     includes(networkModule, dataModule, viewModelModule)
 }

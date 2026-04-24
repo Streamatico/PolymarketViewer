@@ -76,4 +76,4 @@ class UserPreferencesRepository(
     }
 }
 
-private const val MAX_WATCHLIST_SIZE = 50
+internal const val MAX_WATCHLIST_SIZE = 100

@@ -28,7 +28,6 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -60,6 +59,7 @@ import com.streamatico.polymarketviewer.data.model.gamma_api.getDisplayName
 import com.streamatico.polymarketviewer.ui.shared.PaginatedDataLoader
 import com.streamatico.polymarketviewer.ui.shared.PaginatedList
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
+import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.shared.components.ProfileIcon
 import com.streamatico.polymarketviewer.ui.tooling.ProfilePreviewMocks
 import com.streamatico.polymarketviewer.ui.user_profile.components.ClosedPositionItem
@@ -109,7 +109,7 @@ private fun UserProfileScaffold(
     val successState = profileState as? UserProfileState.Success
     val userProfile = successState?.userProfile
 
-    Scaffold(
+    MyScaffold(
         topBar = {
             TopAppBar(
                 title = {
