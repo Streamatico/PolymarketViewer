@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Polymarket Viewer</string>
     <string name="company_name">Streamatico</string>
-    <string name="about_app_title">About App</string>
+    <string name="about_app_title">About</string>
     <string name="settings_title">Settings</string>
     <string name="settings_menu_title">Settings</string>
     <string name="privacy_policy">Privacy Policy</string>
