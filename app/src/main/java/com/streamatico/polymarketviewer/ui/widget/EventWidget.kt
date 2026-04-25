@@ -232,9 +232,6 @@ private fun EventWidgetContent(state: EventWidgetRenderState) {
                         Text(text = volumeText, maxLines = 1, style = secondaryStyle)
                         Spacer(modifier = GlanceModifier.defaultWeight())
                         // Reserved space for future info (e.g., status badge, participant count)
-
-                        // DEBUG!!
-                        //Text(text = sizeClass.toString(), maxLines = 1, style = secondaryStyle)
                     }
 
                     // Row 2: Status badge (left), Updated time (right)

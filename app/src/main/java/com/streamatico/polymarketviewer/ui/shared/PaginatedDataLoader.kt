@@ -11,13 +11,14 @@ data class PaginatedUiState<T>(
     val items: List<T> = emptyList(),
     val isLoading: Boolean = false,
     val canLoadMore: Boolean = true,
-    val error: String? = null
+    val error: UiError? = null
 )
 
 class PaginatedDataLoader<T>(
     private val scope: CoroutineScope,
     private val fetchData: suspend (offset: Int) -> Result<List<T>>,
-    private val limit: Int = 20
+    private val limit: Int = 20,
+    private val dataTitle: String? = null,
 ) {
     private val _state = MutableStateFlow(PaginatedUiState<T>())
     val state: StateFlow<PaginatedUiState<T>> = _state.asStateFlow()
@@ -41,7 +42,7 @@ class PaginatedDataLoader<T>(
                         val updatedItems = if (reset) newItems else state.items + newItems
                         val canLoadMore = newItems.size >= limit
                         currentOffset += newItems.size
-                        
+
                         state.copy(
                             items = updatedItems,
                             isLoading = false,
@@ -49,13 +50,14 @@ class PaginatedDataLoader<T>(
                         )
                     }
                 },
-                onFailure = { error ->
-                    _state.update { it.copy(isLoading = false, error = error.message) }
+                onFailure = { throwable ->
+                    val errorTitle = dataTitle?.let { "Failed to load $it" } ?: "Failed to load data"
+                    _state.update { it.copy(isLoading = false, error = throwable.toUiError(title = errorTitle)) }
                 }
             )
         }
     }
-    
+
     fun loadIfNeeded() {
         if (_state.value.items.isEmpty() && _state.value.canLoadMore && !_state.value.isLoading) {
             loadMore()

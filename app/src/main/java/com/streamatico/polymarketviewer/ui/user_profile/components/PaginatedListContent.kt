@@ -39,10 +39,11 @@ internal fun <T> PaginatedListContent(
 
     // Handle empty list states (Error, Loading, or No Items)
     if (state.items.isEmpty()) {
-        if (state.error != null) {
+        val error = state.error
+        if (error != null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 ErrorBox(
-                    message = state.error!!,
+                    error = error,
                     onRetry = paginatedList::refresh
                 )
             }
@@ -80,13 +81,17 @@ internal fun <T> PaginatedListContent(
             }
         }
 
-        if (state.error != null) {
+        val error = state.error
+        if (error != null) {
             item {
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(text = "Error loading more: ${state.error}", color = MaterialTheme.colorScheme.error)
+                    Text(
+                        text = error.fullMessage,
+                        color = MaterialTheme.colorScheme.error
+                    )
                     Button(onClick = paginatedList::loadMore) { Text("Retry") }
                 }
             }

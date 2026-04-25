@@ -55,6 +55,7 @@ import com.streamatico.polymarketviewer.ui.event_detail.components.eventComments
 import com.streamatico.polymarketviewer.ui.event_detail.components.EventHeader
 import com.streamatico.polymarketviewer.ui.event_detail.components.eventDetailMarketList
 import com.streamatico.polymarketviewer.ui.event_detail.components.TranslateAction
+import com.streamatico.polymarketviewer.ui.shared.UiError
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
@@ -141,7 +142,7 @@ private fun EventDetailsContent(
 
     displayableComments: List<HierarchicalComment>,
     commentsLoading: Boolean,
-    commentsError: String?,
+    commentsError: UiError?,
 
     onNavigateToUserProfile: (profileAddress: String) -> Unit,
     holdersOnly: Boolean,
@@ -263,7 +264,7 @@ private fun EventDetailsContent(
                     contentAlignment = Alignment.Center
                 ) {
                     ErrorBox(
-                        message = uiState.message,
+                        error = uiState.error,
                         onRetry = onRetry
                     )
                 }
@@ -285,7 +286,7 @@ private fun EventDetailsContentSuccess(
     displayableComments: List<HierarchicalComment>,
     // Receive other states/callbacks
     commentsLoading: Boolean,
-    commentsError: String?,
+    commentsError: UiError?,
     onNavigateToUserProfile: (profileAddress: String) -> Unit,
     holdersOnly: Boolean,
     commentsSortOrder: CommentsSortOrder,
@@ -439,7 +440,9 @@ private fun EventDetailScreenPreviewLoading() {
 @Composable
 private fun EventDetailScreenPreviewError() {
     EventDetailsContentPreviewTemplate(
-        uiState = EventDetailUiState.Error(stringResource(R.string.event_details_failed_to_load_preview))
+        uiState = EventDetailUiState.Error(
+            UiError(title = stringResource(R.string.event_details_failed_to_load_preview))
+        )
     )
 }
 
@@ -474,8 +477,8 @@ private fun EventDetailMoreActions(event: EventDto) {
                 val eventUrl = "https://polymarket.com/event/${event.slug}"
                 runCatching {
                     context.startActivity(Intent(Intent.ACTION_VIEW, eventUrl.toUri()))
-                }.onFailure { error ->
-                    Log.e("EventDetailMoreActions", "Failed to open URL: $eventUrl", error)
+                }.onFailure { throwable ->
+                    Log.e("EventDetailMoreActions", "Failed to open URL: $eventUrl", throwable)
                 }
             }
         )

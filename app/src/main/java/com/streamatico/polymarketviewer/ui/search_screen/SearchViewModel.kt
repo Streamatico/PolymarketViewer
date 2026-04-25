@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.streamatico.polymarketviewer.data.model.gamma_api.OptimizedEventDto
 import com.streamatico.polymarketviewer.data.preferences.WatchlistInteractor
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
+import com.streamatico.polymarketviewer.ui.shared.UiError
+import com.streamatico.polymarketviewer.ui.shared.toUiError
 
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,16 +96,16 @@ class SearchViewModel(
                 Log.d("SearchViewModel", "Found ${events.size} events")
             }
 
-            result.onFailure { exception ->
-                Log.e("SearchViewModel", "Search failed", exception)
+            result.onFailure { throwable ->
+                Log.e("SearchViewModel", "Search failed", throwable)
                 _uiState.value = SearchUiState.Error(
-                    exception.message ?: "Failed to search events"
+                    throwable.toUiError(title = "Failed to search events")
                 )
             }
         } catch (e: Exception) {
             Log.e("SearchViewModel", "Search error", e)
             _uiState.value = SearchUiState.Error(
-                e.message ?: "An unexpected error occurred"
+                e.toUiError(title = "Failed to search events")
             )
         }
     }
@@ -132,5 +134,5 @@ sealed interface SearchUiState {
     data object Empty : SearchUiState
     data object Loading : SearchUiState
     data class Success(val events: List<OptimizedEventDto>) : SearchUiState
-    data class Error(val message: String) : SearchUiState
+    data class Error(val error: UiError) : SearchUiState
 }

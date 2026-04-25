@@ -9,6 +9,8 @@ import com.streamatico.polymarketviewer.domain.repository.PolymarketEventsSortOr
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import com.streamatico.polymarketviewer.data.preferences.UserPreferencesRepository
 import com.streamatico.polymarketviewer.data.preferences.WatchlistInteractor
+import com.streamatico.polymarketviewer.ui.shared.UiError
+import com.streamatico.polymarketviewer.ui.shared.toUiError
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -197,13 +199,15 @@ class EventListViewModel(
 
                     _uiState.value = EventListUiState.Success(sortedList, currentTag, currentOrder)
                 }
-                result.onFailure { exception ->
-                    Log.e("EventListViewModel", "Failed to load events", exception)
+                result.onFailure { throwable ->
+                    Log.e("EventListViewModel", "Failed to load events", throwable)
                     if (isPagination) _canLoadMore.value = false
                     // Assign existing unique list on error if not empty
                     val currentUniqueList = _eventList.value // Already unique
                     if ((isInitialLoad || isManualRefresh || currentUniqueList.isEmpty())) {
-                        _uiState.value = EventListUiState.Error(exception.message ?: "Error loading events")
+                        _uiState.value = EventListUiState.Error(
+                            throwable.toUiError(title = "Failed to load events")
+                        )
                     } else {
                         _uiState.value = EventListUiState.Success(currentUniqueList, currentTag, currentOrder) // Show existing data on pagination error
                     }
@@ -266,7 +270,7 @@ sealed interface EventListUiState {
         val tagSlug: String = POLYMARKET_EVENTS_SLUG_ALL,
         val sortOrder: PolymarketEventsSortOrder = PolymarketEventsSortOrder.DEFAULT_SORT_ORDER
     ) : EventListUiState
-    data class Error(val message: String) : EventListUiState
+    data class Error(val error: UiError) : EventListUiState
 }
 
 private const val PAGE_SIZE = 20

@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.OptimizedEventDto
 import com.streamatico.polymarketviewer.ui.event_list.components.EventListItem
+import com.streamatico.polymarketviewer.ui.shared.UiError
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
@@ -162,7 +163,7 @@ private fun SearchScreenContent(
                 }
                 is SearchUiState.Error -> {
                     ErrorBox(
-                        message = uiState.message,
+                        error = uiState.error,
                         onRetry = onRetry,
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -355,7 +356,12 @@ private fun SearchScreenPreview_NoResults() {
 private fun SearchScreenPreview_Error() {
     PolymarketAppTheme {
         SearchScreenContent(
-            uiState = SearchUiState.Error("Network error occurred"),
+            uiState = SearchUiState.Error(
+                UiError(
+                    title = "Failed to search events",
+                    details = "Network error occurred"
+                )
+            ),
             searchQuery = "trump",
             watchlistIds = emptySet(),
             onSearchQueryChange = {},

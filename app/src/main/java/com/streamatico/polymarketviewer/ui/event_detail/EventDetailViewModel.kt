@@ -17,6 +17,8 @@ import com.streamatico.polymarketviewer.domain.repository.CommentsParentEntityTy
 import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import com.streamatico.polymarketviewer.ui.navigation.NavKeys
+import com.streamatico.polymarketviewer.ui.shared.UiError
+import com.streamatico.polymarketviewer.ui.shared.toUiError
 
 import com.streamatico.polymarketviewer.data.preferences.WatchlistInteractor
 import kotlinx.coroutines.async
@@ -88,8 +90,8 @@ class EventDetailViewModel(
     private val _commentsLoading = MutableStateFlow(false)
     val commentsLoading: StateFlow<Boolean> = _commentsLoading.asStateFlow()
 
-    private val _commentsError = MutableStateFlow<String?>(null)
-    val commentsError: StateFlow<String?> = _commentsError.asStateFlow()
+    private val _commentsError = MutableStateFlow<UiError?>(null)
+    val commentsError: StateFlow<UiError?> = _commentsError.asStateFlow()
 
     // Default holdersOnly to true
     private val _holdersOnly = MutableStateFlow(true) // Changed initial value to true
@@ -134,7 +136,9 @@ class EventDetailViewModel(
                 if (isManualRefresh && _uiState.value is EventDetailUiState.Success) {
                     Log.e(TAG, "Failed to refresh event details for event $eventSlug", it)
                 } else {
-                    _uiState.value = EventDetailUiState.Error(it.message ?: "Failed to load event details")
+                    _uiState.value = EventDetailUiState.Error(
+                        it.toUiError(title = "Failed to load event details")
+                    )
                 }
             }
 
@@ -225,12 +229,12 @@ class EventDetailViewModel(
                             )
                         )
                     }
-                }.onFailure { error ->
+                }.onFailure { throwable ->
                     val market = topMarkets[originalIndex]
                     Log.e(
                         TAG,
                         "Failed to load timeseries for market ${market.id}",
-                        error
+                        throwable
                     )
                 }
             }
@@ -305,7 +309,7 @@ class EventDetailViewModel(
                 Log.e(TAG, "Failed to load comments for event $eventSlug", it)
                 // Show error only if it's an initial load/refresh or list is empty
                 if (reset || _commentsState.value.isEmpty()) {
-                    _commentsError.value = it.message ?: "Failed to load comments"
+                    _commentsError.value = it.toUiError(title = "Failed to load comments")
                 }
                 _canLoadMoreComments.value = false // Stop pagination on error
             }
@@ -395,7 +399,7 @@ class EventDetailViewModel(
 sealed interface EventDetailUiState {
     data object Loading : EventDetailUiState
     data class Success(val event: EventDto) : EventDetailUiState // Contains EventDto
-    data class Error(val message: String) : EventDetailUiState
+    data class Error(val error: UiError) : EventDetailUiState
 }
 
 enum class TimeRange(val apiInterval: String, val apiResolutionMins: Int) {

@@ -76,6 +76,7 @@ import com.streamatico.polymarketviewer.data.model.gamma_api.BaseEventDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.TagDto
 import com.streamatico.polymarketviewer.domain.repository.PolymarketEventsSortOrder
 import com.streamatico.polymarketviewer.ui.event_list.components.EventListItem
+import com.streamatico.polymarketviewer.ui.shared.UiError
 import com.streamatico.polymarketviewer.ui.shared.components.AppLogoIcon
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
@@ -517,7 +518,7 @@ fun EventListContent(
                     }
                     is EventListUiState.Error -> {
                         ErrorBox(
-                            message = uiState.message,
+                            error = uiState.error,
                             onRetry = onRetry,
                         )
                     }
@@ -796,7 +797,12 @@ private fun EventListScreenPreview_EmptyWatchlist() {
 private fun EventListScreenPreview_Error() {
     MaterialTheme {
         EventListScreenContent(
-            uiState = EventListUiState.Error("Failed to load events. Please check connection."),
+            uiState = EventListUiState.Error(
+                UiError(
+                    title = "Failed to load events",
+                    details = "Please check your connection and try again."
+                )
+            ),
             tags = emptyList(),
             isRefreshing = false,
             isLoadingMore = false,

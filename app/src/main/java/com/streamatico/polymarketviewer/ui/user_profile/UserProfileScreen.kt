@@ -19,7 +19,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -59,6 +58,7 @@ import com.streamatico.polymarketviewer.data.model.gamma_api.getDisplayName
 import com.streamatico.polymarketviewer.ui.shared.PaginatedDataLoader
 import com.streamatico.polymarketviewer.ui.shared.PaginatedList
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
+import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.shared.components.ProfileIcon
 import com.streamatico.polymarketviewer.ui.tooling.ProfilePreviewMocks
@@ -148,14 +148,11 @@ private fun UserProfileScaffold(
                     )
                 }
                 is UserProfileState.Error -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center).padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(profileState.message, color = MaterialTheme.colorScheme.error)
-                        Spacer(Modifier.height(8.dp))
-                        Button(onClick = onRetryLoadProfile) { Text("Retry") }
-                    }
+                    ErrorBox(
+                        error = profileState.error,
+                        onRetry = onRetryLoadProfile,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
             }
         }
@@ -438,8 +435,8 @@ private fun UserProfileMoreActions(profileWallet: String) {
                 val profileUrl = "https://polymarket.com/profile/$profileWallet"
                 runCatching {
                     context.startActivity(Intent(Intent.ACTION_VIEW, profileUrl.toUri()))
-                }.onFailure { error ->
-                    Log.e("UserProfileMoreActions", "Failed to open URL: $profileUrl", error)
+                }.onFailure { throwable ->
+                    Log.e("UserProfileMoreActions", "Failed to open URL: $profileUrl", throwable)
                 }
             }
         )

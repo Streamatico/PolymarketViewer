@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import com.streamatico.polymarketviewer.ui.navigation.NavKeys
+import com.streamatico.polymarketviewer.ui.shared.toUiError
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,7 +46,9 @@ class MarketDetailViewModel(
                     if (isManualRefresh && _uiState.value is MarketDetailUiState.Success) {
                         Log.e(TAG, "Failed to refresh market details for market $marketId", throwable)
                     } else {
-                        _uiState.value = MarketDetailUiState.Error(throwable.message ?: "Unknown error loading details")
+                        _uiState.value = MarketDetailUiState.Error(
+                            throwable.toUiError(title = "Failed to load market details")
+                        )
                     }
                 }
 

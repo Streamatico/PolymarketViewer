@@ -47,6 +47,7 @@ import coil3.compose.AsyncImage
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.MarketDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.getTitleOrDefault
+import com.streamatico.polymarketviewer.ui.shared.UiError
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
@@ -137,7 +138,7 @@ private fun MarketDetailContent(
                     contentAlignment = Alignment.Center
                 ) {
                     ErrorBox(
-                        message = uiState.message,
+                        error = uiState.error,
                         onRetry = onRetry,
                     )
                 }
@@ -398,7 +399,9 @@ private fun MarketDetailViewPreviewSuccess() { // Removed PreviewParameter
 private fun MarketDetailViewPreviewError() {
     MaterialTheme { // Wrap preview in MaterialTheme
         MarketDetailContent(
-            uiState = MarketDetailUiState.Error(stringResource(R.string.market_details_failed_to_load_preview)),
+            uiState = MarketDetailUiState.Error(
+                UiError(title = stringResource(R.string.market_details_failed_to_load_preview))
+            ),
             isRefreshing = false,
             onRefresh = {},
             onNavigateBack = {},

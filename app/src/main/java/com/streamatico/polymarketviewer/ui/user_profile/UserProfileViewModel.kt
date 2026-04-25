@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.streamatico.polymarketviewer.data.model.gamma_api.UserProfileDto
 import com.streamatico.polymarketviewer.domain.repository.PolymarketRepository
 import com.streamatico.polymarketviewer.ui.navigation.NavKeys
+import com.streamatico.polymarketviewer.ui.shared.UiError
+import com.streamatico.polymarketviewer.ui.shared.toUiError
 
 import com.streamatico.polymarketviewer.ui.shared.PaginatedDataLoader
 import com.streamatico.polymarketviewer.ui.shared.PaginatedList
@@ -17,7 +19,7 @@ import kotlinx.coroutines.launch
 sealed interface UserProfileState {
     data object Loading : UserProfileState
     data class Success(val userProfile: UserProfileDto) : UserProfileState
-    data class Error(val message: String) : UserProfileState
+    data class Error(val error: UiError) : UserProfileState
 }
 
 
@@ -42,21 +44,24 @@ class UserProfileViewModel(
     val activePositions = PaginatedList(
         PaginatedDataLoader(
             scope = viewModelScope,
-            fetchData = { offset -> repository.getPositions(userAddress, limit = 20, offset = offset) }
+            fetchData = { offset -> repository.getPositions(userAddress, limit = 20, offset = offset) },
+            dataTitle = "Active Positions",
         )
     )
 
     val closedPositions = PaginatedList(
         PaginatedDataLoader(
             scope = viewModelScope,
-            fetchData = { offset -> repository.getClosedPositions(userAddress, limit = 20, offset = offset) }
+            fetchData = { offset -> repository.getClosedPositions(userAddress, limit = 20, offset = offset) },
+            dataTitle = "Closed Positions",
         )
     )
 
     val activities = PaginatedList(
         PaginatedDataLoader(
             scope = viewModelScope,
-            fetchData = { offset -> repository.getActivity(userAddress, limit = 20, offset = offset) }
+            fetchData = { offset -> repository.getActivity(userAddress, limit = 20, offset = offset) },
+            dataTitle = "Activities",
         )
     )
 
@@ -71,8 +76,10 @@ class UserProfileViewModel(
                 .onSuccess { profile ->
                     _profileState.value = UserProfileState.Success(profile)
                 }
-                .onFailure {
-                    _profileState.value = UserProfileState.Error(it.message ?: "Failed to load profile")
+                .onFailure { throwable ->
+                    _profileState.value = UserProfileState.Error(
+                        throwable.toUiError(title = "Failed to load profile")
+                    )
                 }
         }
         viewModelScope.launch {

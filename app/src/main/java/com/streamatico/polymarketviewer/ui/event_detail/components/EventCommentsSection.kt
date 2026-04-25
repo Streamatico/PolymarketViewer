@@ -2,7 +2,6 @@ package com.streamatico.polymarketviewer.ui.event_detail.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -39,13 +37,15 @@ import androidx.compose.ui.unit.dp
 import com.streamatico.polymarketviewer.domain.model.EventType
 import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
 import com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment
+import com.streamatico.polymarketviewer.ui.shared.UiError
+import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
 
 @OptIn(ExperimentalMaterial3Api::class)
 fun LazyListScope.eventCommentsSection(
     displayableComments: List<HierarchicalComment>,
     commentsLoading: Boolean,
-    commentsError: String?,
+    commentsError: UiError?,
     onNavigateToUserProfile: (profileAddress: String) -> Unit,
     onRefreshComments: () -> Unit,
     eventOutcomeTokensMap: Map<String, String>,
@@ -160,14 +160,11 @@ fun LazyListScope.eventCommentsSection(
                 CircularProgressIndicator()
             }
         } else if (commentsError != null && displayableComments.isEmpty()) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text("Error loading comments: $commentsError", color = MaterialTheme.colorScheme.error)
-                Spacer(Modifier.height(8.dp))
-                Button(onClick = onRefreshComments) { Text("Retry") }
-            }
+            ErrorBox(
+                error = commentsError,
+                onRetry = onRefreshComments,
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
+            )
         } else if (!commentsLoading && displayableComments.isEmpty()) {
             Text(
                 "No comments found.",
@@ -187,6 +184,30 @@ private fun EventCommentsSectionPreview() {
             displayableComments = PreviewMocks.sampleHierarchicalComments,
             commentsLoading = false,
             commentsError = null,
+            onNavigateToUserProfile = {},
+            onRefreshComments = {},
+            eventOutcomeTokensMap = emptyMap(),
+            eventTokenToGroupTitleMap = emptyMap(),
+            eventType = EventType.BinaryEvent,
+            holdersOnly = false,
+            commentsSortOrder = CommentsSortOrder.NEWEST,
+            onToggleHoldersOnly = {},
+            onCommentsSortOrderChange = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun EventCommentsSectionErrorPreview() {
+    LazyColumn {
+        eventCommentsSection(
+            displayableComments = emptyList(),
+            commentsLoading = false,
+            commentsError = UiError(
+                title = "Failed to load comments",
+                details = "Please check your internet connection and try again."
+            ),
             onNavigateToUserProfile = {},
             onRefreshComments = {},
             eventOutcomeTokensMap = emptyMap(),
