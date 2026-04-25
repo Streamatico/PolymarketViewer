@@ -215,6 +215,36 @@ class EventListViewModelTest {
     }
 
     @Test
+    fun `initial DNS failure shows DNS settings action before any successful load in session`() = runViewModelTest {
+        val repository = RecordingPolymarketRepository().apply {
+            enqueueEventsResult(Result.failure(java.net.UnknownHostException("gamma-api.polymarket.com")))
+        }
+
+        val viewModel = createViewModel(repository = repository)
+        advanceUntilIdle()
+
+        val errorState = assertInstanceOf(EventListUiState.Error::class.java, viewModel.uiState.value)
+        assertTrue(errorState.showDnsSettings)
+    }
+
+    @Test
+    fun `DNS failure after a successful load hides DNS settings action for current session`() = runViewModelTest {
+        val repository = RecordingPolymarketRepository().apply {
+            enqueueEventsResult(successPage(events("initial", 3)))
+            enqueueEventsResult(Result.failure(java.net.UnknownHostException("gamma-api.polymarket.com")))
+        }
+
+        val viewModel = createViewModel(repository = repository)
+        advanceUntilIdle()
+
+        viewModel.refreshEvents()
+        advanceUntilIdle()
+
+        val errorState = assertInstanceOf(EventListUiState.Error::class.java, viewModel.uiState.value)
+        assertFalse(errorState.showDnsSettings)
+    }
+
+    @Test
     fun `stale success from cancelled request does not overwrite newer sort selection`() = runViewModelTest {
         val repository = RecordingPolymarketRepository()
         val pendingInitialLoad = repository.enqueuePendingEventsCall(ignoreCancellation = true)

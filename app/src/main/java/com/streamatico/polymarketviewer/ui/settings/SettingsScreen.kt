@@ -1,5 +1,6 @@
 package com.streamatico.polymarketviewer.ui.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,13 +30,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.preferences.DnsOverHttpsProvider
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
+
+private const val DOH_LEARN_MORE_URL = "https://en.wikipedia.org/wiki/DNS_over_HTTPS"
 
 @Composable
 fun SettingsScreen(
@@ -67,6 +72,7 @@ private fun SettingsScreenContent(
     onDohProviderSelected: (DnsOverHttpsProvider) -> Unit
 ) {
     val selectedProvider = dohProvider ?: DnsOverHttpsProvider.DEFAULT
+    val uriHandler = LocalUriHandler.current
 
     MyScaffold(
         topBar = {
@@ -160,6 +166,19 @@ private fun SettingsScreenContent(
                     text = stringResource(id = R.string.doh_helper_text),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = stringResource(id = R.string.doh_learn_more),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.primary,
+                        textDecoration = TextDecoration.Underline
+                    ),
+                    modifier = Modifier.clickable {
+                        uriHandler.openUri(DOH_LEARN_MORE_URL)
+                    }
                 )
             }
 

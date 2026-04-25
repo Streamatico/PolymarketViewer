@@ -22,7 +22,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.ui.shared.PaginatedList
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -92,7 +94,7 @@ internal fun <T> PaginatedListContent(
                         text = error.fullMessage,
                         color = MaterialTheme.colorScheme.error
                     )
-                    Button(onClick = paginatedList::loadMore) { Text("Retry") }
+                    Button(onClick = paginatedList::loadMore) { Text(stringResource(R.string.action_retry)) }
                 }
             }
         }

@@ -19,22 +19,24 @@
     <string name="search_empty_message">Start typing to search events</string>
     <string name="search_no_results">No events found</string>
     <string name="search_clear">Clear search</string>
+    <string name="action_retry">Retry</string>
 
     <string name="activity_title_yield">Rewards</string>
     <string name="activity_title_reward">Rewards distributed for epoch</string>
 
     <!-- Analytics settings -->
     <string name="analytics_title">Help Improve the App</string>
-    <string name="analytics_description">Send anonymous usage statistics (app version, Android SDK, language). No personal data is collected.</string>
+    <string name="analytics_description">Send anonymous technical diagnostics, such as app version, Android version, language, and basic app events. This does not include your Polymarket account, positions, or trading activity.</string>
 
     <!-- DNS-over-HTTPS settings -->
     <string name="doh_title">DNS-over-HTTPS</string>
-    <string name="doh_description">Resolve Polymarket API domains through an encrypted DNS provider instead of your network or ISP DNS.</string>
-    <string name="doh_provider_title">DNS provider</string>
-    <string name="doh_provider_description">Choose which provider to use when DNS-over-HTTPS is on.</string>
+    <string name="doh_description">Use an alternative DNS service for Polymarket API requests if data loads unreliably on your current network.</string>
+    <string name="doh_provider_title">Provider</string>
+    <string name="doh_provider_description">Choose which DNS service the app should use when this setting is on.</string>
     <string name="doh_provider_google">Google</string>
     <string name="doh_provider_cloudflare">Cloudflare</string>
-    <string name="doh_helper_text">When disabled, the app uses your device’s normal system DNS. Your selected provider is remembered for the next time you enable DNS-over-HTTPS.</string>
+    <string name="doh_helper_text">This only changes how the app resolves Polymarket API domains. It does not change the services available to you. When turned off, the app uses your device’s standard DNS.</string>
+    <string name="doh_learn_more">Learn more about DNS-over-HTTPS</string>
 
     <!-- Links section -->
     <string name="links_section_title">Links</string>
@@ -56,6 +58,7 @@
     <!-- Event List -->
     <string name="tag_all">All</string>
     <string name="no_events_found">No events found for selected tag.</string>
+    <string name="event_list_open_dns_settings">Open DNS settings</string>
     <string name="sort_by_title">Sort by</string>
     <string name="sort_option_default">Default</string>
     <string name="sort_option_24h_volume">24hr Volume</string>

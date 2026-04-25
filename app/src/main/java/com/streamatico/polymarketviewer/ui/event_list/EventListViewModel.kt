@@ -54,6 +54,7 @@ class EventListViewModel(
     private val _canLoadMore = MutableStateFlow(true)
     val canLoadMore: StateFlow<Boolean> = _canLoadMore.asStateFlow()
     private val loadTracker = LoadTracker()
+    private var hasSuccessfulLoadInSession = false
 
     init {
         viewModelScope.launch {
@@ -314,7 +315,8 @@ class EventListViewModel(
         val visibleEvents = currentVisibleEvents()
         if (loadContext.mode != LoadMode.PAGINATION || visibleEvents.isEmpty()) {
             _uiState.value = EventListUiState.Error(
-                throwable.toUiError(title = "Failed to load events")
+                error = throwable.toUiError(title = "Failed to load events"),
+                showDnsSettings = throwable.isDnsError() && !hasSuccessfulLoadInSession
             )
             return
         }
@@ -358,6 +360,8 @@ class EventListViewModel(
         tagSlug: String,
         sortOrder: PolymarketEventsSortOrder,
     ) {
+        hasSuccessfulLoadInSession = true
+
         val displayEvents = if (sortOrder == PolymarketEventsSortOrder.DEFAULT_SORT_ORDER) {
             events.sortedWith(
                 compareBy { if (it.featured == true) it.featuredOrder else 1000 }
@@ -388,6 +392,11 @@ class EventListViewModel(
         loadTracker.activeRequestId += 1
         return loadTracker.activeRequestId
     }
+}
+
+private fun Throwable.isDnsError(): Boolean {
+    return this is java.net.UnknownHostException ||
+            (this.cause != null && this.cause is java.net.UnknownHostException)
 }
 
 private enum class LoadMode(
@@ -437,7 +446,7 @@ sealed interface EventListUiState {
         val tagSlug: String = POLYMARKET_EVENTS_SLUG_ALL,
         val sortOrder: PolymarketEventsSortOrder = PolymarketEventsSortOrder.DEFAULT_SORT_ORDER
     ) : EventListUiState
-    data class Error(val error: UiError) : EventListUiState
+    data class Error(val error: UiError, val showDnsSettings: Boolean = false) : EventListUiState
 }
 
 private const val PAGE_SIZE = 20

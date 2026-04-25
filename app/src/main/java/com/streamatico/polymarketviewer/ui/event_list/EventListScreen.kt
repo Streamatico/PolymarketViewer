@@ -81,6 +81,7 @@ import com.streamatico.polymarketviewer.ui.event_list.components.EventListItem
 import com.streamatico.polymarketviewer.ui.shared.UiError
 import com.streamatico.polymarketviewer.ui.shared.components.AppLogoIcon
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
+import com.streamatico.polymarketviewer.ui.shared.components.ErrorBoxSecondaryAction
 import com.streamatico.polymarketviewer.ui.shared.components.LoadingBox
 import com.streamatico.polymarketviewer.ui.shared.components.MyScaffold
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
@@ -517,9 +518,19 @@ fun EventListContent(
                         }
                     }
                     is EventListUiState.Error -> {
+                        val secondaryAction: ErrorBoxSecondaryAction? = if (uiState.showDnsSettings && onNavigateToSettings != null) {
+                            ErrorBoxSecondaryAction(
+                                label = stringResource(id = R.string.event_list_open_dns_settings),
+                                onClick = onNavigateToSettings
+                            )
+                        } else {
+                            null
+                        }
+
                         ErrorBox(
                             error = uiState.error,
                             onRetry = onRetry,
+                            secondaryAction = secondaryAction
                         )
                     }
                 }
@@ -549,22 +560,6 @@ private fun OverflowMenuAction(
         DropdownMenuItem(
             leadingIcon = {
                 Icon(
-                    imageVector = Icons.Outlined.Settings,
-                    contentDescription = null
-                )
-            },
-            text = { Text(stringResource(id = R.string.settings_menu_title)) },
-            onClick = {
-                showMenu = false
-                onNavigateToSettings()
-            }
-        )
-
-        HorizontalDivider()
-
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
                     imageVector = Icons.Outlined.Info,
                     contentDescription = null
                 )
@@ -573,6 +568,22 @@ private fun OverflowMenuAction(
             onClick = {
                 showMenu = false
                 onNavigateToAbout()
+            }
+        )
+
+        HorizontalDivider()
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(id = R.string.settings_menu_title)) },
+            onClick = {
+                showMenu = false
+                onNavigateToSettings()
             }
         )
     }
@@ -800,6 +811,42 @@ private fun EventListScreenPreview_EmptyWatchlist() {
 @Preview(showBackground = true, name = "Error State")
 @Composable
 private fun EventListScreenPreview_Error() {
+    MaterialTheme {
+        EventListScreenContent(
+            uiState = EventListUiState.Error(
+                UiError(
+                    title = "Failed to load events",
+                    details = "Please check your connection and try again."
+                )
+            ),
+            tags = emptyList(),
+            isRefreshing = false,
+            isLoadingMore = false,
+            areTagsLoading = false,
+            canLoadMore = false,
+            selectedTagSlug = POLYMARKET_EVENTS_SLUG_ALL,
+            selectedSortOrder = PolymarketEventsSortOrder.DEFAULT_SORT_ORDER,
+            watchlistIds = emptySet(),
+            onRefresh = {},
+            onLoadMore = {},
+            onTagSelected = {},
+            onSortOrderSelected = {},
+            onRetry = {},
+            onToggleWatchlist = {},
+            onEventClick = {},
+            showBottomSheet = false,
+            onShowSortOptionsClick = {},
+            onDismissRequest = {},
+            onNavigateToSettings = {},
+            onNavigateToAbout = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Error State With DNS Hint")
+@Composable
+private fun EventListScreenPreview_ErrorWithDnsHint() {
     MaterialTheme {
         EventListScreenContent(
             uiState = EventListUiState.Error(

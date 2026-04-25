@@ -55,6 +55,10 @@ class AnalyticsService(
                     if (isFirstLaunch) {
                         parameters.append("first", "true")
                     }
+
+                    if (preferences.dohEnabled) {
+                        parameters.append("doh", preferences.dohProvider.storageValue)
+                    }
                 }
             }
 
