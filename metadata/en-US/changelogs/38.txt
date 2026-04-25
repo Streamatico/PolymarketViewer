@@ -1,0 +1,3 @@
+- Added DNS-over-HTTPS options to improve connectivity on restrictive networks (added in the new menu Settings)
+- Improved load error handling with a quick action to open DNS settings when needed
+- Polished Event List and About screens, plus stability improvements backed by new regression tests
