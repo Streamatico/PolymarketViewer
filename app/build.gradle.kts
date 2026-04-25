@@ -67,6 +67,10 @@ android {
         }
     }
 
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     // By default, Android generates dependency metadata (a file containing information
     // about all the dependencies used in the project) and includes it in both APKs and app bundles.
     // This metadata is particularly useful for the Google Play Store, as it provides actionable
@@ -151,6 +155,7 @@ dependencies {
     releaseCompileOnly(libs.androidx.glance.appwidget.preview)
 
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.kotlinx.coroutines.test)
     testRuntimeOnly(libs.junit.platform.launcher)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

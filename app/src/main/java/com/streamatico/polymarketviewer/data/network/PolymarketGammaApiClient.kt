@@ -11,7 +11,9 @@ import com.streamatico.polymarketviewer.data.model.gamma_api.UserProfileDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.parameter
+import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 
 
@@ -35,9 +37,15 @@ class PolymarketGammaApiClient(
         ascending: Boolean? = false,
         excludeTagIds: List<Long>? = null,
         slugList: List<String>? = null,
-        idList: List<String>? = null
+        idList: List<String>? = null,
+        forceRefresh: Boolean = false,
     ): PaginationDataDto<EventDto> {
         return client.get("events/pagination") {
+            if (forceRefresh) {
+                header(HttpHeaders.CacheControl, "no-cache, max-age=0")
+                header(HttpHeaders.Pragma, "no-cache")
+                parameter("_refresh_ts", System.currentTimeMillis())
+            }
             parameter("limit", limit)
             parameter("offset", offset)
             parameter("active", active)

@@ -59,6 +59,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -331,6 +332,10 @@ fun EventListContent(
     onNavigateToAbout: (() -> Unit)?
 ) {
     val gridState = rememberLazyGridState()
+    val latestCanLoadMore by rememberUpdatedState(canLoadMore)
+    val latestIsLoadingMore by rememberUpdatedState(isLoadingMore)
+    val latestIsRefreshing by rememberUpdatedState(isRefreshing)
+    val latestEventsCount by rememberUpdatedState((uiState as? EventListUiState.Success)?.events?.size ?: 0)
 
     var isGridDisplayed by remember { mutableStateOf(false) }
     LaunchedEffect(selectedTagSlug, selectedSortOrder) {
@@ -488,27 +493,21 @@ fun EventListContent(
                                     }
                                 }
 
-                                // Logic for loading more items
-                                LaunchedEffect(gridState, canLoadMore, isLoadingMore, isRefreshing,
-                                    uiState.events) {
+                                LaunchedEffect(gridState) {
                                     snapshotFlow { gridState.layoutInfo }
                                         .map { layoutInfo ->
-                                            // Explicitly get visibleItemsInfo based on type
                                             val visibleItemsInfo = layoutInfo.visibleItemsInfo
-                                            if (visibleItemsInfo.isEmpty()) {
+                                            if (visibleItemsInfo.isEmpty() || latestEventsCount == 0) {
                                                 false
                                             } else {
-                                                // Get index from the specific item info type
                                                 val lastVisibleItemIndex = visibleItemsInfo.lastOrNull()?.index ?: -1
-                                                val totalDataItems = uiState.events.size
-                                                // Adjust threshold based on grid layout if needed, currently uses 5
-                                                totalDataItems > 0 && lastVisibleItemIndex != -1 && lastVisibleItemIndex >= totalDataItems - 5
+                                                lastVisibleItemIndex != -1 && lastVisibleItemIndex >= latestEventsCount - LOAD_MORE_THRESHOLD
                                             }
                                         }
                                         .distinctUntilChanged()
                                         .filter { shouldLoadMore -> shouldLoadMore }
                                         .collect {
-                                            if (canLoadMore && !isLoadingMore && !isRefreshing) {
+                                            if (latestCanLoadMore && !latestIsLoadingMore && !latestIsRefreshing) {
                                                 onLoadMore()
                                             }
                                         }
@@ -527,6 +526,8 @@ fun EventListContent(
         }
     }
 }
+
+private const val LOAD_MORE_THRESHOLD = 5
 
 @Composable
 private fun OverflowMenuAction(
