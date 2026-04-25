@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -90,6 +91,7 @@ import org.koin.androidx.compose.koinViewModel
 fun EventListScreen(
     viewModel: EventListViewModel,
     onNavigateToEventDetail: (String) -> Unit,
+    onNavigateToSettings: () -> Unit,
     onNavigateToAbout: () -> Unit,
     onNavigateToSearch: () -> Unit,
 ) {
@@ -98,6 +100,7 @@ fun EventListScreen(
         onEventClick = {
             onNavigateToEventDetail(it.slug)
         },
+        onNavigateToSettings = onNavigateToSettings,
         onNavigateToAbout = onNavigateToAbout,
         onNavigateToSearch = onNavigateToSearch
     )
@@ -112,6 +115,7 @@ fun SelectEventForWidgetScreen(
     InternalEventListScreen(
         viewModel = viewModel,
         onEventClick = onEventSelected,
+        onNavigateToSettings = null,
         onNavigateToAbout = null,
         onNavigateToSearch = null,
         onNavigateBack = onNavigateBack
@@ -122,6 +126,7 @@ fun SelectEventForWidgetScreen(
 private fun InternalEventListScreen(
     viewModel: EventListViewModel,
     onEventClick: (event: BaseEventDto) -> Unit,
+    onNavigateToSettings: (() -> Unit)?,
     onNavigateToAbout: (() -> Unit)?,
     onNavigateToSearch: (() -> Unit)?,
     onNavigateBack: (() -> Unit)? = null,
@@ -158,6 +163,7 @@ private fun InternalEventListScreen(
         showBottomSheet = showBottomSheet,
         onShowSortOptionsClick = { showBottomSheet = true },
         onDismissRequest = { showBottomSheet = false },
+        onNavigateToSettings = onNavigateToSettings,
         onNavigateToAbout = onNavigateToAbout,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateBack = onNavigateBack
@@ -186,6 +192,7 @@ private fun EventListScreenContent(
     showBottomSheet: Boolean,
     onShowSortOptionsClick: () -> Unit,
     onDismissRequest: () -> Unit,
+    onNavigateToSettings: (() -> Unit)?,
     onNavigateToAbout: (() -> Unit)?,
     onNavigateToSearch: (() -> Unit)?,
     onNavigateBack: (() -> Unit)? = null,
@@ -209,6 +216,7 @@ private fun EventListScreenContent(
         onToggleWatchlist = onToggleWatchlist,
         onEventClick = onEventClick,
         onShowSortOptionsClick = onShowSortOptionsClick,
+        onNavigateToSettings = onNavigateToSettings,
         onNavigateToAbout = onNavigateToAbout,
         onSearchClick = onNavigateToSearch,
         onNavigateBack = onNavigateBack
@@ -318,6 +326,7 @@ fun EventListContent(
     onShowSortOptionsClick: () -> Unit,
     onSearchClick: (() -> Unit)?,
     onNavigateBack: (() -> Unit)?,
+    onNavigateToSettings: (() -> Unit)?,
     onNavigateToAbout: (() -> Unit)?
 ) {
     val gridState = rememberLazyGridState()
@@ -374,8 +383,9 @@ fun EventListContent(
                         )
                     }
 
-                    if (onNavigateToAbout != null) {
-                        AboutAction(
+                    if (onNavigateToSettings != null && onNavigateToAbout != null) {
+                        OverflowMenuAction(
+                            onNavigateToSettings = onNavigateToSettings,
                             onNavigateToAbout = onNavigateToAbout
                         )
                     }
@@ -518,7 +528,8 @@ fun EventListContent(
 }
 
 @Composable
-private fun AboutAction(
+private fun OverflowMenuAction(
+    onNavigateToSettings: () -> Unit,
     onNavigateToAbout: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -532,6 +543,19 @@ private fun AboutAction(
         expanded = showMenu,
         onDismissRequest = { showMenu = false }
     ) {
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(id = R.string.settings_menu_title)) },
+            onClick = {
+                showMenu = false
+                onNavigateToSettings()
+            }
+        )
         DropdownMenuItem(
             leadingIcon = {
                 Icon(
@@ -647,15 +671,18 @@ private fun TemplateEventListScreenPreview_Success(isSelectWidgetMode: Boolean) 
 
     val onNavigateToSearch: (() -> Unit)?
     val onNavigateBack: (() -> Unit)?
+    val onNavigateToSettings: (() -> Unit)?
     val onNavigateToAbout: (() -> Unit)?
 
     if (isSelectWidgetMode) {
         onNavigateToSearch = null
         onNavigateBack = {}
+        onNavigateToSettings = null
         onNavigateToAbout = null
     } else {
         onNavigateToSearch = {}
         onNavigateBack = null
+        onNavigateToSettings = {}
         onNavigateToAbout = {}
     }
 
@@ -680,6 +707,7 @@ private fun TemplateEventListScreenPreview_Success(isSelectWidgetMode: Boolean) 
             showBottomSheet = false,
             onShowSortOptionsClick = {},
             onDismissRequest = {},
+            onNavigateToSettings = onNavigateToSettings,
             onNavigateToAbout = onNavigateToAbout,
             onNavigateToSearch = onNavigateToSearch,
             onNavigateBack = onNavigateBack
@@ -723,6 +751,7 @@ private fun EventListScreenPreview_Loading() {
             showBottomSheet = false,
             onShowSortOptionsClick = {},
             onDismissRequest = {},
+            onNavigateToSettings = {},
             onNavigateToAbout = {},
             onNavigateToSearch = {},
         )
@@ -755,6 +784,7 @@ private fun EventListScreenPreview_EmptyWatchlist() {
             showBottomSheet = false,
             onShowSortOptionsClick = {},
             onDismissRequest = {},
+            onNavigateToSettings = {},
             onNavigateToAbout = {},
             onNavigateToSearch = {},
         )
@@ -785,6 +815,7 @@ private fun EventListScreenPreview_Error() {
             showBottomSheet = false,
             onShowSortOptionsClick = {},
             onDismissRequest = {},
+            onNavigateToSettings = {},
             onNavigateToAbout = {},
             onNavigateToSearch = {},
         )

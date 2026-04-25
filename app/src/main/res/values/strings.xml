@@ -2,6 +2,8 @@
     <string name="app_name">Polymarket Viewer</string>
     <string name="company_name">Streamatico</string>
     <string name="about_app_title">About App</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_menu_title">Settings</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="navigate_back">Navigate back</string>
     <string name="filter_tooltip">Sort Options</string>
@@ -24,6 +26,15 @@
     <!-- Analytics settings -->
     <string name="analytics_title">Help Improve the App</string>
     <string name="analytics_description">Send anonymous usage statistics (app version, Android SDK, language). No personal data is collected.</string>
+
+    <!-- DNS-over-HTTPS settings -->
+    <string name="doh_title">DNS-over-HTTPS</string>
+    <string name="doh_description">Resolve Polymarket API domains through an encrypted DNS provider instead of your network or ISP DNS.</string>
+    <string name="doh_provider_title">DNS provider</string>
+    <string name="doh_provider_description">Choose which provider to use when DNS-over-HTTPS is on.</string>
+    <string name="doh_provider_google">Google</string>
+    <string name="doh_provider_cloudflare">Cloudflare</string>
+    <string name="doh_helper_text">When disabled, the app uses your device’s normal system DNS. Your selected provider is remembered for the next time you enable DNS-over-HTTPS.</string>
 
     <!-- Links section -->
     <string name="links_section_title">Links</string>

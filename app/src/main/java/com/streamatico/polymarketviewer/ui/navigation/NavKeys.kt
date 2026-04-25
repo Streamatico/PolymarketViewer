@@ -9,5 +9,6 @@ data object NavKeys {
     @Serializable data class EventDetail(val eventSlug: String) : NavKey
     @Serializable data class MarketDetail(val marketId: String) : NavKey
     @Serializable data class UserProfile(val userAddress: String) : NavKey
+    @Serializable data object Settings : NavKey
     @Serializable data object About : NavKey
 }

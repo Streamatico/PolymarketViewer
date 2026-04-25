@@ -121,6 +121,7 @@ dependencies {
 
     // Ktor client
     implementation(libs.bundles.ktor.client)
+    implementation(libs.okhttp.dnsoverhttps)
     implementation(libs.kotlinx.serialization.json)
 
     // DI: Koin

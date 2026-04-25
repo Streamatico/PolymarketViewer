@@ -10,7 +10,9 @@ data class UserPreferences( // Data class to hold related preferences
     val analyticsEnabled: Boolean = true, // Opt-out: enabled by default
     val isFirstLaunch: Boolean = true, // True until first analytics ping is sent
     val watchlistIds: Set<String> = emptySet(),
-    val isWatchlistSelected: Boolean = false
+    val isWatchlistSelected: Boolean = false,
+    val dohEnabled: Boolean = false,
+    val dohProvider: DnsOverHttpsProvider = DnsOverHttpsProvider.DEFAULT
 )
 
 class UserPreferencesRepository(
@@ -22,7 +24,11 @@ class UserPreferencesRepository(
                 analyticsEnabled = preferences[PreferenceKeys.ANALYTICS_ENABLED] ?: true,
                 isFirstLaunch = preferences[PreferenceKeys.IS_FIRST_LAUNCH] ?: true,
                 watchlistIds = preferences[PreferenceKeys.WATCHLIST_EVENT_IDS] ?: emptySet(),
-                isWatchlistSelected = preferences[PreferenceKeys.IS_WATCHLIST_SELECTED] ?: false
+                isWatchlistSelected = preferences[PreferenceKeys.IS_WATCHLIST_SELECTED] ?: false,
+                dohEnabled = preferences[PreferenceKeys.DOH_ENABLED] ?: false,
+                dohProvider = DnsOverHttpsProvider.fromStorageValue(
+                    preferences[PreferenceKeys.DOH_PROVIDER]
+                )
             )
         }
 
@@ -72,6 +78,18 @@ class UserPreferencesRepository(
     suspend fun setWatchlistSelected(isSelected: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferenceKeys.IS_WATCHLIST_SELECTED] = isSelected
+        }
+    }
+
+    suspend fun setDohEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferenceKeys.DOH_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setDohProvider(provider: DnsOverHttpsProvider) {
+        dataStore.edit { preferences ->
+            preferences[PreferenceKeys.DOH_PROVIDER] = provider.storageValue
         }
     }
 }

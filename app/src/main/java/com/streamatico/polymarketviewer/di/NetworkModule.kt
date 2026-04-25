@@ -3,6 +3,7 @@ package com.streamatico.polymarketviewer.di
 import android.content.Context
 import android.util.Log
 import com.streamatico.polymarketviewer.BuildConfig
+import com.streamatico.polymarketviewer.data.network.PolymarketDnsResolver
 import com.streamatico.polymarketviewer.data.network.PolymarketHttpClientNames
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -16,6 +17,8 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import okhttp3.Cache
+import okhttp3.Dns
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -24,6 +27,9 @@ import java.io.File
 private const val BASE_GAMMA_URL = "https://gamma-api.polymarket.com/"
 private const val BASE_CLOB_URL = "https://clob.polymarket.com/"
 private const val BASE_DATA_URL = "https://data-api.polymarket.com/"
+private const val POLYMARKET_DNS_QUALIFIER = "PolymarketDns"
+private const val HTTP_CACHE_DIRECTORY_NAME = "http_cache"
+private const val NETWORK_CACHE_SIZE_BYTES = 50L * 1024L * 1024L
 
 // Custom Logger implementation using Android Logcat
 private object AndroidLogger : Logger {
@@ -44,16 +50,36 @@ private object AndroidLogger : Logger {
  * Provides HTTP clients for different API endpoints.
  */
 val networkModule = module {
+    single<Dns>(named(POLYMARKET_DNS_QUALIFIER)) {
+        PolymarketDnsResolver(
+            context = androidContext(),
+            userPreferencesRepository = get(),
+            appScope = get(named(APP_SCOPE))
+        )
+    }
+
     single(named(PolymarketHttpClientNames.GAMMA_CLIENT)) {
-        createHttpClient(androidContext(), BASE_GAMMA_URL)
+        createHttpClient(
+            context = androidContext(),
+            baseUrl = BASE_GAMMA_URL,
+            dns = get(named(POLYMARKET_DNS_QUALIFIER))
+        )
     }
 
     single(named(PolymarketHttpClientNames.CLOB_CLIENT)) {
-        createHttpClient(androidContext(), BASE_CLOB_URL)
+        createHttpClient(
+            context = androidContext(),
+            baseUrl = BASE_CLOB_URL,
+            dns = get(named(POLYMARKET_DNS_QUALIFIER))
+        )
     }
 
     single(named(PolymarketHttpClientNames.DATA_CLIENT)) {
-        createHttpClient(androidContext(), BASE_DATA_URL)
+        createHttpClient(
+            context = androidContext(),
+            baseUrl = BASE_DATA_URL,
+            dns = get(named(POLYMARKET_DNS_QUALIFIER))
+        )
     }
 
     single(named(PolymarketHttpClientNames.ANALYTICS_CLIENT)) {
@@ -67,16 +93,20 @@ val networkModule = module {
     }
 }
 
-private fun createHttpClient(context: Context, baseUrl: String): HttpClient {
+private fun createHttpClient(context: Context, baseUrl: String, dns: Dns): HttpClient {
     return HttpClient(OkHttp) {
 
         engine {
             config {
-                okhttp3.Cache(
-                    directory = File(context.cacheDir, "http_cache"),
-                    // $0.05 worth of phone storage in 2020
-                    maxSize = 50L * 1024L * 1024L // 50 MiB
+                cache(
+                    Cache(
+                        directory = File(context.cacheDir, HTTP_CACHE_DIRECTORY_NAME),
+                        // $0.05 worth of phone storage in 2020
+                        maxSize = NETWORK_CACHE_SIZE_BYTES
+                    )
                 )
+
+                dns(dns)
             }
         }
 

@@ -18,18 +18,14 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -51,25 +47,17 @@ const val COMPANY_URL = "https://streamatico.com/"
 
 @Composable
 fun AboutScreen(
-    onNavigateBack: () -> Unit,
-    viewModel: AboutViewModel,
+    onNavigateBack: () -> Unit
 ) {
-    val userPreferences by viewModel.userPreferencesFlow
-        .collectAsState(initial = null)
-
     AboutScreenContent(
-        onNavigateBack = onNavigateBack,
-        analyticsEnabled = userPreferences?.analyticsEnabled,
-        onAnalyticsEnabledChange = viewModel::setAnalyticsEnabled
+        onNavigateBack = onNavigateBack
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AboutScreenContent(
-    onNavigateBack: () -> Unit,
-    analyticsEnabled: Boolean?,
-    onAnalyticsEnabledChange: (enabled: Boolean) -> Unit
+    onNavigateBack: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
 
@@ -191,38 +179,6 @@ private fun AboutScreenContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Analytics Card
-            InfoCard {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(id = R.string.analytics_title),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(id = R.string.analytics_description),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    if(analyticsEnabled == null) {
-                        CircularProgressIndicator()
-                    } else {
-                        Switch(
-                            checked = analyticsEnabled,
-                            onCheckedChange = onAnalyticsEnabledChange
-                        )
-                    }
-                }
-            }
-
             Spacer(modifier = Modifier.height(24.dp))
 
             // Footer with Privacy Policy
@@ -312,9 +268,7 @@ private fun LinkItem(
 private fun AboutScreenPreview() {
     PolymarketAppTheme {
         AboutScreenContent(
-            onNavigateBack = {},
-            analyticsEnabled = true,
-            onAnalyticsEnabledChange = {}
+            onNavigateBack = {}
         )
     }
 }
@@ -324,9 +278,7 @@ private fun AboutScreenPreview() {
 private fun AboutScreenPreviewDark() {
     PolymarketAppTheme(darkTheme = true) {
         AboutScreenContent(
-            onNavigateBack = {},
-            analyticsEnabled = false,
-            onAnalyticsEnabledChange = {}
+            onNavigateBack = {}
         )
     }
 }

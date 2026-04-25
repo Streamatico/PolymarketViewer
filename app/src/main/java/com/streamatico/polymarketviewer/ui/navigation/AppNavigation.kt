@@ -16,7 +16,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.streamatico.polymarketviewer.ui.about.AboutScreen
-import com.streamatico.polymarketviewer.ui.about.AboutViewModel
 import com.streamatico.polymarketviewer.ui.event_detail.EventDetailScreen
 import com.streamatico.polymarketviewer.ui.event_detail.EventDetailViewModel
 import com.streamatico.polymarketviewer.ui.event_list.EventListScreen
@@ -25,6 +24,8 @@ import com.streamatico.polymarketviewer.ui.market_detail.MarketDetailScreen
 import com.streamatico.polymarketviewer.ui.market_detail.MarketDetailViewModel
 import com.streamatico.polymarketviewer.ui.search_screen.SearchScreen
 import com.streamatico.polymarketviewer.ui.search_screen.SearchViewModel
+import com.streamatico.polymarketviewer.ui.settings.SettingsScreen
+import com.streamatico.polymarketviewer.ui.settings.SettingsViewModel
 import com.streamatico.polymarketviewer.ui.user_profile.UserProfileScreen
 import com.streamatico.polymarketviewer.ui.user_profile.UserProfileViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -69,6 +70,7 @@ fun AppNavigation(
                     onNavigateToEventDetail = { eventSlug ->
                         backStack.add(NavKeys.EventDetail(eventSlug))
                     },
+                    onNavigateToSettings = { backStack.add(NavKeys.Settings) },
                     onNavigateToAbout = { backStack.add(NavKeys.About) },
                     onNavigateToSearch = { backStack.add(NavKeys.Search) }
                 )
@@ -113,10 +115,15 @@ fun AppNavigation(
                     }
                 )
             }
-            entry<NavKeys.About> {
-                val vm = koinViewModel<AboutViewModel>()
-                AboutScreen(
+            entry<NavKeys.Settings> {
+                val vm = koinViewModel<SettingsViewModel>()
+                SettingsScreen(
                     viewModel = vm,
+                    onNavigateBack = { backStack.removeLastOrNull() }
+                )
+            }
+            entry<NavKeys.About> {
+                AboutScreen(
                     onNavigateBack = { backStack.removeLastOrNull() }
                 )
             }

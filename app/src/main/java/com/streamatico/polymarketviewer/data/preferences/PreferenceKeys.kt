@@ -1,6 +1,7 @@
 package com.streamatico.polymarketviewer.data.preferences
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 
 object PreferenceKeys {
     // Analytics opt-out setting (enabled by default)
@@ -14,4 +15,8 @@ object PreferenceKeys {
 
     // Watchlist tab selection flag
     val IS_WATCHLIST_SELECTED = booleanPreferencesKey("is_watchlist_selected")
+
+    // DNS-over-HTTPS settings
+    val DOH_ENABLED = booleanPreferencesKey("doh_enabled")
+    val DOH_PROVIDER = stringPreferencesKey("doh_provider")
 }
