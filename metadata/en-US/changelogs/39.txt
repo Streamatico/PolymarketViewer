@@ -1,0 +1,1 @@
+- Updated app dependencies to keep the app current and maintain compatibility with the latest Android tooling
