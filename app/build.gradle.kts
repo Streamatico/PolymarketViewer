@@ -19,7 +19,7 @@ kotlin {
 
 android {
     namespace = "com.streamatico.polymarketviewer"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.streamatico.polymarketviewer"
