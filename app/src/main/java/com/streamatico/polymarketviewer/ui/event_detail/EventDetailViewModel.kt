@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import com.streamatico.polymarketviewer.data.model.clob_api.TimeseriesPointDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.CommentDto
@@ -244,7 +244,7 @@ class EventDetailViewModel(
                 _isChartAvailable.value = true
                 try {
                     chartModelProducer.runTransaction {
-                        lineSeries {
+                        lineModel {
                             combinedMarketsResults.forEach { x ->
                                 series(
                                     x.timeseries.map { it.first },
