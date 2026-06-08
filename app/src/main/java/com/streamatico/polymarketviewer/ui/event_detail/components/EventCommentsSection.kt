@@ -31,11 +31,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.streamatico.polymarketviewer.domain.model.EventType
 import com.streamatico.polymarketviewer.domain.repository.CommentsSortOrder
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.ui.event_detail.HierarchicalComment
 import com.streamatico.polymarketviewer.ui.shared.UiError
 import com.streamatico.polymarketviewer.ui.shared.components.ErrorBox
@@ -64,7 +66,7 @@ fun LazyListScope.eventCommentsSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Comments", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.event_detail_comments_title), style = MaterialTheme.typography.titleLarge)
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -84,14 +86,14 @@ fun LazyListScope.eventCommentsSection(
                     ) {
                         Text(
                             text = when (commentsSortOrder) {
-                                CommentsSortOrder.NEWEST -> "Newest"
-                                CommentsSortOrder.MOST_LIKED -> "Most liked"
+                                CommentsSortOrder.NEWEST -> stringResource(R.string.event_detail_sort_newest)
+                                CommentsSortOrder.MOST_LIKED -> stringResource(R.string.event_detail_sort_most_liked)
                             },
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "Sort order",
+                            contentDescription = stringResource(R.string.event_detail_sort_order),
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -102,14 +104,14 @@ fun LazyListScope.eventCommentsSection(
                         modifier = Modifier.widthIn(min = 120.dp)
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Newest") },
+                            text = { Text(stringResource(R.string.event_detail_sort_newest)) },
                             onClick = {
                                 onCommentsSortOrderChange(CommentsSortOrder.NEWEST)
                                 sortDropdownExpanded = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Most liked") },
+                            text = { Text(stringResource(R.string.event_detail_sort_most_liked)) },
                             onClick = {
                                 onCommentsSortOrderChange(CommentsSortOrder.MOST_LIKED)
                                 sortDropdownExpanded = false
@@ -127,7 +129,7 @@ fun LazyListScope.eventCommentsSection(
                         checked = holdersOnly,
                         onCheckedChange = { onToggleHoldersOnly() }
                     )
-                    Text("Holders", style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.event_detail_holders_only), style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }
@@ -167,7 +169,7 @@ fun LazyListScope.eventCommentsSection(
             )
         } else if (!commentsLoading && displayableComments.isEmpty()) {
             Text(
-                "No comments found.",
+                stringResource(R.string.event_detail_no_comments),
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium
@@ -220,4 +222,3 @@ private fun EventCommentsSectionErrorPreview() {
         )
     }
 }
-

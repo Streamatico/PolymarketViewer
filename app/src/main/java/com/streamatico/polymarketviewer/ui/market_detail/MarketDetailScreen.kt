@@ -165,7 +165,7 @@ fun MarketDetailsContent(market: MarketDto, modifier: Modifier = Modifier) {
             item {
                 AsyncImage(
                     model = market.imageUrl,
-                    contentDescription = "Market image",
+                    contentDescription = stringResource(R.string.market_image_content_description),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(MaterialTheme.shapes.medium),
@@ -193,7 +193,9 @@ fun MarketDetailsContent(market: MarketDto, modifier: Modifier = Modifier) {
                         modifier = Modifier.animateContentSize()
                     )
                     if (it.lines().size > 5) {
-                        val showMoreText = if (isDescriptionExpanded) "Show less" else "Show more"
+                        val showMoreText = stringResource(
+                            if (isDescriptionExpanded) R.string.action_show_less else R.string.action_show_more
+                        )
                         Text(
                             text = showMoreText,
                             color = MaterialTheme.colorScheme.primary,
@@ -218,27 +220,27 @@ fun MarketDetailsContent(market: MarketDto, modifier: Modifier = Modifier) {
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     market.volume?.let {
-                        InfoRow(label = "Volume", value = UiFormatter.formatLargeValueUsd(it))
+                        InfoRow(label = stringResource(R.string.market_detail_label_volume), value = UiFormatter.formatLargeValueUsd(it))
                         Spacer(Modifier.height(8.dp))
                     }
                     market.liquidity?.let {
-                        InfoRow(label = "Liquidity", value = UiFormatter.formatLargeValueUsd(it))
+                        InfoRow(label = stringResource(R.string.market_detail_label_liquidity), value = UiFormatter.formatLargeValueUsd(it))
                         Spacer(Modifier.height(8.dp))
                     }
                     market.startDate?.let {
-                        InfoRow(label = "Starts", value = UiFormatter.formatDateTimeLong(it))
+                        InfoRow(label = stringResource(R.string.market_detail_label_starts), value = UiFormatter.formatDateTimeLong(it))
                         Spacer(Modifier.height(8.dp))
                     }
                     market.endDate?.let {
-                        InfoRow(label = "Ends (estimated)", value = UiFormatter.formatDateTimeLong(it))
+                        InfoRow(label = stringResource(R.string.market_detail_label_ends_estimated), value = UiFormatter.formatDateTimeLong(it))
                         Spacer(Modifier.height(8.dp))
                     }
                     market.umaResolutionStatus?.let {
-                        InfoRow(label = "Resolution Status", value = it)
+                        InfoRow(label = stringResource(R.string.market_detail_label_resolution_status), value = it)
                     }
                     market.resolutionSource?.takeIf { it.isNotBlank() }?.let {
                         // Remove Spacer after the last element
-                        InfoRow(label = "Resolution Source", value = it)
+                        InfoRow(label = stringResource(R.string.market_detail_label_resolution_source), value = it)
                     }
                 }
             }
@@ -249,7 +251,7 @@ fun MarketDetailsContent(market: MarketDto, modifier: Modifier = Modifier) {
         // --- Outcomes list --- //
         if (outcomePricePairs.isNotEmpty()) {
             item { // Header for outcomes
-                Text("Outcomes:", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+                Text(stringResource(R.string.market_detail_outcomes_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
                 HorizontalDivider() // Keep divider above list
             }
             items(outcomePricePairs) { (outcome, price) ->

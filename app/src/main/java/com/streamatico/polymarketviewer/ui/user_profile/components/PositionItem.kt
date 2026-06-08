@@ -6,9 +6,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.data_api.UserPositionDto
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.TrendText
@@ -34,7 +36,10 @@ internal fun PositionItem(
             Spacer(Modifier.width(8.dp))
 
             Text(
-                text = "${UiFormatter.formatPositionSize(position.size) ?: "0"} shares at",
+                text = stringResource(
+                    R.string.position_shares_at_format,
+                    UiFormatter.formatPositionSize(position.size) ?: "0"
+                ),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -46,7 +51,7 @@ internal fun PositionItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
-        dateFooterText = position.endDate?.let { "Ends on $it" },
+        dateFooterText = position.endDate?.let { stringResource(R.string.position_ends_on_format, it) },
         positionValue = position.value,
         pnl = position.pnl,
         percentPnl = position.percentPnl,

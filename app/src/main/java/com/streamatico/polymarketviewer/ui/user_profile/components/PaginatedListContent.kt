@@ -62,7 +62,7 @@ internal fun <T> PaginatedListContent(
         // If we are here: Empty, Not Loading, No Error.
         // Show "No items" placeholder.
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("No items", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.no_items), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         return
     }

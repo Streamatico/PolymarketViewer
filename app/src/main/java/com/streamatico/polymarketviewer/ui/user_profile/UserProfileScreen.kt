@@ -125,7 +125,7 @@ private fun UserProfileScaffold(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.navigate_back))
                     }
                 }
             )
@@ -170,7 +170,10 @@ private fun UserProfileContent(
     onEventClick: (eventSlug: String) -> Unit,
 ) {
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
-    val tabs = listOf("Positions", "Activity")
+    val tabs = listOf(
+        stringResource(R.string.user_profile_tab_positions),
+        stringResource(R.string.user_profile_tab_activity)
+    )
 
     // Lazy loading effect based on selected tab
     LaunchedEffect(selectedTabIndex) {
@@ -241,7 +244,10 @@ private fun UserProfileHeader(
             ProfileIcon(
                 userAddress = userProfile.proxyWallet,
                 iconUrl = userProfile.profileImage,
-                contentDescription = "${userProfile.getDisplayName()}'s avatar",
+                contentDescription = stringResource(
+                    R.string.user_profile_avatar_content_description,
+                    userProfile.getDisplayName()
+                ),
                 avatarSize = 80.dp,
             )
 
@@ -266,7 +272,10 @@ private fun UserProfileHeader(
 
                 if(userProfile.createdAt != null) {
                     Text(
-                        text = "Joined ${UiFormatter.formatDateOnly(userProfile.createdAt)}",
+                        text = stringResource(
+                            R.string.user_profile_joined_format,
+                            UiFormatter.formatDateOnly(userProfile.createdAt)
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
@@ -281,13 +290,13 @@ private fun UserProfileHeader(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             StatItem(
-                label = "Positions Value",
+                label = stringResource(R.string.user_profile_positions_value),
                 value = portfolioValue.let {
                     if(it != null) UiFormatter.formatCurrency(it)
                     else "—"
                 }
             )
-            StatItem(label = "Predictions", value = userTraded?.toString() ?: "—")
+            StatItem(label = stringResource(R.string.user_profile_predictions), value = userTraded?.toString() ?: "—")
         }
     }
 }
@@ -333,9 +342,9 @@ private fun PositionsTab(
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Start
         ) {
-            FilterChip(selected = showActive, onClick = { showActive = true }, label = "Active")
+            FilterChip(selected = showActive, onClick = { showActive = true }, label = stringResource(R.string.user_profile_filter_active))
             Spacer(modifier = Modifier.width(8.dp))
-            FilterChip(selected = !showActive, onClick = { showActive = false }, label = "Closed")
+            FilterChip(selected = !showActive, onClick = { showActive = false }, label = stringResource(R.string.user_profile_filter_closed))
         }
 
         if (showActive) {

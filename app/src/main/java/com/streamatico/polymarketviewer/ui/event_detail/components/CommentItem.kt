@@ -27,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +37,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.CommentDto
 import com.streamatico.polymarketviewer.data.model.gamma_api.PolymarketUserProfile
 import com.streamatico.polymarketviewer.data.model.gamma_api.ProfilePositionDto
@@ -240,7 +243,7 @@ private fun CommentContent(
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             imageVector = Icons.Default.Favorite,
-                            contentDescription = "Likes",
+                            contentDescription = stringResource(R.string.event_detail_likes_content_description),
                             tint = MaterialTheme.colorScheme.outline,
                             modifier = Modifier.size(14.dp)
                         )
@@ -270,13 +273,15 @@ private fun CommentContent(
             ) {
                 Icon(
                     imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = if (isExpanded) "Hide replies" else "Show replies",
+                    contentDescription = stringResource(
+                        if (isExpanded) R.string.event_detail_hide_replies else R.string.event_detail_show_replies
+                    ),
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "$replyCount ${if (replyCount == 1) "Reply" else "Replies"}",
+                    text = pluralStringResource(R.plurals.event_detail_reply_count, replyCount, replyCount),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium
@@ -372,4 +377,3 @@ private fun ReplyItemStandalonePreview() {
         )
     }
 }
-

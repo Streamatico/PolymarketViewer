@@ -19,7 +19,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.gamma_api.EventDto
 
 // --- Utility Functions (moved from TranslateUtils) ---
@@ -67,7 +69,7 @@ private fun openGoogleTranslateInPlayStore(context: Context) {
         context.startActivity(playStoreIntent)
     } catch (e: Exception) {
         Log.e("Translate", "Failed to open Play Store for Google Translate", e)
-        Toast.makeText(context, "Could not open Play Store.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, R.string.translate_play_store_unavailable, Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -84,10 +86,10 @@ private fun InstallTranslateDialog(
     AlertDialog(
         onDismissRequest = onDismissRequest,
         icon = {
-            Icon(Icons.Default.Translate, contentDescription = "Translate Icon")
+            Icon(Icons.Default.Translate, contentDescription = null)
         },
-        title = { Text("Google Translate Not Found") },
-        text = { Text("To translate content, the Google Translate app needs to be installed.") },
+        title = { Text(stringResource(R.string.translate_not_found_title)) },
+        text = { Text(stringResource(R.string.translate_not_found_message)) },
         confirmButton = {
             Button(
                 onClick = {
@@ -96,12 +98,12 @@ private fun InstallTranslateDialog(
                     // openGoogleTranslateInPlayStore(context)
                 }
             ) {
-                Text("Install")
+                Text(stringResource(R.string.action_install))
             }
         },
         dismissButton = {
             OutlinedButton(onClick = onDismissRequest) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
@@ -137,7 +139,7 @@ fun TranslateAction(
             }) {
                 Icon(
                     imageVector = Icons.Default.Translate,
-                    contentDescription = "Translate Title and Description"
+                    contentDescription = stringResource(R.string.translate_action_content_description)
                 )
             }
         }

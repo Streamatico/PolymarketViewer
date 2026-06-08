@@ -109,7 +109,9 @@ fun EventHeader(
                 }
 
                 if(isDescriptionOverflowing == true || isDescriptionExpanded) {
-                    val showMoreText = if (isDescriptionExpanded) "Show less" else "Show more"
+                    val showMoreText = stringResource(
+                        if (isDescriptionExpanded) R.string.action_show_less else R.string.action_show_more
+                    )
                     Text(
                         text = showMoreText,
                         color = MaterialTheme.colorScheme.primary,
@@ -129,27 +131,27 @@ fun EventHeader(
             modifier = Modifier.padding(vertical = 16.dp)
         ) {
             event.volume?.let {
-                InfoRow(label = "Total Volume", value = UiFormatter.formatLargeValueUsd(it))
+                InfoRow(label = stringResource(R.string.event_detail_label_total_volume), value = UiFormatter.formatLargeValueUsd(it))
                 EventHeaderHorizontalSpacer()
             }
             event.category?.let {
-                InfoRow(label = "Category", value = it)
+                InfoRow(label = stringResource(R.string.event_detail_label_category), value = it)
                 EventHeaderHorizontalSpacer()
             }
             event.startDate?.let {
-                InfoRow(label = "Starts", value = UiFormatter.formatDateTimeLong(it))
+                InfoRow(label = stringResource(R.string.event_detail_label_starts), value = UiFormatter.formatDateTimeLong(it))
                 EventHeaderHorizontalSpacer()
             }
             event.endDate?.let {
-                InfoRow(label = "Ends (estimated)", value = UiFormatter.formatDateTimeLong(it))
+                InfoRow(label = stringResource(R.string.event_detail_label_ends_estimated), value = UiFormatter.formatDateTimeLong(it))
                 EventHeaderHorizontalSpacer()
             }
 
-            InfoRow(label = "Status", value = getEventStatusText(event))
+            InfoRow(label = stringResource(R.string.event_detail_label_status), value = getEventStatusText(event))
             EventHeaderHorizontalSpacer()
 
             event.resolutionSource?.takeIf { it.isNotBlank() }?.let {
-                InfoRow(label = "Resolution Source", value = it)
+                InfoRow(label = stringResource(R.string.event_detail_label_resolution_source), value = it)
             }
         }
     }
@@ -186,4 +188,3 @@ private fun EventHeaderPreview() {
         )
     }
 }
-

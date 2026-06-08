@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -85,12 +86,12 @@ fun LazyListScope.eventDetailMarketList(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Outcome".uppercase(),
+                    text = stringResource(R.string.event_detail_outcome_header).uppercase(),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline
                 )
                 Text(
-                    text = "% Chance".uppercase(),
+                    text = stringResource(R.string.event_detail_chance_header).uppercase(),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline
                 )
@@ -115,7 +116,11 @@ fun LazyListScope.eventDetailMarketList(
     if (sortedMarkets.size > MARKET_DISPLAY_LIMIT) {
         item {
             Text(
-                text = if (isMarketListExpanded) "Show less" else "+ $hiddenMarketCount more outcomes",
+                text = if (isMarketListExpanded) {
+                    stringResource(R.string.action_show_less)
+                } else {
+                    pluralStringResource(R.plurals.more_outcomes_count, hiddenMarketCount, hiddenMarketCount)
+                },
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Center,
@@ -159,7 +164,7 @@ private fun EventDetailMarketRow(
             if(showIcon && iconUrl != null) {
                 AsyncImage(
                     model = iconUrl,
-                    contentDescription = "$outcomeText icon",
+                    contentDescription = stringResource(R.string.event_detail_outcome_icon_content_description, outcomeText),
                     modifier = Modifier
                         .size(40.dp) // Adjust size as needed
                         .clip(CircleShape) // Keep it circular? Or MaterialTheme.shapes.small?
@@ -186,7 +191,7 @@ private fun EventDetailMarketRow(
                 ) {
                     volume?.let {
                         Text(
-                            text = UiFormatter.formatLargeValueUsd(it, suffix = " Vol."),
+                            text = UiFormatter.formatLargeValueUsd(it, suffix = stringResource(R.string.volume_suffix)),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.outline,
                             modifier = Modifier.padding(top = 2.dp)
@@ -279,4 +284,3 @@ private fun EventMarketsListPreview() {
         )
     }
 }
-

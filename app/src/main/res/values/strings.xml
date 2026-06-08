@@ -9,6 +9,9 @@
     <string name="filter_tooltip">Sort Options</string>
     <string name="search_tooltip">Search</string>
     <string name="more_options_tooltip">More options</string>
+    <string name="app_logo_content_description">Logo</string>
+    <string name="loading">Loading…</string>
+    <string name="no_items">No items</string>
     <string name="developed_by">Developed by</string>
     <string name="about_data_source_title">Data Source</string>
     <string name="about_data_source_text">This is an unofficial application that displays publicly available data from the Polymarket platform (polymarket.com).</string>
@@ -20,9 +23,13 @@
     <string name="search_no_results">No events found</string>
     <string name="search_clear">Clear search</string>
     <string name="action_retry">Retry</string>
+    <string name="action_show_more">Show more</string>
+    <string name="action_install">Install</string>
+    <string name="action_cancel">Cancel</string>
 
     <string name="activity_title_yield">Rewards</string>
     <string name="activity_title_reward">Rewards distributed for epoch</string>
+    <string name="activity_shares_format">%1$s shares</string>
 
     <!-- Analytics settings -->
     <string name="analytics_title">Help Improve the App</string>
@@ -46,6 +53,21 @@
     <string name="send_email">Send email</string>
 
     <string name="user_profile_title">User profile</string>
+    <string name="user_profile_tab_positions">Positions</string>
+    <string name="user_profile_tab_activity">Activity</string>
+    <string name="user_profile_avatar_content_description">%1$s\'s avatar</string>
+    <string name="user_profile_joined_format">Joined %1$s</string>
+    <string name="user_profile_positions_value">Positions Value</string>
+    <string name="user_profile_predictions">Predictions</string>
+    <string name="user_profile_filter_active">Active</string>
+    <string name="user_profile_filter_closed">Closed</string>
+    <string name="user_profile_unknown_market">Unknown Market</string>
+    <string name="position_won">Won</string>
+    <string name="position_lost">Lost</string>
+    <string name="position_shares_at_format">%1$s shares at</string>
+    <string name="position_ends_on_format">Ends on %1$s</string>
+    <string name="position_closed_on_format">Closed on %1$s</string>
+    <string name="closed_position_summary_format">%1$s %2$s at %3$s</string>
 
     <!-- Watchlist -->
     <string name="watchlist_empty_title">Your watchlist is empty.</string>
@@ -72,11 +94,48 @@
     <!-- Event Detail -->
     <string name="event_details_title">Event Details</string>
     <string name="event_details_failed_to_load_preview">Failed to load event data.</string>
+    <string name="event_detail_label_total_volume">Total Volume</string>
+    <string name="event_detail_label_category">Category</string>
+    <string name="event_detail_label_starts">Starts</string>
+    <string name="event_detail_label_ends_estimated">Ends (estimated)</string>
+    <string name="event_detail_label_status">Status</string>
+    <string name="event_detail_label_resolution_source">Resolution Source</string>
+    <string name="event_detail_outcome_header">Outcome</string>
+    <string name="event_detail_chance_header" formatted="false">% Chance</string>
+    <string name="event_detail_outcome_icon_content_description">%1$s icon</string>
+    <string name="event_detail_comments_title">Comments</string>
+    <string name="event_detail_sort_order">Sort order</string>
+    <string name="event_detail_sort_newest">Newest</string>
+    <string name="event_detail_sort_most_liked">Most liked</string>
+    <string name="event_detail_holders_only">Holders</string>
+    <string name="event_detail_no_comments">No comments found.</string>
+    <string name="event_detail_likes_content_description">Likes</string>
+    <string name="event_detail_hide_replies">Hide replies</string>
+    <string name="event_detail_show_replies">Show replies</string>
+
+    <plurals name="event_detail_reply_count">
+        <item quantity="one">%d Reply</item>
+        <item quantity="other">%d Replies</item>
+    </plurals>
+
+    <!-- Translate -->
+    <string name="translate_action_content_description">Translate title and description</string>
+    <string name="translate_not_found_title">Google Translate Not Found</string>
+    <string name="translate_not_found_message">To translate content, the Google Translate app needs to be installed.</string>
+    <string name="translate_play_store_unavailable">Could not open Play Store.</string>
 
     <!-- Market Detail -->
     <string name="market_details_title">Market Details</string>
     <string name="market_details_loading_title">Loading Details…</string>
     <string name="market_details_failed_to_load_preview">Failed to load market details.</string>
+    <string name="market_image_content_description">Market image</string>
+    <string name="market_detail_label_volume">Volume</string>
+    <string name="market_detail_label_liquidity">Liquidity</string>
+    <string name="market_detail_label_starts">Starts</string>
+    <string name="market_detail_label_ends_estimated">Ends (estimated)</string>
+    <string name="market_detail_label_resolution_status">Resolution Status</string>
+    <string name="market_detail_label_resolution_source">Resolution Source</string>
+    <string name="market_detail_outcomes_title">Outcomes:</string>
 
     <!-- Event Item -->
     <string name="event_state_active">Active</string>

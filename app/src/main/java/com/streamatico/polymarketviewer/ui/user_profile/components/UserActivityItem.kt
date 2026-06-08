@@ -165,8 +165,12 @@ private fun MarketInfoSection(userActivity: UserActivityDto) {
             }
         }
 
+        Spacer(Modifier.width(4.dp))
         Text(
-            text = " ${UiFormatter.formatPositionSize(userActivity.size)} shares",
+            text = stringResource(
+                R.string.activity_shares_format,
+                UiFormatter.formatPositionSize(userActivity.size) ?: "0"
+            ),
             style = textStyle,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis

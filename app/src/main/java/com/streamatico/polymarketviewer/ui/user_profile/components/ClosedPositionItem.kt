@@ -6,9 +6,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.streamatico.polymarketviewer.R
 import com.streamatico.polymarketviewer.data.model.data_api.UserClosedPositionDto
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
 import com.streamatico.polymarketviewer.ui.shared.components.TrendText
@@ -33,7 +35,7 @@ internal fun ClosedPositionItem(
             // Outcome Badge
             TrendText(
                 isPositive = isWin,
-                text = if (isWin) "Won" else "Lost",
+                text = stringResource(if (isWin) R.string.position_won else R.string.position_lost),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
             )
@@ -43,13 +45,21 @@ internal fun ClosedPositionItem(
             // Price (e.g. "57c")
             val priceCentsText = UiFormatter.formatPriceCents(position.avgPrice)
             Text(
-                text = "${UiFormatter.formatPositionSize(position.totalBought)} ${position.outcome} at $priceCentsText",
+                text = stringResource(
+                    R.string.closed_position_summary_format,
+                    UiFormatter.formatPositionSize(position.totalBought) ?: "0",
+                    position.outcome,
+                    priceCentsText
+                ),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
 
-        dateFooterText = "Closed on ${UiFormatter.formatDateOnly(position.timestamp)}",
+        dateFooterText = stringResource(
+            R.string.position_closed_on_format,
+            UiFormatter.formatDateOnly(position.timestamp)
+        ),
         positionValue = finalValue,
         pnl = profit,
         percentPnl = roiPercent,
