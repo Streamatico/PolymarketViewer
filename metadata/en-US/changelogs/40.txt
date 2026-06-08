@@ -1,0 +1,3 @@
+- Updated the Android dependency stack
+- Updated Vico charts and migrated chart data setup to the current line model API
+- Prepared more interface text for future translations
