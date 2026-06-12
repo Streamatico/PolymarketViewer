@@ -32,7 +32,7 @@ fun <T : BaseMarketDto> List<T>.sortedByViewPriority(sortByEnum: EventMarketsSor
     }
 }
 
-fun List<BaseMarketDto>.sortedForShortView(limit: Int): List<BaseMarketDto> {
+private fun List<BaseMarketDto>.sortedForCompactDisplay(limit: Int): List<BaseMarketDto> {
     return this
         //.filter { !it.closed }
 
@@ -58,7 +58,10 @@ data class MarketDisplayRow(
     val resolvedOutcome: String? = null
 )
 
-fun BaseEventDto.toDisplayRows(limit: Int? = null): List<MarketDisplayRow> {
+/**
+ * Canonical expanded/detail display order for event outcomes.
+ */
+fun BaseEventDto.toDisplayRows(): List<MarketDisplayRow> {
     val markets = baseMarkets
     if (markets.isEmpty()) return emptyList()
 
@@ -67,16 +70,34 @@ fun BaseEventDto.toDisplayRows(limit: Int? = null): List<MarketDisplayRow> {
 
         EventType.CategoricalMarket -> {
             val mainMarket = markets.firstOrNull { it.groupItemThreshold == 0 } ?: markets.first()
-            mainMarket.toCategoricalDisplayRows(limit)
+            mainMarket.toCategoricalDisplayRows()
         }
 
         EventType.MultiMarket -> {
-            val sortedMarkets = if(limit == null) {
-                markets.sortedByViewPriority(sortByEnum)
-            } else {
-                // Short view
-                markets.sortedForShortView(limit)
-            }
+            val sortedMarkets = markets.sortedByViewPriority(sortByEnum)
+            val isSingleMarket = sortedMarkets.size == 1
+            sortedMarkets.map { it.toMultiMarketDisplayRow(isSingleMarket) }
+        }
+    }
+}
+
+/**
+ * Compact card order: choose the strongest markets first, then present them in group order.
+ */
+fun BaseEventDto.toCompactDisplayRows(limit: Int): List<MarketDisplayRow> {
+    val markets = baseMarkets
+    if (markets.isEmpty()) return emptyList()
+
+    return when (eventType) {
+        EventType.BinaryEvent -> listOf(markets.first().toBinaryDisplayRow())
+
+        EventType.CategoricalMarket -> {
+            val mainMarket = markets.firstOrNull { it.groupItemThreshold == 0 } ?: markets.first()
+            mainMarket.toCategoricalDisplayRows().take(limit)
+        }
+
+        EventType.MultiMarket -> {
+            val sortedMarkets = markets.sortedForCompactDisplay(limit)
             val isSingleMarket = sortedMarkets.size == 1
             sortedMarkets.map { it.toMultiMarketDisplayRow(isSingleMarket) }
         }
@@ -109,13 +130,12 @@ private fun BaseMarketDto.toBinaryDisplayRow(): MarketDisplayRow {
     )
 }
 
-private fun BaseMarketDto.toCategoricalDisplayRows(limit: Int? = null): List<MarketDisplayRow> {
+private fun BaseMarketDto.toCategoricalDisplayRows(): List<MarketDisplayRow> {
     val resolutionStatus = getResolutionStatus()
 
     return outcomes
         .mapIndexed { index, outcome -> outcome to outcomePrices.getOrNull(index) }
         .sortedWith(compareByDescending { it.second ?: -1.0 })
-        .take(limit ?: Int.MAX_VALUE)
         .map { (outcome, price) -> MarketDisplayRow(title = outcome, price = price, resolutionStatus = resolutionStatus) }
 }
 

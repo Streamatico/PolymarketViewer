@@ -89,7 +89,9 @@ internal object EventWidgetSnapshotBuilder {
     }.getOrNull()
 
     private fun buildRows(event: BaseEventDto): List<EventWidgetRow> =
-        event.toDisplayRows(MAX_CACHED_ROWS).map { it.toWidgetRow() }
+        event.toDisplayRows()
+            .take(MAX_CACHED_ROWS)
+            .map { it.toWidgetRow() }
 
     private fun buildTotalRowsCount(event: BaseEventDto): Int =
         event.totalDisplayRowsCount()

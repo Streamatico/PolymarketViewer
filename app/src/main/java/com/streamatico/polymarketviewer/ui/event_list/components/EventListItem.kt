@@ -48,6 +48,7 @@ import com.streamatico.polymarketviewer.domain.model.EventType
 import com.streamatico.polymarketviewer.ui.shared.MarketBadgeState
 import com.streamatico.polymarketviewer.ui.shared.MarketDisplayRow
 import com.streamatico.polymarketviewer.ui.shared.UiFormatter
+import com.streamatico.polymarketviewer.ui.shared.toCompactDisplayRows
 import com.streamatico.polymarketviewer.ui.shared.toDisplayRows
 import com.streamatico.polymarketviewer.ui.theme.PolymarketAppTheme
 import com.streamatico.polymarketviewer.ui.tooling.PreviewMocks
@@ -129,12 +130,9 @@ fun EventListItem(
                     EventType.MultiMarket -> {
                         val sortedMarkets = remember(event, isMarketListExpanded) {
                             if (isMarketListExpanded || event.baseMarkets.size <= (MAX_VISIBLE_MARKETS + 1)) {
-                                //event.baseMarkets.sortedByViewPriority(event.sortByEnum)
                                 event.toDisplayRows()
                             } else {
-                                //event.baseMarkets
-                                //    .sortedForShortView(MAX_VISIBLE_MARKETS)
-                                event.toDisplayRows(MAX_VISIBLE_MARKETS)
+                                event.toCompactDisplayRows(MAX_VISIBLE_MARKETS)
                             }
                         }
 
