@@ -1,0 +1,1 @@
+- Fixed widget outcome ordering for multi-outcome events so it matches the event detail view
