@@ -1,0 +1,2 @@
+- Fixed an issue where some events failed to load
+- Improved overall app stability and performance
