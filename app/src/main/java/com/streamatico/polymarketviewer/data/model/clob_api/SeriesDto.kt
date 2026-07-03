@@ -11,7 +11,7 @@ data class SeriesDto (
     @SerialName("ticker") val ticker: String,
     @SerialName("slug") val slug: String,
     @SerialName("title") val title: String,
-    @SerialName("seriesType") val seriesType: String,
+    @SerialName("seriesType") val seriesType: String? = null,
     @SerialName("recurrence") val recurrence: String,
     @SerialName("image") val image: String? = null, // Made nullable as URLs can sometimes be missing
     @SerialName("icon") val icon: String? = null,   // Made nullable
