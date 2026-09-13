@@ -1,0 +1,1 @@
+- Improved overall app stability and performance
