@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -146,6 +147,7 @@ private fun EventDetailMarketRow(
 
     val iconUrl = market.iconUrl
     val resolutionStatus = market.getResolutionStatus()
+    val isResolved = resolutionStatus == MarketResolutionStatus.RESOLVED
     val price = market.yesPrice()
     val oneDayPriceChange = market.oneDayPriceChange
     val volume = market.volume
@@ -158,6 +160,7 @@ private fun EventDetailMarketRow(
             .padding(vertical = 12.dp)
     ) {
         Row(
+            modifier = Modifier.padding(end = if (isResolved) trendIndicatorEndPadding else 0.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // --- Start Icon --- //
@@ -185,8 +188,7 @@ private fun EventDetailMarketRow(
                     )
                 }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     volume?.let {
@@ -194,6 +196,8 @@ private fun EventDetailMarketRow(
                             text = UiFormatter.formatLargeValueUsd(it, suffix = stringResource(R.string.volume_suffix)),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.outline,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(top = 2.dp)
                         )
                     }
@@ -208,6 +212,8 @@ private fun EventDetailMarketRow(
                             text = resolutionText,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
@@ -216,12 +222,12 @@ private fun EventDetailMarketRow(
 
             // Chance
             Column(
+                // Reserve space for the market title when the value is a long winner name.
+                modifier = if (isResolved) Modifier.weight(1f) else Modifier,
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    val isResolved = resolutionStatus == MarketResolutionStatus.RESOLVED
-
                     val chanceText: String = if (isResolved) {
                         market.getResolvedOutcome() ?: "??"
                     } else {
@@ -229,21 +235,23 @@ private fun EventDetailMarketRow(
                     }
 
                     Text(
-                        modifier = Modifier.priceAlpha(price, isResolved),
+                        modifier = (if (isResolved) Modifier.weight(1f) else Modifier)
+                            .priceAlpha(price, isResolved),
                         text = chanceText,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.End,
                     )
 
-                    Box(
-                        Modifier.widthIn(min = trendIndicatorEndPadding)
-                    ) {
-                        if (!isResolved && oneDayPriceChange != null && displayOneDayPriceChange(oneDayPriceChange)) {
-                            val priceChangePercent = (oneDayPriceChange * 100).toInt()
-                            ChangePercentIndicator(
-                                priceChangePercent,
-                                Modifier.padding(start = 4.dp)
-                            )
+                    if (!isResolved) {
+                        Box(Modifier.widthIn(min = trendIndicatorEndPadding)) {
+                            if (oneDayPriceChange != null && displayOneDayPriceChange(oneDayPriceChange)) {
+                                val priceChangePercent = (oneDayPriceChange * 100).toInt()
+                                ChangePercentIndicator(
+                                    priceChangePercent,
+                                    Modifier.padding(start = 4.dp)
+                                )
+                            }
                         }
                     }
                 }
