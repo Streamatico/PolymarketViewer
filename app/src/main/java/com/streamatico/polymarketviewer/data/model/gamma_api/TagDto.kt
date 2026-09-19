@@ -19,8 +19,7 @@ data class TagDto(
 
     @SerialName("isCarousel") val isCarousel: Boolean? = null,
 
-    @Serializable(with = OffsetDateTimeSerializer::class)
-    @SerialName("publishedAt") val publishedAt: OffsetDateTime? = null,
+    @SerialName("publishedAt") val publishedAt: String? = null,
     @Serializable(with = OffsetDateTimeSerializer::class)
     @SerialName("createdAt") val createdAt: OffsetDateTime? = null,
     @Serializable(with = OffsetDateTimeSerializer::class)

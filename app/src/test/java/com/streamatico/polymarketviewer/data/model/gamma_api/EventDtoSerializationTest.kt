@@ -1,14 +1,22 @@
 package com.streamatico.polymarketviewer.data.model.gamma_api
 
-import kotlinx.serialization.json.Json
+import com.streamatico.polymarketviewer.data.network.polymarketJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 class EventDtoSerializationTest {
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
+    private val json = polymarketJson
+
+    @Test
+    fun `event reads the documented resolutionSource field`() {
+        val event = json.decodeFromString<EventDto>(
+            """{"id":"1","title":"AI bill?","slug":"ai-bill","active":true,
+                "closed":false,"markets":[],"resolutionSource":"Official announcement"}"""
+        )
+
+        assertEquals("Official announcement", event.resolutionSource)
+        assertEquals("ai-bill", event.slug)
     }
 
     @Test
@@ -54,4 +62,22 @@ class EventDtoSerializationTest {
         assertEquals("12051", series?.id)
         assertNull(series?.seriesType)
     }
+
+    @Test
+    fun `AI Safety page decodes the live series without recurrence`() {
+        val payload = requireNotNull(javaClass.getResource("/polymarket/ai-safety-missing-recurrence.json"))
+            .readText()
+
+        val page = json.decodeFromString<PaginationDataDto<EventDto>>(payload)
+        val event = page.data.single()
+        val series = requireNotNull(event.series).single()
+
+        assertEquals("79075", event.id)
+        assertEquals("10624", series.id)
+        assertEquals("single", series.seriesType)
+        assertNull(series.recurrence)
+        assertEquals(7L, series.commentCount)
+        assertEquals(1, page.pagination.totalResults)
+    }
+
 }

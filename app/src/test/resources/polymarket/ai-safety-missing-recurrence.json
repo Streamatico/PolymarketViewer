@@ -1,0 +1,39 @@
+{
+  "data": [
+    {
+      "id": "79075",
+      "title": "U.S. enacts AI safety bill before 2027?",
+      "slug": "us-enacts-ai-safety-bill-before-2027",
+      "active": true,
+      "closed": false,
+      "series": [
+        {
+          "id": "10624",
+          "ticker": "us-ai-safety-bill",
+          "slug": "us-ai-safety-bill",
+          "title": "US AI Safety Bill",
+          "seriesType": "single",
+          "image": "",
+          "icon": "",
+          "active": true,
+          "closed": false,
+          "archived": false,
+          "featured": false,
+          "restricted": true,
+          "createdAt": "2025-11-11T18:31:38.590744Z",
+          "updatedAt": "2026-09-19T20:00:53.499339Z",
+          "volume24hr": 1292.994636,
+          "volume": 132310.95444000003,
+          "liquidity": 21496.6822,
+          "commentCount": 7,
+          "requiresTranslation": false
+        }
+      ],
+      "markets": []
+    }
+  ],
+  "pagination": {
+    "hasMore": false,
+    "totalResults": 1
+  }
+}

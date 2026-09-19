@@ -49,6 +49,6 @@ class EventWidgetSnapshotBuilderTest {
             closed = false,
             isArchived = false,
             groupItemTitle = title,
-            groupItemThreshold = groupItemThreshold
+            rawGroupItemThreshold = groupItemThreshold.toString()
         )
 }

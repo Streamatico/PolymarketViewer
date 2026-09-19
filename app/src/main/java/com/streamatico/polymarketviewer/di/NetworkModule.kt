@@ -5,6 +5,7 @@ import android.util.Log
 import com.streamatico.polymarketviewer.BuildConfig
 import com.streamatico.polymarketviewer.data.network.PolymarketDnsResolver
 import com.streamatico.polymarketviewer.data.network.PolymarketHttpClientNames
+import com.streamatico.polymarketviewer.data.network.polymarketJson
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -16,7 +17,6 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
 import okhttp3.Cache
 import okhttp3.Dns
 import org.koin.android.ext.koin.androidContext
@@ -122,12 +122,7 @@ private fun createHttpClient(context: Context, baseUrl: String, dns: Dns): HttpC
 
         // Content negotiation for JSON serialization/deserialization
         install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true // Useful for debugging JSON output
-                isLenient = true // Allows parsing JSON that is not strictly standard compliant
-                ignoreUnknownKeys = true // Prevents errors if the API adds new fields
-                encodeDefaults = true // Include default values during serialization if needed
-            })
+            json(polymarketJson)
         }
 
         // Logging configuration

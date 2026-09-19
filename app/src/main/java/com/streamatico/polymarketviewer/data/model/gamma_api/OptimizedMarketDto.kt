@@ -28,7 +28,7 @@ data class OptimizedMarketDto(
     @SerialName("closed") override val closed: Boolean, // Whether closed (event occurred)
     @SerialName("archived") override val isArchived: Boolean,
 
-    @SerialName("groupItemThreshold") override val groupItemThreshold: Int? = null,
+    @SerialName("groupItemThreshold") val rawGroupItemThreshold: String? = null,
     @SerialName("groupItemTitle") override val groupItemTitle: String? = null,
 
     @Serializable(with = OffsetDateTimeSerializer::class)
@@ -36,6 +36,9 @@ data class OptimizedMarketDto(
 
     override val umaResolutionStatus: String? = null, // Not applicable for optimized DTO
 ): BaseMarketDto {
+    override val groupItemThreshold: Double?
+        get() = rawGroupItemThreshold?.toDoubleOrNull()?.takeIf { it.isFinite() }
+
     val isBinaryMarket: Boolean by lazy {
         (outcomes.size == 2 && outcomes.any { isYesOutcome(it) })
     }

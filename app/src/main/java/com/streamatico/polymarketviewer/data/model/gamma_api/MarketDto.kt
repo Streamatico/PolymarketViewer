@@ -36,23 +36,23 @@ data class MarketDto(
     @SerialName("closed") override val closed: Boolean, // Whether closed (event occurred)
 
     @Serializable(with = OffsetDateTimeSerializer::class)
-    @SerialName("createdAt") val createdAt: OffsetDateTime,
+    @SerialName("createdAt") val createdAt: OffsetDateTime? = null,
     @Serializable(with = OffsetDateTimeSerializer::class)
     @SerialName("updatedAt") val updatedAt: OffsetDateTime? = null,
 
     @Serializable(with = OffsetDateTimeSerializer::class)
     @SerialName("closedTime") override val closedTime: OffsetDateTime? = null,
 
-    @SerialName("new") val isNew: Boolean,
+    @SerialName("new") val isNew: Boolean? = null,
     @SerialName("featured") val isFeatured: Boolean? = null,
 
     @SerialName("submitted_by") val submittedBy: String? = null,
     @SerialName("archived") override val isArchived: Boolean,
     @SerialName("resolvedBy") val resolvedBy: String? = null,
-    @SerialName("restricted") val isRestricted: Boolean,
+    @SerialName("restricted") val isRestricted: Boolean? = null,
 
     @SerialName("groupItemTitle") override val groupItemTitle: String? = null,
-    @SerialName("groupItemThreshold") override val groupItemThreshold: Int? = null,
+    @SerialName("groupItemThreshold") val rawGroupItemThreshold: String? = null,
     @SerialName("questionID") val questionId: String? = null,
 
 
@@ -72,9 +72,9 @@ data class MarketDto(
     @Serializable(with = OffsetDateTimeSerializer::class)
     @SerialName("acceptingOrdersTimestamp") val acceptingOrdersTimestamp: OffsetDateTime? = null,
 
-    @SerialName("ready") val isReady: Boolean,
-    @SerialName("funded") val isFunded: Boolean,
-    @SerialName("approved") val isApproved: Boolean,
+    @SerialName("ready") val isReady: Boolean? = null,
+    @SerialName("funded") val isFunded: Boolean? = null,
+    @SerialName("approved") val isApproved: Boolean? = null,
 
     @SerialName("spread") override val spread: Double? = null,
     @SerialName("lastTradePrice") override val lastTradePrice: Double? = null,
@@ -89,7 +89,7 @@ data class MarketDto(
     @SerialName("seriesColor") val seriesColor: String? = null,
     @SerialName("showGmpSeries") val showGmpSeries: Boolean = false,
     @SerialName("showGmpOutcome") val showGmpOutcome: Boolean = false,
-    @SerialName("manualActivation") val manualActivation: Boolean,
+    @SerialName("manualActivation") val manualActivation: Boolean? = null,
 
     // Allowed values: "disputed", "resolved", ...
     @SerialName("umaResolutionStatus") override val umaResolutionStatus: String? = null,
@@ -101,6 +101,9 @@ data class MarketDto(
     @SerialName("line") val line: Double? = null,
 
 ) : BaseMarketDto {
+    override val groupItemThreshold: Double?
+        get() = rawGroupItemThreshold?.toDoubleOrNull()?.takeIf { it.isFinite() }
+
     override val outcomes: List<String> by lazy {
         JsonUtils.parsedJsonList(outcomesJson) ?: emptyList()
     }
@@ -178,7 +181,7 @@ data class MarketDto(
         outcomePricesJson = outcomePricesJson,
         groupItemTitle = groupItemTitle,
 
-        groupItemThreshold = groupItemThreshold,
+        rawGroupItemThreshold = groupItemThreshold?.toString(),
         submittedBy = submittedBy,
         isNew = isNew,
         isFeatured = isFeatured,

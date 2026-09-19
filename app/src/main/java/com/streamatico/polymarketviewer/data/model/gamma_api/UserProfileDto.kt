@@ -26,7 +26,7 @@ data class UserProfileDto(
 // Represents the nested 'users' object in the profile API response
 @Serializable
 data class UserAssociationDto(
-    @SerialName("id") val id: String?,
-    @SerialName("creator") val creator: Boolean?,
-    @SerialName("mod") val mod: Boolean?
+    @SerialName("id") val id: String? = null,
+    @SerialName("creator") val creator: Boolean? = null,
+    @SerialName("mod") val mod: Boolean? = null
 )

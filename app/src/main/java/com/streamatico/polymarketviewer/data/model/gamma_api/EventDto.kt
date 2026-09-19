@@ -63,7 +63,7 @@ data class EventDto(
     @Serializable(with = OffsetDateTimeSerializer::class)
     @SerialName("closedTime") override val closedTime: OffsetDateTime? = null,
 
-    @SerialName("resolution_source") val resolutionSource: String? = null,
+    @SerialName("resolutionSource") val resolutionSource: String? = null,
     @SerialName("markets") internal val rawMarkets: List<MarketDto>, // Make internal
     @SerialName("featured") val featured: Boolean? = null,
     @SerialName("featuredOrder") val featuredOrder: Int? = null,

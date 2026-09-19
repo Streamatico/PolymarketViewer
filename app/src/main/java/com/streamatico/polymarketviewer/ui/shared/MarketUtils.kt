@@ -69,7 +69,7 @@ fun BaseEventDto.toDisplayRows(): List<MarketDisplayRow> {
         EventType.BinaryEvent -> listOf(markets.first().toBinaryDisplayRow())
 
         EventType.CategoricalMarket -> {
-            val mainMarket = markets.firstOrNull { it.groupItemThreshold == 0 } ?: markets.first()
+            val mainMarket = markets.firstOrNull { it.groupItemThreshold == 0.0 } ?: markets.first()
             mainMarket.toCategoricalDisplayRows()
         }
 
@@ -92,7 +92,7 @@ fun BaseEventDto.toCompactDisplayRows(limit: Int): List<MarketDisplayRow> {
         EventType.BinaryEvent -> listOf(markets.first().toBinaryDisplayRow())
 
         EventType.CategoricalMarket -> {
-            val mainMarket = markets.firstOrNull { it.groupItemThreshold == 0 } ?: markets.first()
+            val mainMarket = markets.firstOrNull { it.groupItemThreshold == 0.0 } ?: markets.first()
             mainMarket.toCategoricalDisplayRows().take(limit)
         }
 
@@ -111,7 +111,7 @@ fun BaseEventDto.totalDisplayRowsCount(): Int {
     return when (eventType) {
         EventType.BinaryEvent -> 1
         EventType.CategoricalMarket -> {
-            val mainMarket = markets.firstOrNull { it.groupItemThreshold == 0 } ?: markets.first()
+            val mainMarket = markets.firstOrNull { it.groupItemThreshold == 0.0 } ?: markets.first()
             mainMarket.outcomes.size
         }
         EventType.MultiMarket -> {

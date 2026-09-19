@@ -39,7 +39,7 @@ data class CommentCreatorProfileDto(
     // Usernames
     @SerialName("name") override val name: String? = null, // User-set name
     @SerialName("pseudonym") override val pseudonym: String? = null, // Generated pseudonym
-    @SerialName("displayUsernamePublic") override val displayUsernamePublic: Boolean?,
+    @SerialName("displayUsernamePublic") override val displayUsernamePublic: Boolean? = null,
 
     // Addresses
     @SerialName("userAddress") val userAddress: String? = null, // Address associated with the comment itself
@@ -58,5 +58,5 @@ data class CommentCreatorProfileDto(
 @Serializable
 data class ProfilePositionDto(
     @SerialName("tokenId") val tokenId: String, // ID of the market outcome token
-    @SerialName("positionSize") val positionSize: String? // Size of the position (comes as string)
+    @SerialName("positionSize") val positionSize: String? = null // Size of the position (comes as string)
 )
