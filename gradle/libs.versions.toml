@@ -1,5 +1,5 @@
 [versions]
-agp = "9.4.0"
+agp = "9.4.1"
 
 kotlin = "2.4.20"
 
@@ -17,13 +17,13 @@ composeBom = "2026.09.00"
 lifecycleVersion = "2.11.0"
 nav3Core = "1.1.7"
 
-coil = "3.6.2"
+coil = "3.6.3"
 coroutines = "1.11.0"
 vico = "3.3.1"
 glance = "1.2.0"
 work = "2.11.2"
 
-ktor = "3.5.2"  # Ktor version
+ktor = "3.6.0"  # Ktor version
 okhttp = "5.5.0"
 kotlinx-serialization = "1.11.0" # Kotlinx Serialization version
 
