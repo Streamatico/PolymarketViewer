@@ -65,6 +65,5 @@ Run commands from the repository root. Choose checks that cover the change:
 
 ## Release and F-Droid Metadata
 
-- Update `versionName` and increase `versionCode` in `app/build.gradle.kts` together for a new release.
-- Add `metadata/en-US/changelogs/<versionCode>.txt`; the filename uses the numeric version code, not the display version name. Preserve previous release notes.
-- Keep each changelog within 500 characters, using concise English bullets that describe the actual changes. Do not claim unverified performance or stability improvements.
+- Follow [the release guide](docs/releasing.md) for versioning, F-Droid changelogs, and validation.
+- The agent's task ends before committing. The user handles the commit, push, and all subsequent release steps manually.

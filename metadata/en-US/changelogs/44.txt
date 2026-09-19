@@ -1,0 +1,5 @@
+- Fixed category loading when Polymarket omits optional data
+- Improved handling of optional market and profile metadata
+- Fixed market ordering for fractional group thresholds
+- Fixed display of event resolution sources
+- Fixed wrapping of long winner names in event details
